@@ -1,17 +1,12 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { MeetingProvider } from './hooks';
+
 import App from './App';
-import { AttendeeManagerProvider } from './hooks/attendee';
-import { CommonManagerProvider } from './hooks/common';
-import { EngineProvider } from './hooks/engine';
 
 render(
-  <EngineProvider>
-    <CommonManagerProvider>
-      <AttendeeManagerProvider>
-        <App />
-      </AttendeeManagerProvider>
-    </CommonManagerProvider>
-  </EngineProvider>,
+  <MeetingProvider>
+    <App />
+  </MeetingProvider>,
   document.getElementById('root')
 );
