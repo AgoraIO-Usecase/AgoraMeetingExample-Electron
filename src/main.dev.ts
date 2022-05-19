@@ -14,12 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, shell } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-
-export default class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-  }
-}
+import './utils/logtransports';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -107,17 +102,15 @@ const createWindow = async () => {
     event.preventDefault();
     shell.openExternal(url);
   });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 };
+
 app.allowRendererProcessReuse = false;
 /**
  * Add event listeners...
  */
 
 app.on('window-all-closed', () => {
+  log.info('app uninitialized..............\r\n\r\n');
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
@@ -132,3 +125,5 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
 });
+
+log.info('app initialized..............');

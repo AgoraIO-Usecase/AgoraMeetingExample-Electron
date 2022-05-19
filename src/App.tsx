@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import log from 'electron-log';
+
 import { useAttendeeManager } from './hooks/attendee';
 import { useCommonManager } from './hooks/common';
 
@@ -7,12 +9,12 @@ const App = () => {
   const { attendeeManager } = useAttendeeManager();
 
   useEffect(() => {
-    console.info('commonManager:', commonManager);
+    log.info('commonManager:', typeof commonManager);
     if (commonManager) commonManager.trace();
   }, [commonManager]);
 
   useEffect(() => {
-    console.info('attendeeManager:', attendeeManager);
+    log.info('attendeeManager:', typeof attendeeManager);
     if (attendeeManager) attendeeManager.trace();
   }, [attendeeManager]);
 

@@ -1,6 +1,8 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import AgoraRtcEngine from 'agora-electron-sdk';
+import log from 'electron-log';
+
 import { AttendeeManager, AttendeeManagerContext } from './attendee';
 import { CommonManager, CommonManagerContext } from './common';
 
@@ -16,7 +18,7 @@ export const MeetingProvider: FC = (props) => {
       const engine = new AgoraRtcEngine();
       setRtcEngine(engine);
 
-      console.info('initialize engine...');
+      log.info('initialize engine...');
     }
 
     return () => {
@@ -24,7 +26,7 @@ export const MeetingProvider: FC = (props) => {
         rtcEngine.release();
         setRtcEngine(undefined);
 
-        console.info('release engine...');
+        log.info('release engine...');
       }
     };
   }, []);
@@ -34,12 +36,12 @@ export const MeetingProvider: FC = (props) => {
       const manager = new CommonManager();
       setCommonManager(manager);
 
-      console.info('initialize common manager...');
+      log.info('initialize common manager...');
     }
 
     if (commonManager && !rtcEngine) {
       setCommonManager(undefined);
-      console.info('release common manager...');
+      log.info('release common manager...');
     }
   }, [rtcEngine]);
 
@@ -48,12 +50,12 @@ export const MeetingProvider: FC = (props) => {
       const manager = new AttendeeManager();
       setAttendeeManager(manager);
 
-      console.info('initialize attendee manager...');
+      log.info('initialize attendee manager...');
     }
 
     if (attendeeManager && !rtcEngine) {
       setAttendeeManager(undefined);
-      console.info('release attendee manager...');
+      log.info('release attendee manager...');
     }
   }, [rtcEngine]);
 
