@@ -59,8 +59,6 @@ export const MeetingProvider: FC = (props) => {
     }
   }, [rtcEngine]);
 
-  useEffect(() => {}, [rtcEngine]);
-
   return (
     <CommonManagerContext.Provider value={{ commonManager }}>
       <AttendeeManagerContext.Provider value={{ attendeeManager }}>

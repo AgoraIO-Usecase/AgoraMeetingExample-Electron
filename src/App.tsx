@@ -1,27 +1,21 @@
-import React, { useEffect } from 'react';
-import log from 'electron-log';
+import React from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
+import { MeetingProvider } from './hooks';
+import MainView from './views/main';
+import MeetingView from './views/meeting';
 
-import { useAttendeeManager } from './hooks/attendee';
-import { useCommonManager } from './hooks/common';
+import './utils/logtransports';
 
 const App = () => {
-  const { commonManager } = useCommonManager();
-  const { attendeeManager } = useAttendeeManager();
-
-  useEffect(() => {
-    log.info('commonManager:', typeof commonManager);
-    if (commonManager) commonManager.trace();
-  }, [commonManager]);
-
-  useEffect(() => {
-    log.info('attendeeManager:', typeof attendeeManager);
-    if (attendeeManager) attendeeManager.trace();
-  }, [attendeeManager]);
-
   return (
-    <div>
-      <p>Hello</p>
-    </div>
+    <MeetingProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/*" element={<MainView />} />
+          <Route path="meeting" element={<MeetingView />} />
+        </Routes>
+      </HashRouter>
+    </MeetingProvider>
   );
 };
 

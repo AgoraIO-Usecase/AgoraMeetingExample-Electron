@@ -1,13 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { MeetingProvider } from './hooks';
-import './utils/logtransports';
-
 import App from './App';
 
 render(
-  <MeetingProvider>
+  <React.StrictMode>
     <App />
-  </MeetingProvider>,
+  </React.StrictMode>,
   document.getElementById('root')
 );
