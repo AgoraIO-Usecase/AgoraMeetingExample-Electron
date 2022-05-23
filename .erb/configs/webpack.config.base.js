@@ -6,6 +6,9 @@ import path from 'path';
 import webpack from 'webpack';
 import { dependencies as externals } from '../../src/package.json';
 
+require('dotenv').config();
+require('dotenv').config('./.env');
+
 export default {
   externals: [...Object.keys(externals || {})],
 
