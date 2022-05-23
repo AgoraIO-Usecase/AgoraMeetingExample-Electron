@@ -11,7 +11,7 @@ const App = () => {
     <MeetingProvider>
       <HashRouter>
         <Routes>
-          <Route path="/*" element={<MainView />} />
+          <Route path="/*" element={<MeetingView />} />
           <Route path="meeting" element={<MeetingView />} />
         </Routes>
       </HashRouter>

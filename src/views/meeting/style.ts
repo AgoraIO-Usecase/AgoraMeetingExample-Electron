@@ -13,15 +13,11 @@ const useStyle = makeStyles(() => {
       padding: 6,
       height: 52,
     },
-    containerSubmit: {
-      padding: 8,
+    viewContainer: {
+      background: '#F3F3F3',
     },
-    containerCheckBoxes: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 8,
-    },
+    toolBar: { padding: 6, boxSizing: 'border-box' },
+    toolButton: {},
   });
 });
 

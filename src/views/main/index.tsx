@@ -1,25 +1,28 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import log from 'electron-log';
 import { Stack } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import SettingsIcon from '@mui/icons-material/Settings';
-import FormLabel from '@mui/material/FormLabel';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
+import { useCommonManager } from '../../hooks';
+
+import HeaderBar from '../components/header';
 import useStyle from './style';
 
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
+  const { commonManager } = useCommonManager();
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNickNameInvalid, setNickNameInvalid] = useState(false);
   const [channelName, setChannelName] = useState('');
   const [nickName, setNickName] = useState('');
+  const [isCameraOn, setCameraOn] = useState(false);
+  const [isMicrophoneOn, setMicrophoneOn] = useState(false);
 
   const onChannelNameChanged = (value: string) => {
     setChannelName(value);
@@ -34,14 +37,23 @@ const MainView = () => {
   };
 
   const onSubmit = () => {
-    log.info('submit');
+    let isInvalid = false;
+
     if (channelName === '') {
       setChannelNameInvalid(true);
+      isInvalid = true;
     }
 
     if (nickName === '') {
       setNickNameInvalid(true);
+      isInvalid = true;
     }
+
+    log.info('submit', isInvalid);
+
+    if (isInvalid) return;
+
+    log.info('submit');
   };
 
   return (
@@ -53,16 +65,7 @@ const MainView = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <Stack
-        className={style.titleBar}
-        direction="row"
-        justifyContent="flex-end"
-        alignItems="center"
-      >
-        <IconButton onClick={() => {}}>
-          <SettingsIcon />
-        </IconButton>
-      </Stack>
+      <HeaderBar fixed />
       <Box
         component="form"
         sx={{
@@ -70,9 +73,7 @@ const MainView = () => {
         }}
         noValidate
         autoComplete="off"
-        onSubmit={onSubmit}
       >
-        {/* <FormLabel component="legend">ChannelName</FormLabel> */}
         <div>
           <TextField
             id="channelname"
@@ -84,7 +85,6 @@ const MainView = () => {
             }
           />
         </div>
-        {/* <FormLabel component="legend">NickName</FormLabel> */}
         <div>
           <TextField
             id="nickname"
@@ -99,19 +99,31 @@ const MainView = () => {
         <div className={style.containerCheckBoxes}>
           <FormControlLabel
             control={
-              <Checkbox checked={false} onChange={() => {}} name="camera" />
+              <Checkbox
+                checked={isCameraOn}
+                onChange={(_evt, checked: boolean) => {
+                  setCameraOn(checked);
+                }}
+                name="camera"
+              />
             }
             label="Camera"
           />
           <FormControlLabel
             control={
-              <Checkbox checked={false} onChange={() => {}} name="microphone" />
+              <Checkbox
+                checked={isMicrophoneOn}
+                onChange={(_evt, checked: boolean) => {
+                  setMicrophoneOn(checked);
+                }}
+                name="microphone"
+              />
             }
             label="Microphone"
           />
         </div>
         <div className={style.containerSubmit}>
-          <Button fullWidth type="submit" variant="contained">
+          <Button fullWidth variant="contained" onClick={onSubmit}>
             Join
           </Button>
         </div>
