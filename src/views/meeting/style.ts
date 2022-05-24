@@ -17,7 +17,10 @@ const useStyle = makeStyles(() => {
       background: '#F3F3F3',
     },
     toolBar: { padding: 6, boxSizing: 'border-box' },
-    toolButton: {},
+    toolButton: {
+      // border: '1px solid #E0E3E7 !important',
+      // borderRadius: '10px !important',
+    },
   });
 });
 

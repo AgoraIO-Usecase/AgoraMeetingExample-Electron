@@ -1,3 +1,3 @@
 export * from './attendee';
-export * from './common';
+export * from './manager';
 export * from './provider';

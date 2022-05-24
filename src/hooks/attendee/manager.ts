@@ -1,7 +1,14 @@
+/* eslint-disable import/prefer-default-export */
 import log from 'electron-log';
+import AgoraRtcEngine from 'agora-electron-sdk';
 
-// eslint-disable-next-line import/prefer-default-export
 export class AttendeeManager {
+  engine!: AgoraRtcEngine;
+
+  constructor(engine: AgoraRtcEngine) {
+    this.engine = engine;
+  }
+
   trace = () => {
     log.info('I am attendee manager.');
   };

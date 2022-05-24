@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import log from 'electron-log';
 import { Stack } from '@mui/material';
@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
-import { useCommonManager } from '../../hooks';
+import { useMeetingManager } from '../../hooks';
 
 import HeaderBar from '../components/header';
 import useStyle from './style';
@@ -16,7 +16,7 @@ import useStyle from './style';
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
-  const { commonManager } = useCommonManager();
+  const { meetingManager } = useMeetingManager();
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNickNameInvalid, setNickNameInvalid] = useState(false);
   const [channelName, setChannelName] = useState('');
@@ -54,6 +54,12 @@ const MainView = () => {
     if (isInvalid) return;
 
     log.info('submit');
+
+    meetingManager?.joinMeeting({
+      channelName,
+      nickName,
+      streamId: Number(`${new Date().getTime()}`.slice(7)),
+    });
   };
 
   return (

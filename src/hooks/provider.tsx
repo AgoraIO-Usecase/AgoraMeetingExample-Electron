@@ -1,17 +1,28 @@
-import React, { FC, useEffect, useState } from 'react';
+/* eslint-disable import/prefer-default-export */
+import React, { FC, useEffect, useState, useReducer } from 'react';
 
 import AgoraRtcEngine from 'agora-electron-sdk';
 import log from 'electron-log';
 
 import { AttendeeManager, AttendeeManagerContext } from './attendee';
-import { CommonManager, CommonManagerContext } from './common';
+import { MeetingInfoDispatcher, MeetingInfoContext } from './info';
+import { MeetingManager, MeetingManagerContext } from './manager';
+import { MeetingInfo } from './types';
 
-// eslint-disable-next-line import/prefer-default-export
+const MeetingInfoReducer = (
+  info: MeetingInfo,
+  action: MeetingInfoDispatcher
+): MeetingInfo => {
+  log.info('meeting info dispatch:', action);
+  return info;
+};
+
 export const MeetingProvider: FC = (props) => {
   const { children } = props;
   const [rtcEngine, setRtcEngine] = useState<AgoraRtcEngine>();
-  const [commonManager, setCommonManager] = useState<CommonManager>();
+  const [meetingManager, setMeetingManager] = useState<MeetingManager>();
   const [attendeeManager, setAttendeeManager] = useState<AttendeeManager>();
+  const [info, infoDispatcher] = useReducer(MeetingInfoReducer, {});
 
   useEffect(() => {
     if (!rtcEngine) {
@@ -32,22 +43,22 @@ export const MeetingProvider: FC = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!commonManager && rtcEngine) {
-      const manager = new CommonManager();
-      setCommonManager(manager);
+    if (!meetingManager && rtcEngine) {
+      const manager = new MeetingManager(rtcEngine);
+      setMeetingManager(manager);
 
-      log.info('initialize common manager...');
+      log.info('initialize meeting manager...');
     }
 
-    if (commonManager && !rtcEngine) {
-      setCommonManager(undefined);
-      log.info('release common manager...');
+    if (meetingManager && !rtcEngine) {
+      setMeetingManager(undefined);
+      log.info('release meeting manager...');
     }
   }, [rtcEngine]);
 
   useEffect(() => {
     if (!attendeeManager && rtcEngine) {
-      const manager = new AttendeeManager();
+      const manager = new AttendeeManager(rtcEngine);
       setAttendeeManager(manager);
 
       log.info('initialize attendee manager...');
@@ -60,10 +71,18 @@ export const MeetingProvider: FC = (props) => {
   }, [rtcEngine]);
 
   return (
-    <CommonManagerContext.Provider value={{ commonManager }}>
-      <AttendeeManagerContext.Provider value={{ attendeeManager }}>
-        {children}
-      </AttendeeManagerContext.Provider>
-    </CommonManagerContext.Provider>
+    <MeetingInfoContext.Provider
+      value={{ meetingInfo: info, meetingInfoDispatcher: infoDispatcher }}
+    >
+      <MeetingManagerContext.Provider
+        value={{
+          meetingManager,
+        }}
+      >
+        <AttendeeManagerContext.Provider value={{ attendeeManager }}>
+          {children}
+        </AttendeeManagerContext.Provider>
+      </MeetingManagerContext.Provider>
+    </MeetingInfoContext.Provider>
   );
 };
