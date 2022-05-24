@@ -7,9 +7,16 @@ import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-
 import HeaderBar from '../components/header';
 import useStyle from './style';
+import {
+  getNickName,
+  setNickName,
+  getUseCamera,
+  setUseCamera,
+  getUseMicrophone,
+  setUseMicrophone,
+} from '../../utils/localstorage';
 import {
   useMeetingInfo,
   useMeetingManager,
@@ -24,10 +31,10 @@ const MainView = () => {
   const { meetingManager } = useMeetingManager();
   const [joinParams, setJoinParams] = useState<JoinMeetingParams>({
     channelName: '',
-    nickName: '',
+    nickName: getNickName(),
     streamId: Number(`${new Date().getTime()}`.slice(7)),
-    isCameraOn: false,
-    isMicrophoneOn: false,
+    isCameraOn: getUseCamera(),
+    isMicrophoneOn: getUseMicrophone(),
   });
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNickNameInvalid, setNickNameInvalid] = useState(false);
@@ -46,6 +53,10 @@ const MainView = () => {
     }
 
     if (meetingInfo?.state === MeetingConnectionState.CONNECTED) {
+      const { nickName, isCameraOn, isMicrophoneOn } = joinParams;
+      setNickName(nickName);
+      setUseCamera(isCameraOn);
+      setUseMicrophone(isMicrophoneOn);
       navigate('/meeting');
     }
   }, [meetingInfo, meetingInfo?.state]);
@@ -103,6 +114,7 @@ const MainView = () => {
         <div>
           <TextField
             id="channelname"
+            defaultValue={joinParams.channelName}
             placeholder="input your channel name"
             error={isChannelNameInvalid}
             helperText={isChannelNameInvalid ? '*invalid channel name' : ''}
@@ -114,6 +126,7 @@ const MainView = () => {
         <div>
           <TextField
             id="nickname"
+            defaultValue={joinParams.nickName}
             placeholder="input your nickname"
             error={isNickNameInvalid}
             helperText={isNickNameInvalid ? '*invalid nickname' : ''}
