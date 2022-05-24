@@ -2,13 +2,17 @@
 import log from 'electron-log';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import { RtcStats } from 'agora-electron-sdk/types/Api/native_type';
-import { JoinMeetingParams } from '../types';
+import { JoinMeetingParams, MeetingConnectionState } from '../types';
+import { MeetingInfoDispatcherType, MeetingInfoRedux } from '../info';
 
 export class MeetingManager {
   engine!: AgoraRtcEngine;
 
-  constructor(engine: AgoraRtcEngine) {
+  infoRedux!: MeetingInfoRedux;
+
+  constructor(engine: AgoraRtcEngine, infoRedux: MeetingInfoRedux) {
     this.engine = engine;
+    this.infoRedux = infoRedux;
     this.initializeRtcEngine();
     this.registerRtcEngineEvents();
   }
@@ -32,13 +36,12 @@ export class MeetingManager {
           this.engine.getVersion()
         )})`
       );
-      // const { allUser: oldAllUser } = this.state;
-      // const newAllUser = [...oldAllUser];
-      // newAllUser.push({ isMyself: true, uid });
-      // this.setState({
-      //   isJoined: true,
-      //   allUser: newAllUser,
-      // });
+
+      if (this.infoRedux.meetingInfoDispatcher)
+        this.infoRedux.meetingInfoDispatcher({
+          type: MeetingInfoDispatcherType.DISPATCHER_TYPE_CONNECTION,
+          payload: { state: MeetingConnectionState.CONNECTED },
+        });
     });
 
     this.engine.on('userJoined', (uid, elapsed) => {
@@ -69,6 +72,12 @@ export class MeetingManager {
       //   isJoined: false,
       //   allUser: [],
       // });
+
+      if (this.infoRedux.meetingInfoDispatcher)
+        this.infoRedux.meetingInfoDispatcher({
+          type: MeetingInfoDispatcherType.DISPATCHER_TYPE_CONNECTION,
+          payload: { state: MeetingConnectionState.DISCONNECTED },
+        });
     });
 
     this.engine.on('lastmileProbeResult', (result) => {
@@ -108,6 +117,12 @@ export class MeetingManager {
       '',
       streamId
     );
+
+    if (this.infoRedux.meetingInfoDispatcher)
+      this.infoRedux.meetingInfoDispatcher({
+        type: MeetingInfoDispatcherType.DISPATCHER_TYPE_CONNECTION,
+        payload: { state: MeetingConnectionState.CONNECTING },
+      });
   };
 
   leaveMeeting = () => {

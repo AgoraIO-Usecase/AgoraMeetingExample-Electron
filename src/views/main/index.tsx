@@ -4,39 +4,67 @@ import log from 'electron-log';
 import { Stack } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
-import { useMeetingManager } from '../../hooks';
-
 import HeaderBar from '../components/header';
 import useStyle from './style';
+import {
+  useMeetingInfo,
+  useMeetingManager,
+  JoinMeetingParams,
+  MeetingConnectionState,
+} from '../../hooks';
 
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
+  const { meetingInfo } = useMeetingInfo();
   const { meetingManager } = useMeetingManager();
+  const [joinParams, setJoinParams] = useState<JoinMeetingParams>({
+    channelName: '',
+    nickName: '',
+    streamId: Number(`${new Date().getTime()}`.slice(7)),
+    isCameraOn: false,
+    isMicrophoneOn: false,
+  });
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNickNameInvalid, setNickNameInvalid] = useState(false);
-  const [channelName, setChannelName] = useState('');
-  const [nickName, setNickName] = useState('');
-  const [isCameraOn, setCameraOn] = useState(false);
-  const [isMicrophoneOn, setMicrophoneOn] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    log.info('mainview meeting info changed', meetingInfo);
+
+    if (
+      meetingInfo?.state === MeetingConnectionState.CONNECTING &&
+      loading !== true
+    ) {
+      setLoading(true);
+    } else if (loading === true) {
+      setLoading(false);
+    }
+
+    if (meetingInfo?.state === MeetingConnectionState.CONNECTED) {
+      navigate('/meeting');
+    }
+  }, [meetingInfo, meetingInfo?.state]);
 
   const onChannelNameChanged = (value: string) => {
-    setChannelName(value);
+    setJoinParams({ ...joinParams, channelName: value });
 
     if (value !== '' && isChannelNameInvalid) setChannelNameInvalid(false);
   };
 
   const onNickNameChanged = (value: string) => {
-    setNickName(value);
+    setJoinParams({ ...joinParams, nickName: value });
 
     if (value !== '' && isNickNameInvalid) setNickNameInvalid(false);
   };
 
   const onSubmit = () => {
+    const { channelName, nickName } = joinParams;
+
     let isInvalid = false;
 
     if (channelName === '') {
@@ -49,17 +77,9 @@ const MainView = () => {
       isInvalid = true;
     }
 
-    log.info('submit', isInvalid);
-
     if (isInvalid) return;
 
-    log.info('submit');
-
-    meetingManager?.joinMeeting({
-      channelName,
-      nickName,
-      streamId: Number(`${new Date().getTime()}`.slice(7)),
-    });
+    meetingManager?.joinMeeting(joinParams);
   };
 
   return (
@@ -106,9 +126,9 @@ const MainView = () => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={isCameraOn}
+                checked={joinParams.isCameraOn}
                 onChange={(_evt, checked: boolean) => {
-                  setCameraOn(checked);
+                  setJoinParams({ ...joinParams, isCameraOn: checked });
                 }}
                 name="camera"
               />
@@ -118,9 +138,9 @@ const MainView = () => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={isMicrophoneOn}
+                checked={joinParams.isMicrophoneOn}
                 onChange={(_evt, checked: boolean) => {
-                  setMicrophoneOn(checked);
+                  setJoinParams({ ...joinParams, isMicrophoneOn: checked });
                 }}
                 name="microphone"
               />
@@ -129,9 +149,14 @@ const MainView = () => {
           />
         </div>
         <div className={style.containerSubmit}>
-          <Button fullWidth variant="contained" onClick={onSubmit}>
+          <LoadingButton
+            fullWidth
+            loading={loading}
+            variant="contained"
+            onClick={onSubmit}
+          >
             Join
-          </Button>
+          </LoadingButton>
         </div>
       </Box>
     </Stack>

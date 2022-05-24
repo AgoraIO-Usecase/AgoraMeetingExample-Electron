@@ -5,17 +5,8 @@ import AgoraRtcEngine from 'agora-electron-sdk';
 import log from 'electron-log';
 
 import { AttendeeManager, AttendeeManagerContext } from './attendee';
-import { MeetingInfoDispatcher, MeetingInfoContext } from './info';
+import { MeetingInfoContext, MeetingInfoReducer } from './info';
 import { MeetingManager, MeetingManagerContext } from './manager';
-import { MeetingInfo } from './types';
-
-const MeetingInfoReducer = (
-  info: MeetingInfo,
-  action: MeetingInfoDispatcher
-): MeetingInfo => {
-  log.info('meeting info dispatch:', action);
-  return info;
-};
 
 export const MeetingProvider: FC = (props) => {
   const { children } = props;
@@ -44,7 +35,10 @@ export const MeetingProvider: FC = (props) => {
 
   useEffect(() => {
     if (!meetingManager && rtcEngine) {
-      const manager = new MeetingManager(rtcEngine);
+      const manager = new MeetingManager(rtcEngine, {
+        meetingInfo: info,
+        meetingInfoDispatcher: infoDispatcher,
+      });
       setMeetingManager(manager);
 
       log.info('initialize meeting manager...');
