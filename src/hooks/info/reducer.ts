@@ -7,7 +7,7 @@ const onMeetingConnection = (
   state: MeetingInfo,
   connectionState: MeetingConnectionState
 ) => {
-  // clear state when meeting connection state is disconnected
+  // clear state when meeting connection state is connecting
   if (connectionState === MeetingConnectionState.CONNECTING)
     return { connectionState };
 

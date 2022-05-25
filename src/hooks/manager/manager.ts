@@ -6,6 +6,10 @@ import {
   LOCAL_AUDIO_STREAM_STATE,
   LOCAL_VIDEO_STREAM_ERROR,
   LOCAL_VIDEO_STREAM_STATE,
+  RemoteAudioState,
+  RemoteAudioStateReason,
+  RemoteVideoState,
+  RemoteVideoStateReason,
   RtcStats,
 } from 'agora-electron-sdk/types/Api/native_type';
 import { JoinMeetingParams, MeetingConnectionState, UserInfo } from '../types';
@@ -134,6 +138,50 @@ export class MeetingManager {
             payload: this.selfUser,
           });
         }
+      }
+    );
+
+    this.engine.on(
+      'remoteVideoStateChanged',
+      (
+        uid: number,
+        state: RemoteVideoState,
+        reason: RemoteVideoStateReason,
+        elapsed: number
+      ) => {
+        const isOn = state !== 0 && state !== 3 && state !== 4;
+
+        log.info('remote video state changed,', uid, state, reason, isOn);
+
+        this.store.dispatch({
+          type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+          payload: {
+            uid,
+            isCameraOn: isOn,
+          },
+        });
+      }
+    );
+
+    this.engine.on(
+      'remoteAudioStateChanged',
+      (
+        uid: number,
+        state: RemoteAudioState,
+        reason: RemoteAudioStateReason,
+        elapsed: number
+      ) => {
+        const isOn = state !== 0 && state !== 3 && state !== 4;
+
+        log.info('remote audio state changed,', uid, state, reason, isOn);
+
+        this.store.dispatch({
+          type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+          payload: {
+            uid,
+            isMicrophoneOn: isOn,
+          },
+        });
       }
     );
   };

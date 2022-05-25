@@ -25,14 +25,10 @@ const MeetingView = () => {
   const { state } = useMeetingStore();
   const { meetingManager } = useMeetingManager();
   const selfUser = useMemo(() => {
-    if (
-      state.connectionState === MeetingConnectionState.CONNECTED &&
-      !state.users
-    )
-      throw Error('invalid context');
+    if (!state.users) throw Error('invalid context');
 
     return state.users[0];
-  }, [state.users, state.connectionState]);
+  }, [state.users]);
 
   useEffect(() => {
     log.debug('meeting view state changed:', state);

@@ -16,14 +16,14 @@ export enum MeetingConnectionState {
 
 export declare interface UserInfo {
   uid: number;
-  shareId: number;
-  parentId: number;
-  nickName: string;
+  shareId?: number;
+  parentId?: number;
+  nickName?: string;
 
-  isSelf: boolean;
-  isCameraOn: boolean;
-  isMicrophoneOn: boolean;
-  isScreenSharing: boolean;
+  isSelf?: boolean;
+  isCameraOn?: boolean;
+  isMicrophoneOn?: boolean;
+  isScreenSharing?: boolean;
 }
 
 export declare type MeetingInfo = {
