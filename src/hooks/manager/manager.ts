@@ -164,12 +164,7 @@ export class MeetingManager {
     this.engine.enableLocalAudio(isMicrophoneOn);
     this.engine.enableLocalVideo(isCameraOn);
 
-    this.engine.joinChannel(
-      '006b8590cc94c0d429a92137f33a44820deIACxaWjIFUWQ0dUdwn70sI9iD5eY8dWW5a83R71ecsNmRiy7EcwAAAAAEADTxV3A/OCNYgEAAQD84I1i',
-      channelName,
-      '',
-      uid
-    );
+    this.engine.joinChannel('', channelName, '', uid);
 
     if (this.infoRedux.meetingInfoDispatcher)
       this.infoRedux.meetingInfoDispatcher({
@@ -203,13 +198,15 @@ export class MeetingManager {
     this.engine.muteLocalVideoStream(mute);
   };
 
-  setupLocalVideoRenderer = (view: Element) => {
+  setupLocalVideoRenderer = (view: Element, isFit: boolean) => {
     log.info('setup local video renderer');
     this.engine.setupLocalVideo(view);
+    this.engine.setupViewContentMode('local', isFit ? 1 : 0, undefined);
   };
 
-  setupRemoteVideoRenderer = (uid: number, view: Element) => {
+  setupRemoteVideoRenderer = (uid: number, view: Element, isFit: boolean) => {
     log.info(`setup remote video renderer for ${uid}`);
     this.engine.setupRemoteVideo(uid, view);
+    this.engine.setupViewContentMode(uid, isFit ? 1 : 0, undefined);
   };
 }
