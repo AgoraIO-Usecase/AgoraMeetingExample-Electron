@@ -78,39 +78,12 @@ export class MeetingManager {
     this.engine.on('leavechannel', (rtcStats: RtcStats) => {
       log.info('leavechannel', rtcStats);
 
-      // this.setState({
-      //   isJoined: false,
-      //   allUser: [],
-      // });
-
       if (this.infoRedux.meetingInfoDispatcher)
         this.infoRedux.meetingInfoDispatcher({
           type: MeetingInfoDispatcherType.DISPATCHER_TYPE_CONNECTION,
           payload: { state: MeetingConnectionState.DISCONNECTED },
         });
     });
-
-    this.engine.on('lastmileProbeResult', (result) => {
-      log.info(`lastmileproberesult: ${JSON.stringify(result)}`);
-    });
-
-    this.engine.on('lastMileQuality', (quality) => {
-      log.info(`lastmilequality: ${JSON.stringify(quality)}`);
-    });
-
-    this.engine.on(
-      'audiovolumeindication',
-      (
-        uid: number,
-        volume: number,
-        speakerNumber: number,
-        totalVolume: number
-      ) => {
-        log.info(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        );
-      }
-    );
 
     this.engine.on('error', (err) => {
       log.error(err);

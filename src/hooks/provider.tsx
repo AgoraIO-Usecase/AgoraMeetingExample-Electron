@@ -4,7 +4,6 @@ import React, { FC, useEffect, useState, useReducer } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import log from 'electron-log';
 
-import { AttendeeManager, AttendeeManagerContext } from './attendee';
 import { MeetingInfoContext, MeetingInfoReducer } from './info';
 import { MeetingManager, MeetingManagerContext } from './manager';
 
@@ -12,7 +11,6 @@ export const MeetingProvider: FC = (props) => {
   const { children } = props;
   const [rtcEngine, setRtcEngine] = useState<AgoraRtcEngine>();
   const [meetingManager, setMeetingManager] = useState<MeetingManager>();
-  const [attendeeManager, setAttendeeManager] = useState<AttendeeManager>();
   const [info, infoDispatcher] = useReducer(MeetingInfoReducer, {});
 
   useEffect(() => {
@@ -50,20 +48,6 @@ export const MeetingProvider: FC = (props) => {
     }
   }, [rtcEngine]);
 
-  useEffect(() => {
-    if (!attendeeManager && rtcEngine) {
-      const manager = new AttendeeManager(rtcEngine);
-      setAttendeeManager(manager);
-
-      log.info('initialize attendee manager...');
-    }
-
-    if (attendeeManager && !rtcEngine) {
-      setAttendeeManager(undefined);
-      log.info('release attendee manager...');
-    }
-  }, [rtcEngine]);
-
   return (
     <MeetingInfoContext.Provider
       value={{ meetingInfo: info, meetingInfoDispatcher: infoDispatcher }}
@@ -73,9 +57,7 @@ export const MeetingProvider: FC = (props) => {
           meetingManager,
         }}
       >
-        <AttendeeManagerContext.Provider value={{ attendeeManager }}>
-          {children}
-        </AttendeeManagerContext.Provider>
+        {children}
       </MeetingManagerContext.Provider>
     </MeetingInfoContext.Provider>
   );
