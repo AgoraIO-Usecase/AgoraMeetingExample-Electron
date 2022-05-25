@@ -1,7 +1,7 @@
 export declare type JoinMeetingParams = {
   channelName: string;
   nickName: string;
-  streamId: number;
+  uid: number;
   isCameraOn: boolean;
   isMicrophoneOn: boolean;
 };

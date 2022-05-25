@@ -32,7 +32,7 @@ const MainView = () => {
   const [joinParams, setJoinParams] = useState<JoinMeetingParams>({
     channelName: '',
     nickName: getNickName(),
-    streamId: Number(`${new Date().getTime()}`.slice(7)),
+    uid: Number(`${new Date().getTime()}`.slice(7)),
     isCameraOn: getUseCamera(),
     isMicrophoneOn: getUseMicrophone(),
   });

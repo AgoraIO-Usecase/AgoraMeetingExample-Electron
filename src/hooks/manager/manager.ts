@@ -27,6 +27,10 @@ export class MeetingManager {
       filePath: appLogPath,
       fileSize: 2000,
     });
+    this.engine.setChannelProfile(1);
+    this.engine.setClientRole(1);
+    this.engine.enableAudio();
+    this.engine.enableVideo();
   };
 
   private registerRtcEngineEvents = () => {
@@ -110,12 +114,18 @@ export class MeetingManager {
   joinMeeting = (params: JoinMeetingParams) => {
     log.info('join meeting', params);
 
-    const { channelName, nickName, streamId } = params;
+    const { channelName, nickName, uid, isCameraOn, isMicrophoneOn } = params;
+
+    this.engine.enableAudioVolumeIndication(200, 3, false);
+    this.engine.enableDualStreamMode(true);
+    this.engine.enableLocalAudio(isMicrophoneOn);
+    this.engine.enableLocalVideo(isCameraOn);
+
     this.engine.joinChannel(
       '006b8590cc94c0d429a92137f33a44820deIACxaWjIFUWQ0dUdwn70sI9iD5eY8dWW5a83R71ecsNmRiy7EcwAAAAAEADTxV3A/OCNYgEAAQD84I1i',
       channelName,
       '',
-      streamId
+      uid
     );
 
     if (this.infoRedux.meetingInfoDispatcher)
@@ -148,5 +158,13 @@ export class MeetingManager {
   muteVideo = (mute: boolean) => {
     log.info('mute video', mute);
     this.engine.muteLocalVideoStream(mute);
+  };
+
+  setupLocalVideoRenderer = (view: Element) => {
+    this.engine.setupLocalVideo(view);
+  };
+
+  setupRemoteVideoRenderer = (uid: number, view: Element) => {
+    this.engine.setupRemoteVideo(uid, view);
   };
 }

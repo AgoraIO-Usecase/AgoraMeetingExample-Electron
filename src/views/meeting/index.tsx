@@ -10,6 +10,7 @@ import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 
 import HeaderBar from '../components/header';
+import VideoBox from '../components/video';
 import useStyle from './style';
 import {
   MeetingConnectionState,
@@ -43,7 +44,7 @@ const MeetingView = () => {
     >
       <HeaderBar title="AgoraMeeting" fixed={false} layouts />
       <Stack className={style.viewContainer} width="100%" height="100%">
-        <div />
+        <VideoBox />
       </Stack>
       <Stack
         className={style.toolBar}
