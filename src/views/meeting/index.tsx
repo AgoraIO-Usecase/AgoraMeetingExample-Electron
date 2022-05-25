@@ -29,6 +29,16 @@ const MeetingView = () => {
       navigate('/main');
   }, [meetingInfo?.state]);
 
+  const onMicrophoneClicked = () => {
+    meetingManager?.enableAudio(!meetingInfo?.isMicrophoneOn);
+  };
+
+  const onCameraClicked = () => {
+    meetingManager?.enableVideo(!meetingInfo?.isCameraOn);
+  };
+
+  const onScreenShareClicked = () => {};
+
   const onLeaveMeetingClicked = () => {
     meetingManager?.leaveMeeting();
   };
@@ -54,22 +64,22 @@ const MeetingView = () => {
         alignItems="center"
         spacing={2}
       >
-        <IconButton className={style.toolButton}>
-          {meetingInfo?.isCameraOn ? (
+        <IconButton className={style.toolButton} onClick={onMicrophoneClicked}>
+          {meetingInfo?.isMicrophoneOn ? (
             <MicNoneOutlinedIcon color="primary" />
           ) : (
             <MicOffOutlinedIcon color="error" />
           )}
         </IconButton>
-        <IconButton className={style.toolButton}>
+        <IconButton className={style.toolButton} onClick={onCameraClicked}>
           {meetingInfo?.isCameraOn ? (
             <VideocamOutlinedIcon color="primary" />
           ) : (
             <VideocamOffOutlinedIcon color="error" />
           )}
         </IconButton>
-        <IconButton className={style.toolButton}>
-          {meetingInfo?.isCameraOn ? (
+        <IconButton className={style.toolButton} onClick={onScreenShareClicked}>
+          {meetingInfo?.isScreenSharing ? (
             <ScreenShareOutlinedIcon color="success" />
           ) : (
             <ScreenShareOutlinedIcon color="primary" />

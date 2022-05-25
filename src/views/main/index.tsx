@@ -30,7 +30,7 @@ const MainView = () => {
   const { meetingInfo } = useMeetingInfo();
   const { meetingManager } = useMeetingManager();
   const [joinParams, setJoinParams] = useState<JoinMeetingParams>({
-    channelName: '',
+    channelName: 'HPL123',
     nickName: getNickName(),
     uid: Number(`${new Date().getTime()}`.slice(7)),
     isCameraOn: getUseCamera(),

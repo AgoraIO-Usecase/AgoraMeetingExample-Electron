@@ -1,7 +1,13 @@
 /* eslint-disable import/prefer-default-export */
 import log from 'electron-log';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { RtcStats } from 'agora-electron-sdk/types/Api/native_type';
+import {
+  LOCAL_AUDIO_STREAM_ERROR,
+  LOCAL_AUDIO_STREAM_STATE,
+  LOCAL_VIDEO_STREAM_ERROR,
+  LOCAL_VIDEO_STREAM_STATE,
+  RtcStats,
+} from 'agora-electron-sdk/types/Api/native_type';
 import { JoinMeetingParams, MeetingConnectionState } from '../types';
 import { MeetingInfoDispatcherType, MeetingInfoRedux } from '../info';
 
@@ -109,6 +115,43 @@ export class MeetingManager {
     this.engine.on('error', (err) => {
       log.error(err);
     });
+
+    this.engine.on(
+      'localVideoStateChanged',
+      (
+        localVideoState: LOCAL_VIDEO_STREAM_STATE,
+        err: LOCAL_VIDEO_STREAM_ERROR
+      ) => {
+        // LOCAL_VIDEO_STREAM_STATE.LOCAL_VIDEO_STREAM_STATE_STOPPED = 0
+        // LOCAL_VIDEO_STREAM_STATE.LOCAL_VIDEO_STREAM_STATE_FAILED = 3
+        const isOn = localVideoState !== 0 && localVideoState !== 3;
+
+        log.info('local video state changed,', localVideoState, err, isOn);
+
+        if (this.infoRedux.meetingInfoDispatcher)
+          this.infoRedux.meetingInfoDispatcher({
+            type: MeetingInfoDispatcherType.DISPATCHER_TYPE_INFO,
+            payload: { isCameraOn: isOn },
+          });
+      }
+    );
+
+    this.engine.on(
+      'localAudioStateChanged',
+      (state: LOCAL_AUDIO_STREAM_STATE, err: LOCAL_AUDIO_STREAM_ERROR) => {
+        // LOCAL_AUDIO_STREAM_STATE.LOCAL_AUDIO_STREAM_STATE_STOPPED = 0
+        // LOCAL_AUDIO_STREAM_STATE.LOCAL_AUDIO_STREAM_STATE_FAILED = 3
+        const isOn = state !== 0 && state !== 3;
+
+        log.info('local audio state changed,', state, err, isOn);
+
+        if (this.infoRedux.meetingInfoDispatcher)
+          this.infoRedux.meetingInfoDispatcher({
+            type: MeetingInfoDispatcherType.DISPATCHER_TYPE_INFO,
+            payload: { isMicrophoneOn: isOn },
+          });
+      }
+    );
   };
 
   joinMeeting = (params: JoinMeetingParams) => {
@@ -161,10 +204,12 @@ export class MeetingManager {
   };
 
   setupLocalVideoRenderer = (view: Element) => {
+    log.info('setup local video renderer');
     this.engine.setupLocalVideo(view);
   };
 
   setupRemoteVideoRenderer = (uid: number, view: Element) => {
+    log.info(`setup remote video renderer for ${uid}`);
     this.engine.setupRemoteVideo(uid, view);
   };
 }
