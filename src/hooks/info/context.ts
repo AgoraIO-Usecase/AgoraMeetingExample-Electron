@@ -1,20 +1,29 @@
-/* eslint-disable import/prefer-default-export */
 import React, { createContext } from 'react';
-import { MeetingInfo } from '../types';
+import { MeetingConnectionState, MeetingInfo, UserInfo } from '../types';
 
-export enum MeetingInfoDispatcherType {
-  DISPATCHER_TYPE_CONNECTION,
-  DISPATCHER_TYPE_INFO,
+export enum MeetingStoreActionType {
+  ACTION_TYPE_CONNECTION,
+  ACTION_TYPE_INFO,
+  ACTION_TYPE_USER_NEW,
+  ACTION_TYPE_USER_REMOVE,
+  ACTION_TYPE_USER_MODIFY,
 }
 
-export type MeetingInfoDispatcher = {
-  type: MeetingInfoDispatcherType;
-  payload?: MeetingInfo;
+export type MeetingStoreAction = {
+  type: MeetingStoreActionType;
+  payload?:
+    | MeetingInfo
+    | UserInfo
+    | number
+    | MeetingConnectionState
+    | undefined;
 };
 
-export type MeetingInfoRedux = {
-  meetingInfo?: MeetingInfo;
-  meetingInfoDispatcher?: React.Dispatch<MeetingInfoDispatcher>;
+export type MeetingStore = {
+  state: MeetingInfo;
+  dispatch: React.Dispatch<MeetingStoreAction>;
 };
 
-export const MeetingInfoContext = createContext<MeetingInfoRedux>({});
+export const MeetingStoreContext = createContext<MeetingStore | undefined>(
+  undefined
+);

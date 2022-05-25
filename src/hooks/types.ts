@@ -1,7 +1,7 @@
 export declare type JoinMeetingParams = {
+  uid: number;
   channelName: string;
   nickName: string;
-  uid: number;
   isCameraOn: boolean;
   isMicrophoneOn: boolean;
 };
@@ -14,10 +14,20 @@ export enum MeetingConnectionState {
   DISCONNECTING,
 }
 
+export declare interface UserInfo {
+  uid: number;
+  shareId: number;
+  parentId: number;
+  nickName: string;
+
+  isSelf: boolean;
+  isCameraOn: boolean;
+  isMicrophoneOn: boolean;
+  isScreenSharing: boolean;
+}
+
 export declare type MeetingInfo = {
   channelName?: string;
-  state?: MeetingConnectionState;
-  isCameraOn?: boolean;
-  isMicrophoneOn?: boolean;
-  isScreenSharing?: boolean;
+  connectionState?: MeetingConnectionState;
+  users?: UserInfo[];
 };

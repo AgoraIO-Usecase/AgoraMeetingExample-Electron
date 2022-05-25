@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import log from 'electron-log';
 import { useNavigate } from 'react-router-dom';
 import { Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -14,27 +15,40 @@ import VideoBox from '../components/video';
 import useStyle from './style';
 import {
   MeetingConnectionState,
-  useMeetingInfo,
+  useMeetingStore,
   useMeetingManager,
 } from '../../hooks';
 
 const MeetingView = () => {
   const navigate = useNavigate();
   const style = useStyle();
-  const { meetingInfo } = useMeetingInfo();
+  const { state } = useMeetingStore();
   const { meetingManager } = useMeetingManager();
+  const selfUser = useMemo(() => {
+    if (
+      state.connectionState === MeetingConnectionState.CONNECTED &&
+      !state.users
+    )
+      throw Error('invalid context');
+
+    return state.users[0];
+  }, [state.users, state.connectionState]);
 
   useEffect(() => {
-    if (meetingInfo?.state === MeetingConnectionState.DISCONNECTED)
+    log.debug('meeting view state changed:', state);
+  }, [state]);
+
+  useEffect(() => {
+    if (state.connectionState === MeetingConnectionState.DISCONNECTED)
       navigate('/main');
-  }, [meetingInfo?.state]);
+  }, [state.connectionState]);
 
   const onMicrophoneClicked = () => {
-    meetingManager?.enableAudio(!meetingInfo?.isMicrophoneOn);
+    meetingManager?.enableAudio(!selfUser.isMicrophoneOn);
   };
 
   const onCameraClicked = () => {
-    meetingManager?.enableVideo(!meetingInfo?.isCameraOn);
+    meetingManager?.enableVideo(!selfUser.isCameraOn);
   };
 
   const onScreenShareClicked = () => {};
@@ -65,21 +79,21 @@ const MeetingView = () => {
         spacing={2}
       >
         <IconButton className={style.toolButton} onClick={onMicrophoneClicked}>
-          {meetingInfo?.isMicrophoneOn ? (
+          {selfUser.isMicrophoneOn ? (
             <MicNoneOutlinedIcon color="primary" />
           ) : (
             <MicOffOutlinedIcon color="error" />
           )}
         </IconButton>
         <IconButton className={style.toolButton} onClick={onCameraClicked}>
-          {meetingInfo?.isCameraOn ? (
+          {selfUser.isCameraOn ? (
             <VideocamOutlinedIcon color="primary" />
           ) : (
             <VideocamOffOutlinedIcon color="error" />
           )}
         </IconButton>
         <IconButton className={style.toolButton} onClick={onScreenShareClicked}>
-          {meetingInfo?.isScreenSharing ? (
+          {selfUser.isScreenSharing ? (
             <ScreenShareOutlinedIcon color="success" />
           ) : (
             <ScreenShareOutlinedIcon color="primary" />

@@ -1,8 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 import { useContext } from 'react';
-import { MeetingInfoContext } from './context';
+import { MeetingStoreContext } from './context';
 
-export const useMeetingInfo = () => {
-  const context = useContext(MeetingInfoContext);
+export const useMeetingStore = () => {
+  const context = useContext(MeetingStoreContext);
+  if (!context) {
+    throw Error('invalid context');
+  }
+
   return context;
 };

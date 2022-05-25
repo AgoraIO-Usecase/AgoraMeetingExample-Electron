@@ -18,7 +18,7 @@ import {
   setUseMicrophone,
 } from '../../utils/localstorage';
 import {
-  useMeetingInfo,
+  useMeetingStore,
   useMeetingManager,
   JoinMeetingParams,
   MeetingConnectionState,
@@ -27,7 +27,7 @@ import {
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
-  const { meetingInfo } = useMeetingInfo();
+  const { state } = useMeetingStore();
   const { meetingManager } = useMeetingManager();
   const [joinParams, setJoinParams] = useState<JoinMeetingParams>({
     channelName: 'HPL123',
@@ -41,10 +41,12 @@ const MainView = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    log.info('mainview meeting info changed', meetingInfo);
+    log.debug('main view state changed:', state);
+  }, [state]);
 
+  useEffect(() => {
     if (
-      meetingInfo?.state === MeetingConnectionState.CONNECTING &&
+      state.connectionState === MeetingConnectionState.CONNECTING &&
       loading !== true
     ) {
       setLoading(true);
@@ -52,14 +54,14 @@ const MainView = () => {
       setLoading(false);
     }
 
-    if (meetingInfo?.state === MeetingConnectionState.CONNECTED) {
+    if (state.connectionState === MeetingConnectionState.CONNECTED) {
       const { nickName, isCameraOn, isMicrophoneOn } = joinParams;
       setNickName(nickName);
       setUseCamera(isCameraOn);
       setUseMicrophone(isMicrophoneOn);
       navigate('/meeting');
     }
-  }, [meetingInfo, meetingInfo?.state]);
+  }, [state.connectionState]);
 
   const onChannelNameChanged = (value: string) => {
     setJoinParams({ ...joinParams, channelName: value });
