@@ -1,4 +1,4 @@
-export declare type JoinMeetingParams = {
+export declare type JoinParams = {
   uid: number;
   channelName: string;
   nickName: string;
@@ -6,7 +6,7 @@ export declare type JoinMeetingParams = {
   isMicrophoneOn: boolean;
 };
 
-export enum MeetingConnectionState {
+export enum ConnectionType {
   DISCONNECTED,
   CONNECTING,
   CONNECTED,
@@ -26,8 +26,22 @@ export declare interface UserInfo {
   isScreenSharing?: boolean;
 }
 
+export declare type DeviceInfo = {
+  deviceid: string;
+  devicename: string;
+};
+
+export declare type EngineInfo = {
+  currentCameraId?: string;
+  currentSpeakerId?: string;
+  currentMicrophoneId?: string;
+  cameras?: DeviceInfo[];
+  speakers?: DeviceInfo[];
+  microphones?: DeviceInfo[];
+};
+
 export declare type MeetingInfo = {
   channelName?: string;
-  connectionState?: MeetingConnectionState;
+  connection?: ConnectionType;
   users?: UserInfo[];
 };

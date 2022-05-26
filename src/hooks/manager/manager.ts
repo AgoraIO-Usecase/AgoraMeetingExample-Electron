@@ -12,17 +12,17 @@ import {
   RemoteVideoStateReason,
   RtcStats,
 } from 'agora-electron-sdk/types/Api/native_type';
-import { JoinMeetingParams, MeetingConnectionState, UserInfo } from '../types';
-import { MeetingStoreActionType, MeetingStore } from '../info';
+import { DeviceInfo, JoinParams, ConnectionType, UserInfo } from '../types';
+import { StoreActionType, Store } from '../store';
 
 export class MeetingManager {
   engine!: AgoraRtcEngine;
 
-  store!: MeetingStore;
+  store!: Store;
 
   selfUser!: UserInfo;
 
-  constructor(engine: AgoraRtcEngine, store: MeetingStore) {
+  constructor(engine: AgoraRtcEngine, store: Store) {
     this.engine = engine;
     this.store = store;
     this.initializeRtcEngine();
@@ -43,6 +43,10 @@ export class MeetingManager {
     this.engine.setClientRole(1);
     this.engine.enableAudio();
     this.engine.enableVideo();
+
+    this.refreshDevices('camera');
+    this.refreshDevices('speaker');
+    this.refreshDevices('mic');
   };
 
   private registerRtcEngineEvents = () => {
@@ -54,8 +58,8 @@ export class MeetingManager {
       );
 
       this.store.dispatch({
-        type: MeetingStoreActionType.ACTION_TYPE_CONNECTION,
-        payload: MeetingConnectionState.CONNECTED,
+        type: StoreActionType.ACTION_TYPE_CONNECTION,
+        payload: ConnectionType.CONNECTED,
       });
     });
 
@@ -73,7 +77,7 @@ export class MeetingManager {
         isScreenSharing: false,
       };
       this.store.dispatch({
-        type: MeetingStoreActionType.ACTION_TYPE_USER_NEW,
+        type: StoreActionType.ACTION_TYPE_USER_NEW,
         payload: selfUser,
       });
     });
@@ -82,7 +86,7 @@ export class MeetingManager {
       log.info(`userOffline ---- ${uid}  reason: ${reason}`);
 
       this.store.dispatch({
-        type: MeetingStoreActionType.ACTION_TYPE_USER_NEW,
+        type: StoreActionType.ACTION_TYPE_USER_NEW,
         payload: uid,
       });
     });
@@ -91,8 +95,8 @@ export class MeetingManager {
       log.info('leavechannel', rtcStats);
 
       this.store.dispatch({
-        type: MeetingStoreActionType.ACTION_TYPE_CONNECTION,
-        payload: MeetingConnectionState.DISCONNECTED,
+        type: StoreActionType.ACTION_TYPE_CONNECTION,
+        payload: ConnectionType.DISCONNECTED,
       });
     });
 
@@ -112,10 +116,10 @@ export class MeetingManager {
 
         log.info('local video state changed,', localVideoState, err, isOn);
 
-        if (this.selfUser.isCameraOn !== isOn) {
+        if (this.isInMeeting() && this.selfUser.isCameraOn !== isOn) {
           this.selfUser.isCameraOn = isOn;
           this.store.dispatch({
-            type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+            type: StoreActionType.ACTION_TYPE_USER_MODIFY,
             payload: this.selfUser,
           });
         }
@@ -131,10 +135,10 @@ export class MeetingManager {
 
         log.info('local audio state changed,', state, err, isOn);
 
-        if (this.selfUser.isMicrophoneOn !== isOn) {
+        if (this.isInMeeting() && this.selfUser.isMicrophoneOn !== isOn) {
           this.selfUser.isMicrophoneOn = isOn;
           this.store.dispatch({
-            type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+            type: StoreActionType.ACTION_TYPE_USER_MODIFY,
             payload: this.selfUser,
           });
         }
@@ -154,7 +158,7 @@ export class MeetingManager {
         log.info('remote video state changed,', uid, state, reason, isOn);
 
         this.store.dispatch({
-          type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+          type: StoreActionType.ACTION_TYPE_USER_MODIFY,
           payload: {
             uid,
             isCameraOn: isOn,
@@ -176,7 +180,7 @@ export class MeetingManager {
         log.info('remote audio state changed,', uid, state, reason, isOn);
 
         this.store.dispatch({
-          type: MeetingStoreActionType.ACTION_TYPE_USER_MODIFY,
+          type: StoreActionType.ACTION_TYPE_USER_MODIFY,
           payload: {
             uid,
             isMicrophoneOn: isOn,
@@ -184,9 +188,81 @@ export class MeetingManager {
         });
       }
     );
+
+    this.engine.on(
+      'videoDeviceStateChanged',
+      (deviceId: string, deviceType: number, deviceState: number) => {
+        if (deviceType !== 3) return; // MediaDeviceType.VIDEO_CAPTURE_DEVICE
+        this.refreshDevices('camera');
+      }
+    );
+
+    this.engine.on(
+      'audioDeviceStateChanged',
+      (deviceId: string, deviceType: number, deviceState: number) => {
+        if (deviceType === 0) this.refreshDevices('speaker');
+        if (deviceType === 1) this.refreshDevices('mic');
+      }
+    );
   };
 
-  joinMeeting = (params: JoinMeetingParams) => {
+  private refreshDevices = (type: 'camera' | 'speaker' | 'mic') => {
+    switch (type) {
+      case 'camera':
+        {
+          const devices = this.engine.getVideoDevices() as DeviceInfo[];
+          const currentDevice = this.engine.getCurrentVideoDevice() as string;
+          this.store.dispatch({
+            type: StoreActionType.ACTION_TYPE_ENGINE_INFO,
+            payload: {
+              cameras: devices,
+              currentCameraId: currentDevice,
+            },
+          });
+        }
+        break;
+      case 'speaker':
+        {
+          const devices = this.engine.getAudioPlaybackDevices() as DeviceInfo[];
+          const currentDevice =
+            this.engine.getCurrentAudioPlaybackDevice() as string;
+
+          this.store.dispatch({
+            type: StoreActionType.ACTION_TYPE_ENGINE_INFO,
+            payload: {
+              speakers: devices,
+              currentSpeakerId: currentDevice,
+            },
+          });
+        }
+        break;
+      case 'mic':
+        {
+          const devices =
+            this.engine.getAudioRecordingDevices() as DeviceInfo[];
+          const currentDevice =
+            this.engine.getCurrentAudioRecordingDevice() as string;
+
+          this.store.dispatch({
+            type: StoreActionType.ACTION_TYPE_ENGINE_INFO,
+            payload: {
+              microphones: devices,
+              currentMicrophoneId: currentDevice,
+            },
+          });
+        }
+        break;
+      default:
+        log.error('revresh device with invalid device type');
+    }
+  };
+
+  isInMeeting = () => {
+    const { meeting } = this.store.state;
+    return meeting.connection !== ConnectionType.DISCONNECTED;
+  };
+
+  joinMeeting = (params: JoinParams) => {
     log.info('join meeting', params);
 
     const { channelName, nickName, uid, isCameraOn, isMicrophoneOn } = params;
@@ -199,8 +275,8 @@ export class MeetingManager {
     this.engine.joinChannel('', channelName, '', uid);
 
     this.store.dispatch({
-      type: MeetingStoreActionType.ACTION_TYPE_CONNECTION,
-      payload: MeetingConnectionState.CONNECTING,
+      type: StoreActionType.ACTION_TYPE_CONNECTION,
+      payload: ConnectionType.CONNECTING,
     });
 
     this.selfUser = {
@@ -214,7 +290,7 @@ export class MeetingManager {
       isScreenSharing: false,
     };
     this.store.dispatch({
-      type: MeetingStoreActionType.ACTION_TYPE_USER_NEW,
+      type: StoreActionType.ACTION_TYPE_USER_NEW,
       payload: this.selfUser,
     });
   };
@@ -242,6 +318,11 @@ export class MeetingManager {
   muteVideo = (mute: boolean) => {
     log.info('mute video', mute);
     this.engine.muteLocalVideoStream(mute);
+  };
+
+  setVideoPreview = (enable: boolean) => {
+    if (enable) this.engine.startPreview();
+    else this.engine.stopPreview();
   };
 
   setupLocalVideoRenderer = (view: Element, isFit: boolean) => {

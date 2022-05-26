@@ -13,31 +13,27 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import HeaderBar from '../components/header';
 import VideoBox from '../components/video';
 import useStyle from './style';
-import {
-  MeetingConnectionState,
-  useMeetingStore,
-  useMeetingManager,
-} from '../../hooks';
+import { ConnectionType, useStore, useMeetingManager } from '../../hooks';
 
 const MeetingView = () => {
   const navigate = useNavigate();
   const style = useStyle();
-  const { state } = useMeetingStore();
-  const { meetingManager } = useMeetingManager();
+  const { state } = useStore();
+  const meetingManager = useMeetingManager();
   const selfUser = useMemo(() => {
-    if (!state.users) throw Error('invalid context');
+    if (!state.meeting.users) throw Error('invalid context');
 
-    return state.users[0];
-  }, [state.users]);
+    return state.meeting.users[0];
+  }, [state.meeting.users]);
 
   useEffect(() => {
     log.debug('meeting view state changed:', state);
   }, [state]);
 
   useEffect(() => {
-    if (state.connectionState === MeetingConnectionState.DISCONNECTED)
+    if (state.meeting.connection === ConnectionType.DISCONNECTED)
       navigate('/main');
-  }, [state.connectionState]);
+  }, [state.meeting.connection]);
 
   const onMicrophoneClicked = () => {
     meetingManager?.enableAudio(!selfUser.isMicrophoneOn);

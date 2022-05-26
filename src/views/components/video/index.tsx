@@ -8,7 +8,7 @@ export declare type VideoBoxProps = {
 
 const VideoBox = (props: VideoBoxProps) => {
   const { uid, fit } = props;
-  const { meetingManager } = useMeetingManager();
+  const meetingManager = useMeetingManager();
   const domId = useMemo(() => {
     return uid === undefined ? 'videobox-local' : `videobox-${uid as number}`;
   }, [uid]);

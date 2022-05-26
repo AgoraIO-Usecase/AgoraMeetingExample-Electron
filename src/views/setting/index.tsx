@@ -23,7 +23,6 @@ import CommonPage from './pages/common';
 import VideoPage from './pages/video';
 import AudioPage from './pages/audio';
 import AboutPage from './pages/about';
-import useStyle from './style';
 
 const tabs: {
   index: number;
@@ -117,7 +116,7 @@ const SettingTabs = () => {
         aria-label="Vertical tabs example"
         sx={{ borderRight: 1, borderColor: 'divider' }}
         visibleScrollbar={false}
-        style={{ paddingTop: '24px' }}
+        style={{ paddingTop: '24px', width: '140px', minWidth: '140px' }}
       >
         {tabs.map((tab) => (
           <Tab
@@ -184,12 +183,10 @@ const SettingPaperComponent = (props: PaperProps) => {
 };
 
 const SettingView = (props: { open: boolean; onClose: () => void }) => {
-  const style = useStyle();
   const { open, onClose } = props;
 
   return (
     <Dialog
-      className={style.dialog}
       open={open}
       onClose={onClose}
       PaperComponent={SettingPaperComponent}

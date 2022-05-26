@@ -4,14 +4,22 @@ import React, { FC, useEffect, useState, useReducer } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import log from 'electron-log';
 
-import { MeetingStoreContext, MeetingStoreReducer } from './info';
+import { StoreContext, StoreReducer } from './store';
 import { MeetingManager, MeetingManagerContext } from './manager';
+import { ConnectionType } from './types';
 
-export const MeetingProvider: FC = (props) => {
+export const RootProvider: FC = (props) => {
   const { children } = props;
   const [rtcEngine, setRtcEngine] = useState<AgoraRtcEngine>();
   const [meetingManager, setMeetingManager] = useState<MeetingManager>();
-  const [state, dispatch] = useReducer(MeetingStoreReducer, {});
+  const [state, dispatch] = useReducer(StoreReducer, {
+    engine: {},
+    meeting: {
+      channelName: '',
+      connection: ConnectionType.DISCONNECTED,
+      users: [],
+    },
+  });
 
   useEffect(() => {
     if (!rtcEngine) {
@@ -49,14 +57,10 @@ export const MeetingProvider: FC = (props) => {
   }, [rtcEngine]);
 
   return (
-    <MeetingStoreContext.Provider value={{ state, dispatch }}>
-      <MeetingManagerContext.Provider
-        value={{
-          meetingManager,
-        }}
-      >
+    <StoreContext.Provider value={{ state, dispatch }}>
+      <MeetingManagerContext.Provider value={meetingManager}>
         {children}
       </MeetingManagerContext.Provider>
-    </MeetingStoreContext.Provider>
+    </StoreContext.Provider>
   );
 };

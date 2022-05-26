@@ -2,6 +2,6 @@
 import { createContext } from 'react';
 import { MeetingManager } from './manager';
 
-export const MeetingManagerContext = createContext<{
-  meetingManager?: MeetingManager | undefined;
-}>({});
+export const MeetingManagerContext = createContext<MeetingManager | undefined>(
+  undefined
+);
