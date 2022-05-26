@@ -62,7 +62,9 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
-    height: 728,
+    height: 768,
+    minWidth: 1024,
+    minHeight: 768,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
@@ -70,7 +72,7 @@ const createWindow = async () => {
     },
   });
   mainWindow.webContents.openDevTools({
-    mode: 'detach',
+    mode: 'right',
     activate: true,
   });
 

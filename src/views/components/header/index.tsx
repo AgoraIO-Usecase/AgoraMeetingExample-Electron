@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
+
+import SettingView from '../../setting';
 
 export declare type HeaderBarProps = {
   fixed: boolean;
@@ -15,6 +17,11 @@ export declare type HeaderBarProps = {
 
 const HeaderBar = (props: HeaderBarProps) => {
   const { fixed, title, layouts, onLayoutClicked } = props;
+  const [showSetting, setShowSetting] = useState(false);
+
+  const onSettingClicked = useCallback(() => {
+    setShowSetting(true);
+  }, []);
 
   return (
     <Stack
@@ -51,9 +58,15 @@ const HeaderBar = (props: HeaderBarProps) => {
       ) : (
         <></>
       )}
-      <IconButton onClick={() => {}}>
+      <IconButton onClick={onSettingClicked}>
         <SettingsOutlinedIcon color="primary" />
       </IconButton>
+      <SettingView
+        open={showSetting}
+        onClose={() => {
+          setShowSetting(false);
+        }}
+      />
     </Stack>
   );
 };

@@ -241,6 +241,7 @@
     "history": "^5.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-draggable": "^4.4.5",
     "react-router-dom": "^6.3.0",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19"

@@ -64,7 +64,7 @@ const MeetingView = () => {
     >
       <HeaderBar title="AgoraMeeting" fixed={false} layouts />
       <Stack className={style.viewContainer} width="100%" height="100%">
-        <VideoBox fit />
+        {selfUser.isCameraOn ? <VideoBox fit /> : <></>}
       </Stack>
       <Stack
         className={style.toolBar}
