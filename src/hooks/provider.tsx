@@ -1,66 +1,85 @@
 /* eslint-disable import/prefer-default-export */
-import React, { FC, useEffect, useState, useReducer } from 'react';
-
-import AgoraRtcEngine from 'agora-electron-sdk';
-import log from 'electron-log';
-
-import { StoreContext, StoreReducer } from './store';
-import { MeetingManager, MeetingManagerContext } from './manager';
-import { ConnectionType } from './types';
+import React, { FC, useEffect, useMemo, useReducer } from 'react';
+import {
+  StoreActionType,
+  StoreContext,
+  StoreReducer,
+  StoreState,
+} from './store';
+import { CommonManager, CommonManagerContext, DeviceType } from './manager';
 
 export const RootProvider: FC = (props) => {
   const { children } = props;
-  const [rtcEngine, setRtcEngine] = useState<AgoraRtcEngine>();
-  const [meetingManager, setMeetingManager] = useState<MeetingManager>();
-  const [state, dispatch] = useReducer(StoreReducer, {
-    engine: {},
-    meeting: {
-      channelName: '',
-      connection: ConnectionType.DISCONNECTED,
-      users: [],
-    },
-  });
+  const [state, dispatch] = useReducer(StoreReducer, {});
+  const commonManager = useMemo(() => new CommonManager(), []);
 
   useEffect(() => {
-    if (!rtcEngine) {
-      const engine = new AgoraRtcEngine();
-      setRtcEngine(engine);
-
-      log.info('initialize engine...');
-    }
-
-    return () => {
-      if (rtcEngine) {
-        rtcEngine.release();
-        setRtcEngine(undefined);
-
-        log.info('release engine...');
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!meetingManager && rtcEngine) {
-      const manager = new MeetingManager(rtcEngine, {
-        state,
-        dispatch,
+    commonManager.on('connection', (connection, reason) => {
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_CONNECTION,
+        payload: connection,
       });
-      setMeetingManager(manager);
+    });
+    commonManager.on('deviceList', (deviceType, currentDeviceId, devices) => {
+      const newState: StoreState = {};
+      switch (deviceType) {
+        case DeviceType.Camera:
+          newState.cameras = devices;
+          newState.currentCameraId = currentDeviceId;
+          break;
+        case DeviceType.Speaker:
+          newState.speakers = devices;
+          newState.currentSpeakerId = currentDeviceId;
+          break;
+        case DeviceType.Microphone:
+          newState.microphones = devices;
+          newState.currentMicrophoneId = currentDeviceId;
+          break;
+        default:
+          break;
+      }
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_INFO,
+        payload: newState,
+      });
+    });
+    commonManager.on('attendeeNew', (position, attendee) => {
+      const attendees = state.attendees || [];
+      attendees.splice(position, 1, attendee);
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_INFO,
+        payload: { attendees },
+      });
+    });
+    commonManager.on('attendeeUpdate', (position, attendee) => {
+      const attendees = state.attendees || [];
+      attendees[position] = { ...attendees[position], ...attendee };
 
-      log.info('initialize meeting manager...');
-    }
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_INFO,
+        payload: { attendees },
+      });
+    });
+    commonManager.on('attendeeRemove', (position) => {
+      const attendees = state.attendees || [];
+      attendees.splice(position, 1);
 
-    if (meetingManager && !rtcEngine) {
-      setMeetingManager(undefined);
-      log.info('release meeting manager...');
-    }
-  }, [rtcEngine]);
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_INFO,
+        payload: { attendees },
+      });
+    });
+
+    commonManager.initialize();
+
+    return () => commonManager.release();
+  }, []);
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>
-      <MeetingManagerContext.Provider value={meetingManager}>
+      <CommonManagerContext.Provider value={commonManager}>
         {children}
-      </MeetingManagerContext.Provider>
+      </CommonManagerContext.Provider>
     </StoreContext.Provider>
   );
 };

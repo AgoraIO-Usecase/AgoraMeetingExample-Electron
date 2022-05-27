@@ -4,7 +4,7 @@ import { StoreContext } from './context';
 
 export const useStore = () => {
   const context = useContext(StoreContext);
-  if (!context) throw Error('use root store invalid context');
+  if (!context) throw Error('invalid store context');
 
   return context;
 };

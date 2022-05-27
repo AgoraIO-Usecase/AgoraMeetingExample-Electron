@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { createContext } from 'react';
-import { MeetingManager } from './manager';
+import { CommonManager } from './common';
 
-export const MeetingManagerContext = createContext<MeetingManager | undefined>(
+export const CommonManagerContext = createContext<CommonManager | undefined>(
   undefined
 );

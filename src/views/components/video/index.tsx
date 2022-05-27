@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useMeetingManager } from '../../../hooks';
+import { useCommonManager } from '../../../hooks';
 
 export declare type VideoBoxProps = {
   uid?: number | undefined;
@@ -8,7 +8,7 @@ export declare type VideoBoxProps = {
 
 const VideoBox = (props: VideoBoxProps) => {
   const { uid, fit } = props;
-  const meetingManager = useMeetingManager();
+  const commonManager = useCommonManager();
   const domId = useMemo(() => {
     return uid === undefined ? 'videobox-local' : `videobox-${uid as number}`;
   }, [uid]);
@@ -16,9 +16,9 @@ const VideoBox = (props: VideoBoxProps) => {
   useEffect(() => {
     const dom = document.getElementById(domId);
     if (uid === undefined) {
-      meetingManager?.setupLocalVideoRenderer(dom!, fit === true);
+      commonManager.setupLocalVideoRenderer(dom!, fit === true);
     } else {
-      meetingManager?.setupRemoteVideoRenderer(uid, dom!, fit === true);
+      commonManager.setupRemoteVideoRenderer(uid, dom!, fit === true);
     }
   }, []);
 

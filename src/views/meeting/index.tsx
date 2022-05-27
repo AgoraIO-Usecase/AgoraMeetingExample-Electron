@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
-import log from 'electron-log';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -13,40 +12,33 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import HeaderBar from '../components/header';
 import VideoBox from '../components/video';
 import useStyle from './style';
-import { ConnectionType, useStore, useMeetingManager } from '../../hooks';
+import { useCommonManager, useStore } from '../../hooks';
 
 const MeetingView = () => {
   const navigate = useNavigate();
   const style = useStyle();
   const { state } = useStore();
-  const meetingManager = useMeetingManager();
+  const commonManager = useCommonManager();
   const selfUser = useMemo(() => {
-    if (!state.meeting.users) throw Error('invalid context');
+    if (state.attendees && state.attendees.length) return state.attendees[0];
 
-    return state.meeting.users[0];
-  }, [state.meeting.users]);
-
-  useEffect(() => {
-    log.debug('meeting view state changed:', state);
-  }, [state]);
-
-  useEffect(() => {
-    if (state.meeting.connection === ConnectionType.DISCONNECTED)
-      navigate('/main');
-  }, [state.meeting.connection]);
+    return { isAudioOn: false, isCameraOn: false, isScreenSharing: false };
+  }, [state.attendees]);
 
   const onMicrophoneClicked = () => {
-    meetingManager?.enableAudio(!selfUser.isMicrophoneOn);
+    commonManager.enableAudio(!selfUser.isAudioOn);
   };
 
   const onCameraClicked = () => {
-    meetingManager?.enableVideo(!selfUser.isCameraOn);
+    commonManager.enableVideo(!selfUser.isCameraOn);
   };
 
   const onScreenShareClicked = () => {};
 
   const onLeaveMeetingClicked = () => {
-    meetingManager?.leaveMeeting();
+    commonManager.leaveMeeting();
+
+    navigate('/main');
   };
 
   return (
@@ -71,7 +63,7 @@ const MeetingView = () => {
         spacing={2}
       >
         <IconButton className={style.toolButton} onClick={onMicrophoneClicked}>
-          {selfUser.isMicrophoneOn ? (
+          {selfUser.isAudioOn ? (
             <MicNoneOutlinedIcon color="primary" />
           ) : (
             <MicOffOutlinedIcon color="error" />

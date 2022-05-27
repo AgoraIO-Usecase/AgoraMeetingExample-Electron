@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import log from 'electron-log';
 import { Stack } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -10,58 +9,50 @@ import Checkbox from '@mui/material/Checkbox';
 import HeaderBar from '../components/header';
 import useStyle from './style';
 import {
-  getNickName,
-  setNickName,
+  getNickname,
+  setNickname,
   getUseCamera,
   setUseCamera,
   getUseMicrophone,
   setUseMicrophone,
 } from '../../utils/localstorage';
 import {
+  MeetingConnection,
+  MeetingParams,
+  useCommonManager,
   useStore,
-  useMeetingManager,
-  JoinParams,
-  ConnectionType,
 } from '../../hooks';
 
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
   const { state } = useStore();
-  const meetingManager = useMeetingManager();
-  const [joinParams, setJoinParams] = useState<JoinParams>({
+  const commonManager = useCommonManager();
+  const [joinParams, setJoinParams] = useState<MeetingParams>({
     channelName: 'HPL123',
-    nickName: getNickName(),
-    uid: Number(`${new Date().getTime()}`.slice(7)),
+    nickname: getNickname(),
     isCameraOn: getUseCamera(),
-    isMicrophoneOn: getUseMicrophone(),
+    isAudioOn: getUseMicrophone(),
   });
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
-  const [isNickNameInvalid, setNickNameInvalid] = useState(false);
+  const [isNicknameInvalid, setNicknameInvalid] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    log.debug('main view state changed:', state);
-  }, [state]);
-
-  useEffect(() => {
-    if (
-      state.meeting.connection === ConnectionType.CONNECTING &&
-      loading !== true
-    ) {
+    if (state.connection === MeetingConnection.Connecting && loading !== true) {
       setLoading(true);
     } else if (loading === true) {
       setLoading(false);
     }
 
-    if (state.meeting.connection === ConnectionType.CONNECTED) {
-      const { nickName, isCameraOn, isMicrophoneOn } = joinParams;
-      setNickName(nickName);
+    if (state.connection === MeetingConnection.Connected) {
+      const { nickname, isCameraOn, isAudioOn } = joinParams;
+      setNickname(nickname);
       setUseCamera(isCameraOn);
-      setUseMicrophone(isMicrophoneOn);
+      setUseMicrophone(isAudioOn);
       navigate('/meeting');
     }
-  }, [state.meeting.connection]);
+  }, [state.connection]);
 
   const onChannelNameChanged = (value: string) => {
     setJoinParams({ ...joinParams, channelName: value });
@@ -69,14 +60,14 @@ const MainView = () => {
     if (value !== '' && isChannelNameInvalid) setChannelNameInvalid(false);
   };
 
-  const onNickNameChanged = (value: string) => {
-    setJoinParams({ ...joinParams, nickName: value });
+  const onNicknameChanged = (value: string) => {
+    setJoinParams({ ...joinParams, nickname: value });
 
-    if (value !== '' && isNickNameInvalid) setNickNameInvalid(false);
+    if (value !== '' && isNicknameInvalid) setNicknameInvalid(false);
   };
 
   const onSubmit = () => {
-    const { channelName, nickName } = joinParams;
+    const { channelName, nickname } = joinParams;
 
     let isInvalid = false;
 
@@ -85,14 +76,14 @@ const MainView = () => {
       isInvalid = true;
     }
 
-    if (nickName === '') {
-      setNickNameInvalid(true);
+    if (nickname === '') {
+      setNicknameInvalid(true);
       isInvalid = true;
     }
 
     if (isInvalid) return;
 
-    meetingManager?.joinMeeting(joinParams);
+    commonManager?.joinMeeting(joinParams);
   };
 
   return (
@@ -128,12 +119,12 @@ const MainView = () => {
         <div>
           <TextField
             id="nickname"
-            defaultValue={joinParams.nickName}
+            defaultValue={joinParams.nickname}
             placeholder="input your nickname"
-            error={isNickNameInvalid}
-            helperText={isNickNameInvalid ? '*invalid nickname' : ''}
+            error={isNicknameInvalid}
+            helperText={isNicknameInvalid ? '*invalid nickname' : ''}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              onNickNameChanged(e.target.value)
+              onNicknameChanged(e.target.value)
             }
           />
         </div>
@@ -153,9 +144,9 @@ const MainView = () => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={joinParams.isMicrophoneOn}
+                checked={joinParams.isAudioOn}
                 onChange={(_evt, checked: boolean) => {
-                  setJoinParams({ ...joinParams, isMicrophoneOn: checked });
+                  setJoinParams({ ...joinParams, isAudioOn: checked });
                 }}
                 name="microphone"
               />

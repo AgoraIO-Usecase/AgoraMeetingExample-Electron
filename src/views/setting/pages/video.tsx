@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { MenuItem, Stack, FormControl } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-
-import { ConnectionType, useMeetingManager, useStore } from '../../../hooks';
+import { useCommonManager, useStore } from '../../../hooks';
 
 const VideoPage = () => {
   const { state } = useStore();
-  const meetingManager = useMeetingManager();
+  const commonManager = useCommonManager();
 
   const handleChange = (event: SelectChangeEvent) => {
     console.info('select changed:', event.target.value);
@@ -14,14 +13,13 @@ const VideoPage = () => {
 
   useEffect(() => {
     const dom = document.getElementById('videobox-preview');
-    if (state.meeting.connection === ConnectionType.DISCONNECTED) {
-      meetingManager?.setVideoPreview(true);
-      meetingManager?.setupLocalVideoRenderer(dom!, true);
+    if (!commonManager.isInMeeting()) {
+      commonManager.setVideoPreview(true);
+      commonManager.setupLocalVideoRenderer(dom!, true);
     }
 
     return () => {
-      if (state.meeting.connection === ConnectionType.DISCONNECTED)
-        meetingManager?.setVideoPreview(false);
+      if (!commonManager.isInMeeting()) commonManager.setVideoPreview(false);
     };
   });
 
@@ -34,10 +32,10 @@ const VideoPage = () => {
       <FormControl fullWidth>
         <Select
           id="select-camera"
-          value={state.engine.currentCameraId}
+          value={state.currentCameraId}
           onChange={handleChange}
         >
-          {state.engine.cameras?.map((device) => (
+          {state.cameras?.map((device) => (
             <MenuItem key={device.deviceid} value={device.deviceid}>
               {device.devicename}
             </MenuItem>

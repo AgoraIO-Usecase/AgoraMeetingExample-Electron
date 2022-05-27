@@ -1,8 +1,11 @@
 /* eslint-disable import/prefer-default-export */
 import { useContext } from 'react';
-import { MeetingManagerContext } from './context';
+import { CommonManagerContext } from './context';
 
-export const useMeetingManager = () => {
-  const context = useContext(MeetingManagerContext);
+export const useCommonManager = () => {
+  const context = useContext(CommonManagerContext);
+
+  if (!context) throw Error('invalid common manager');
+
   return context;
 };
