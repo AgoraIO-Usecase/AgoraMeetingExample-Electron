@@ -1,6 +1,5 @@
 import { VideoEncoderConfiguration } from 'agora-electron-sdk/types/Api/native_type';
 
-/* eslint-disable import/prefer-default-export */
 export const PresetEncoderConfigurations: VideoEncoderConfiguration[] = [
   {
     width: 1920,
@@ -36,3 +35,5 @@ export const PresetEncoderConfigurations: VideoEncoderConfiguration[] = [
     mirrorMode: 0, // VideoMirrorModeType.AUTO,
   },
 ];
+
+export default {};

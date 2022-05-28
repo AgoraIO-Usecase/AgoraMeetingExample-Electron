@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { useContext } from 'react';
 import { StoreContext } from './context';
 
@@ -8,3 +7,5 @@ export const useStore = () => {
 
   return context;
 };
+
+export default {};

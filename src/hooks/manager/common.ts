@@ -9,12 +9,15 @@ import {
   AttendeeInfo,
   DeviceInfo,
   DeviceType,
+  EffectType,
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
   VideoEncoderConfigurationType,
+  VolumeIndication,
 } from './types';
 import storage from './localstorage';
+import { getResourcePath } from '../../utils/resource';
 
 export interface CommonManager {
   on(
@@ -38,6 +41,10 @@ export interface CommonManager {
     cb: (position: number, attendee: AttendeeInfo) => void
   ): this;
   on(evt: 'attendeeRemove', cb: (position: number) => void): this;
+  on(
+    evt: 'volumeIndications',
+    cb: (indications: VolumeIndication[]) => void
+  ): this;
 }
 
 export class CommonManager extends EventEmitter {
@@ -63,6 +70,10 @@ export class CommonManager extends EventEmitter {
     this.rtcManager.on('deviceList', (deviceType, currentDeviceId, devices) => {
       this.emit('deviceList', deviceType, currentDeviceId, devices);
     });
+    this.rtcManager.on('volumeIndications', (indications) => {
+      this.emit('volumeIndications', indications as VolumeIndication[]);
+    });
+
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
       './log/rtc.log'
@@ -212,4 +223,30 @@ export class CommonManager extends EventEmitter {
   };
 
   getSpeakerVolume = () => this.rtcManager.getSpeakerVolume();
+
+  private getEffectSourceByType = (effectType: EffectType) => {
+    switch (effectType) {
+      case EffectType.EffectSpeakerTest:
+        return getResourcePath('audioeffect.mp3');
+      default:
+        return '';
+    }
+  };
+
+  setEffect = (effectType: EffectType, play: boolean, loopCount = -1) => {
+    this.rtcManager.playEffect(
+      effectType as number,
+      this.getEffectSourceByType(effectType),
+      loopCount
+    );
+  };
+
+  setSpeakerTest = (enable: boolean) =>
+    this.rtcManager.setSpeakerTest(
+      enable,
+      this.getEffectSourceByType(EffectType.EffectSpeakerTest)
+    );
+
+  setMicrophoneTest = (enable: boolean) =>
+    this.rtcManager.setMicrophoneTest(enable);
 }

@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import log from 'electron-log';
 import { MeetingConnection } from '../manager';
 import { StoreActionType, StoreAction, StoreState } from './types';
@@ -39,3 +38,5 @@ export const StoreReducer = (
 
   return newState;
 };
+
+export default {};

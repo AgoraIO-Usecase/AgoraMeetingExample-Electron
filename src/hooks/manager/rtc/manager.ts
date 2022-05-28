@@ -22,6 +22,7 @@ import {
   RtcJoinParams,
   RtcVideoEncoderConfigurationType,
   RtcUser,
+  RtcAudioVolumeIndication,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 
@@ -40,6 +41,10 @@ export declare interface RtcManager {
       currentDeviceId: string,
       devices: RtcDeviceInfo[]
     ) => void
+  ): this;
+  on(
+    evt: 'volumeIndications',
+    cb: (indications: RtcAudioVolumeIndication[]) => void
   ): this;
 }
 
@@ -220,6 +225,33 @@ export class RtcManager extends EventEmitter {
 
   getMicrophoneVolume = () => this.engine.getAudioRecordingVolume();
 
+  playEffect = (id: number, filePath: string, loopCount: number) => {
+    log.info('rtc manager play effect', id, filePath);
+    if (!this.isInChannel()) {
+      log.error('rtc manager play effect failed, not in channel');
+      return -1;
+    }
+
+    return this.engine.playEffect(id, filePath, loopCount, 1, 0, 100, false, 0);
+  };
+
+  stopEffect = (id: number) => {
+    log.info('rtc manager stop effect', id);
+    return this.engine.stopEffect(id);
+  };
+
+  setSpeakerTest = (enable: boolean, filePath?: string) => {
+    if (enable) return this.engine.startAudioPlaybackDeviceTest(filePath!);
+
+    return this.engine.stopAudioPlaybackDeviceTest();
+  };
+
+  setMicrophoneTest = (enable: boolean) => {
+    if (enable) return this.engine.startAudioRecordingDeviceTest(200);
+
+    return this.engine.stopAudioRecordingDeviceTest();
+  };
+
   private registerEngineEvents = () => {
     this.engine.on('joinedChannel', (channel, uid, elapsed) => {
       log.info(
@@ -360,6 +392,13 @@ export class RtcManager extends EventEmitter {
         );
         if (deviceType === 0) this.refreshDeviceList(RtcDeviceType.Speaker);
         if (deviceType === 1) this.refreshDeviceList(RtcDeviceType.Microphone);
+      }
+    );
+
+    this.engine.on(
+      'groupAudioVolumeIndication',
+      (speakers, speakerNumber, totalVolume) => {
+        this.emit('volumeIndications', speakers as RtcAudioVolumeIndication[]);
       }
     );
   };

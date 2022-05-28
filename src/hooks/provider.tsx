@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import React, { FC, useEffect, useMemo, useReducer } from 'react';
 import {
   StoreActionType,
@@ -83,3 +82,5 @@ export const RootProvider: FC = (props) => {
     </StoreContext.Provider>
   );
 };
+
+export default {};

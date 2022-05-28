@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Grid,
   Typography,
@@ -14,11 +14,19 @@ import VolumeUpOutlinedIcon from '@mui/icons-material/VolumeUpOutlined';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import AudiotrackOutlinedIcon from '@mui/icons-material/AudiotrackOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
-import { useCommonManager, useStore } from '../../../hooks';
+import {
+  EffectType,
+  useCommonManager,
+  useStore,
+  VolumeIndication,
+} from '../../../hooks';
 
 const AudioPage = () => {
   const { state } = useStore();
   const commonManager = useCommonManager();
+  const [effectPlaying, setEffectPlaying] = useState(false);
+  const [microphoneTesting, setMicrophoneTesting] = useState(false);
+  const [microphoneVolume, setMicrophoneVolume] = useState(0);
 
   const translateVolume = useCallback(
     (volume: number) => Math.min(Math.ceil((volume / 255) * 100), 100),
@@ -35,12 +43,42 @@ const AudioPage = () => {
     []
   );
 
-  const onSpeakerVolumeChanged = (
-    event: Event,
-    newValue: number | number[]
-  ) => {
-    commonManager.setSpeakerVolume(calculateVolume(newValue as number));
-  };
+  const onVolumeIndications = useCallback((indications: VolumeIndication[]) => {
+    indications.map((indication) => {
+      // local microphone
+      if (indication.uid === 0)
+        setMicrophoneVolume(translateVolume(indication.volume));
+      return indication;
+    });
+  }, []);
+
+  useEffect(() => {
+    commonManager.on('volumeIndications', onVolumeIndications);
+
+    return () => {
+      commonManager.setSpeakerTest(false);
+      commonManager.setMicrophoneTest(false);
+      commonManager.off('volumeIndications', onVolumeIndications);
+    };
+  }, []);
+
+  const onSpeakerVolumeChanged = useCallback(
+    (event: Event, newValue: number | number[]) => {
+      commonManager.setSpeakerVolume(calculateVolume(newValue as number));
+    },
+    []
+  );
+
+  const onPlayEffectClicked = useCallback(() => {
+    commonManager.setSpeakerTest(!effectPlaying);
+    setEffectPlaying(!effectPlaying);
+  }, [effectPlaying]);
+
+  const onTestMicrophoneClicked = useCallback(() => {
+    commonManager.setMicrophoneTest(!microphoneTesting);
+    setMicrophoneTesting(!microphoneTesting);
+    setMicrophoneVolume(0);
+  }, [microphoneTesting]);
 
   return (
     <Stack spacing={2} width="320px">
@@ -71,9 +109,14 @@ const AudioPage = () => {
             <Typography variant="body2" gutterBottom display="block">
               Volume
             </Typography>
-            <Tooltip placement="left" title="Play Effect">
-              <IconButton>
-                <AudiotrackOutlinedIcon />
+            <Tooltip
+              placement="left"
+              title={effectPlaying ? 'Stop Effect' : 'Play Effect'}
+            >
+              <IconButton onClick={onPlayEffectClicked}>
+                <AudiotrackOutlinedIcon
+                  color={effectPlaying ? 'success' : 'info'}
+                />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -119,9 +162,14 @@ const AudioPage = () => {
             <Typography variant="body2" gutterBottom display="block">
               Volume
             </Typography>
-            <Tooltip placement="left" title="Test Microphone">
-              <IconButton>
-                <RecordVoiceOverOutlinedIcon />
+            <Tooltip
+              placement="left"
+              title={microphoneTesting ? 'Stop' : 'Test Microphone'}
+            >
+              <IconButton onClick={onTestMicrophoneClicked}>
+                <RecordVoiceOverOutlinedIcon
+                  color={microphoneTesting ? 'success' : 'info'}
+                />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -132,7 +180,7 @@ const AudioPage = () => {
             <Grid item xs>
               <LinearProgress
                 variant="determinate"
-                value={1}
+                value={microphoneVolume}
                 valueBuffer={100}
               />
             </Grid>

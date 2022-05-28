@@ -50,3 +50,9 @@ export enum RtcVideoEncoderConfigurationType {
   Medium = 1,
   High = 2,
 }
+
+export interface RtcAudioVolumeIndication {
+  uid: number;
+  volume: number;
+  vad: number;
+}

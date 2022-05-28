@@ -51,3 +51,13 @@ export enum VideoEncoderConfigurationType {
   Medium = 1,
   High = 2,
 }
+
+export enum EffectType {
+  EffectSpeakerTest,
+}
+
+export type VolumeIndication = {
+  uid: number;
+  volume: number;
+  vad: number;
+};

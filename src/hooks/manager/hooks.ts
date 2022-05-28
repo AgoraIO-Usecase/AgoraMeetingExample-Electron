@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { useContext } from 'react';
 import { CommonManagerContext } from './context';
 
@@ -9,3 +8,5 @@ export const useCommonManager = () => {
 
   return context;
 };
+
+export default {};
