@@ -20,8 +20,10 @@ import {
   RtcDeviceInfo,
   RtcDeviceType,
   RtcJoinParams,
+  RtcVideoEncoderConfigurationType,
   RtcUser,
 } from './types';
+import { PresetEncoderConfigurations } from './recommend';
 
 export declare interface RtcManager {
   on(
@@ -182,6 +184,27 @@ export class RtcManager extends EventEmitter {
     log.info(`rtc manager setup remote video renderer for ${uid}`);
     this.engine.setupRemoteVideo(uid, view);
     this.engine.setupViewContentMode(uid, isFit ? 1 : 0, undefined);
+  };
+
+  setCurrentCamera = (deviceId: string) => this.engine.setVideoDevice(deviceId);
+
+  setCurrentMicrophone = (deviceId: string) =>
+    this.engine.setAudioRecordingDevice(deviceId);
+
+  setCurrentSpeaker = (deviceId: string) =>
+    this.engine.setAudioPlaybackDevice(deviceId);
+
+  setVideoEncoderConfiguration = (
+    configurationType: RtcVideoEncoderConfigurationType
+  ) => {
+    log.info(
+      'rtc manager set video encoder configuration with type',
+      configurationType
+    );
+
+    this.engine.setVideoEncoderConfiguration(
+      PresetEncoderConfigurations[configurationType]
+    );
   };
 
   private registerEngineEvents = () => {

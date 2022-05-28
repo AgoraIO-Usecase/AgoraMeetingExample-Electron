@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events';
 
 import log from 'electron-log';
-import { RtcManager } from './rtc';
+import { RtcManager, RtcVideoEncoderConfigurationType } from './rtc';
 import { MeetingManager } from './meeting';
 import { AttendeeManager } from './attendee';
 import {
@@ -12,7 +12,9 @@ import {
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
+  VideoEncoderConfigurationType,
 } from './types';
+import storage from './localstorage';
 
 export interface CommonManager {
   on(
@@ -57,11 +59,7 @@ export class CommonManager extends EventEmitter {
     this.attendeeManager = new AttendeeManager(this.rtcManager);
   }
 
-  initialize = () => {
-    if (this.state.isInitialized) return;
-
-    log.info('common manager initialize');
-
+  private initializeRtcManager = () => {
     this.rtcManager.on('deviceList', (deviceType, currentDeviceId, devices) => {
       this.emit('deviceList', deviceType, currentDeviceId, devices);
     });
@@ -69,13 +67,22 @@ export class CommonManager extends EventEmitter {
       process.env.AGORA_MEETING_APPID || '',
       './log/rtc.log'
     );
+    this.rtcManager.setVideoEncoderConfiguration(
+      this.transVideoEncoderConfigruationType(
+        this.getVideoEncoderConfigurationType()
+      )
+    );
+  };
 
+  private initializeMeetingManager = () => {
     this.meetingManager.on('connection', (connection, reason) => {
       // should adjust connection with other situations in future
       this.emit('connection', connection, reason);
     });
     this.meetingManager.initialize();
+  };
 
+  private initializeAttendeeManager = () => {
     this.attendeeManager.on('new', (position, attendee) => {
       this.emit('attendeeNew', position, attendee);
     });
@@ -86,6 +93,16 @@ export class CommonManager extends EventEmitter {
       this.emit('attendeeRemove', position);
     });
     this.attendeeManager.initialize();
+  };
+
+  initialize = () => {
+    if (this.state.isInitialized) return;
+
+    log.info('common manager initialize');
+
+    this.initializeRtcManager();
+    this.initializeMeetingManager();
+    this.initializeAttendeeManager();
 
     this.state.isInitialized = true;
   };
@@ -151,5 +168,42 @@ export class CommonManager extends EventEmitter {
   setupRemoteVideoRenderer = (uid: number, view: Element, isFit: boolean) => {
     log.info(`common manager setup remote video renderer for ${uid}`);
     this.rtcManager.setupRemoteVideoRenderer(uid, view, isFit);
+  };
+
+  setDevice = (deviceType: DeviceType, deviceId: string) => {
+    if (deviceType === DeviceType.Camera)
+      this.rtcManager.setCurrentCamera(deviceId);
+    else if (deviceType === DeviceType.Microphone)
+      this.rtcManager.setCurrentMicrophone(deviceId);
+    else if (deviceType === DeviceType.Speaker)
+      this.rtcManager.setCurrentSpeaker(deviceId);
+  };
+
+  getVideoEncoderConfigurationType = () =>
+    storage.getVideoEncoderConfigurationType() as VideoEncoderConfigurationType;
+
+  private transVideoEncoderConfigruationType = (
+    configurationType: VideoEncoderConfigurationType
+  ) => {
+    switch (configurationType) {
+      case VideoEncoderConfigurationType.Low:
+        return RtcVideoEncoderConfigurationType.Low;
+      case VideoEncoderConfigurationType.Medium:
+        return RtcVideoEncoderConfigurationType.Medium;
+      case VideoEncoderConfigurationType.High:
+        return RtcVideoEncoderConfigurationType.High;
+      default:
+        return RtcVideoEncoderConfigurationType.Medium;
+    }
+  };
+
+  setVideoEncoderConfigurationType = (
+    configurationType: VideoEncoderConfigurationType
+  ) => {
+    this.rtcManager.setVideoEncoderConfiguration(
+      this.transVideoEncoderConfigruationType(configurationType)
+    );
+
+    storage.setVideoEncoderConfigurationType(configurationType as number);
   };
 }

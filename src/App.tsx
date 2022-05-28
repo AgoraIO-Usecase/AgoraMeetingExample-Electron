@@ -1,10 +1,10 @@
 import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { RootProvider } from './hooks';
 import MainView from './views/main';
 import MeetingView from './views/meeting';
 
 import './utils/logtransports';
+import { RootProvider } from './hooks';
 
 const App = () => {
   return (

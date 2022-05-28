@@ -44,3 +44,9 @@ export interface RtcJoinParams {
   isCameraOn: boolean;
   isAudioOn: boolean;
 }
+
+export enum RtcVideoEncoderConfigurationType {
+  Low = 0,
+  Medium = 1,
+  High = 2,
+}
