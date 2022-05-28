@@ -1,4 +1,8 @@
-export declare type AttendeeInfo = {
+export type Version = {
+  rtcVersion: string;
+};
+
+export type AttendeeInfo = {
   uid: number;
   nickname?: string;
 

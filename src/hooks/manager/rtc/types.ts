@@ -1,3 +1,8 @@
+export type RtcVersion = {
+  build: number;
+  version: string;
+};
+
 export enum RtcConnection {
   Disconnected,
   Connecting,

@@ -17,6 +17,7 @@ import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutl
 import DeviceSelect from './deviceselect';
 import {
   DeviceType,
+  MeetingConnection,
   useCommonManager,
   useStore,
   VolumeIndication,
@@ -176,16 +177,20 @@ const AudioPage = () => {
             <Typography variant="body2" gutterBottom display="block">
               Volume
             </Typography>
-            <Tooltip
-              placement="left"
-              title={microphoneTesting ? 'Stop' : 'Test Microphone'}
-            >
-              <IconButton onClick={onTestMicrophoneClicked}>
-                <RecordVoiceOverOutlinedIcon
-                  color={microphoneTesting ? 'success' : 'info'}
-                />
-              </IconButton>
-            </Tooltip>
+            {!commonManager.isInMeeting() ? (
+              <Tooltip
+                placement="left"
+                title={microphoneTesting ? 'Stop' : 'Test Microphone'}
+              >
+                <IconButton onClick={onTestMicrophoneClicked}>
+                  <RecordVoiceOverOutlinedIcon
+                    color={microphoneTesting ? 'success' : 'info'}
+                  />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <></>
+            )}
           </Stack>
           <Grid container spacing={2} alignItems="center">
             <Grid item>

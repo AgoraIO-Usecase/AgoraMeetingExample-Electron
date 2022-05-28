@@ -23,6 +23,7 @@ import {
   RtcVideoEncoderConfigurationType,
   RtcUser,
   RtcAudioVolumeIndication,
+  RtcVersion,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 
@@ -110,6 +111,8 @@ export class RtcManager extends EventEmitter {
   isInChannel = () => {
     return this.state.connection !== RtcConnection.Disconnected;
   };
+
+  getVersion = () => this.engine.getVersion() as unknown as RtcVersion;
 
   joinChannel = (params: RtcJoinParams) => {
     if (this.isInChannel()) {

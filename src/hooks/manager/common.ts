@@ -13,6 +13,7 @@ import {
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
+  Version,
   VideoEncoderConfigurationType,
   VolumeIndication,
 } from './types';
@@ -128,6 +129,14 @@ export class CommonManager extends EventEmitter {
     this.rtcManager.release();
 
     this.state.isInitialized = false;
+  };
+
+  getVersion = (): Version => {
+    const rtcVersion = this.rtcManager.getVersion();
+    const version: Version = {
+      rtcVersion: `${rtcVersion.version}.${rtcVersion.build}`,
+    };
+    return version;
   };
 
   joinMeeting = (params: MeetingParams) => {
