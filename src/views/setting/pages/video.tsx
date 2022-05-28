@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
-import { MenuItem, Stack } from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { MenuItem, Stack, Typography } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 import {
   DeviceType,
   useCommonManager,
   useStore,
   VideoEncoderConfigurationType,
 } from '../../../hooks';
+import DeviceSelect from './deviceselect';
 
 const VideoPage = () => {
   const { state } = useStore();
@@ -45,31 +46,37 @@ const VideoPage = () => {
 
   return (
     <Stack spacing={2}>
-      <div
-        id="videobox-preview"
-        style={{ width: '320px', height: '240px', background: '#F3F3F3' }}
-      />
-
-      <Select
-        id="select-camera"
-        defaultValue={state.currentCameraId}
-        onChange={onCameraSelectChanged}
-      >
-        {state.cameras?.map((device) => (
-          <MenuItem key={device.deviceid} value={device.deviceid}>
-            {device.devicename}
-          </MenuItem>
-        ))}
-      </Select>
-      <Select
-        id="select-encoder-configuration"
-        defaultValue={`${currentVideoEncoderConfiguratyonType}`}
-        onChange={onVideoEncoderConfigurationSelectChanged}
-      >
-        <MenuItem value={0}>Low</MenuItem>
-        <MenuItem value={1}>Medium</MenuItem>
-        <MenuItem value={2}>High</MenuItem>
-      </Select>
+      <Stack spacing={1}>
+        <div
+          id="videobox-preview"
+          style={{ width: '320px', height: '240px', background: '#F3F3F3' }}
+        />
+        <DeviceSelect
+          id="select-camera"
+          defaultValue={state.currentCameraId}
+          onChange={onCameraSelectChanged}
+        >
+          {state.cameras?.map((device) => (
+            <MenuItem key={device.deviceid} value={device.deviceid}>
+              {device.devicename}
+            </MenuItem>
+          ))}
+        </DeviceSelect>
+      </Stack>
+      <Stack spacing={1}>
+        <Typography variant="body2" gutterBottom display="block">
+          Encoder Configuration
+        </Typography>
+        <DeviceSelect
+          id="select-encoder-configuration"
+          defaultValue={`${currentVideoEncoderConfiguratyonType}`}
+          onChange={onVideoEncoderConfigurationSelectChanged}
+        >
+          <MenuItem value={0}>Low</MenuItem>
+          <MenuItem value={1}>Medium</MenuItem>
+          <MenuItem value={2}>High</MenuItem>
+        </DeviceSelect>
+      </Stack>
     </Stack>
   );
 };

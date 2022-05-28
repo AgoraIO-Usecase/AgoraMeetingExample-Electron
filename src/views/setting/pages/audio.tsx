@@ -3,19 +3,20 @@ import {
   Grid,
   Typography,
   Stack,
-  Select,
   MenuItem,
   Slider,
   LinearProgress,
   IconButton,
   Tooltip,
+  SelectChangeEvent,
 } from '@mui/material';
 import VolumeUpOutlinedIcon from '@mui/icons-material/VolumeUpOutlined';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import AudiotrackOutlinedIcon from '@mui/icons-material/AudiotrackOutlined';
 import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutlined';
+import DeviceSelect from './deviceselect';
 import {
-  EffectType,
+  DeviceType,
   useCommonManager,
   useStore,
   VolumeIndication,
@@ -80,25 +81,37 @@ const AudioPage = () => {
     setMicrophoneVolume(0);
   }, [microphoneTesting]);
 
+  const onSpeakerSelectChanged = (event: SelectChangeEvent) => {
+    const deviceId = event.target.value;
+    if (deviceId.length) commonManager.setDevice(DeviceType.Speaker, deviceId);
+  };
+
+  const onMicrophoneSelectChanged = (event: SelectChangeEvent) => {
+    const deviceId = event.target.value;
+    if (deviceId.length)
+      commonManager.setDevice(DeviceType.Microphone, deviceId);
+  };
+
   return (
     <Stack spacing={2} width="320px">
       <Stack />
       <Stack spacing={1}>
-        <Stack>
+        <Stack spacing={1}>
           <Typography variant="body2" gutterBottom display="block">
             Speaker
           </Typography>
-          <Select
+          <DeviceSelect
             id="select-speaker"
             defaultValue={state.currentSpeakerId}
             fullWidth
+            onChange={onSpeakerSelectChanged}
           >
             {state.speakers?.map((device) => (
               <MenuItem key={device.deviceid} value={device.deviceid}>
                 {device.devicename}
               </MenuItem>
             ))}
-          </Select>
+          </DeviceSelect>
         </Stack>
         <Stack>
           <Stack
@@ -137,21 +150,22 @@ const AudioPage = () => {
       </Stack>
       <Stack />
       <Stack spacing={1}>
-        <Stack>
+        <Stack spacing={1}>
           <Typography variant="body2" gutterBottom display="block">
             Microphone
           </Typography>
-          <Select
+          <DeviceSelect
             id="select-speaker"
             defaultValue={state.currentSpeakerId}
             fullWidth
+            onChange={onMicrophoneSelectChanged}
           >
             {state.speakers?.map((device) => (
               <MenuItem key={device.deviceid} value={device.deviceid}>
                 {device.devicename}
               </MenuItem>
             ))}
-          </Select>
+          </DeviceSelect>
         </Stack>
         <Stack>
           <Stack

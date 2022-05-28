@@ -213,7 +213,7 @@ export class RtcManager extends EventEmitter {
   };
 
   setSpeakerVolume = (volume: number) => {
-    log.info('rtc manager set speaker volume', volume);
+    // log.info('rtc manager set speaker volume', volume);
     return this.engine.setAudioPlaybackVolume(volume);
   };
 

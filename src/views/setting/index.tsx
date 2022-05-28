@@ -30,11 +30,17 @@ const tabs: {
   icon: string | React.ReactElement;
   panel: React.ReactNode;
 }[] = [
+  // {
+  //   index: 0,
+  //   label: 'Common',
+  //   icon: <InsertDriveFileOutlinedIcon />,
+  //   panel: <CommonPage />,
+  // },
   {
     index: 0,
-    label: 'Common',
-    icon: <InsertDriveFileOutlinedIcon />,
-    panel: <CommonPage />,
+    label: 'Audio',
+    icon: <GraphicEqOutlinedIcon />,
+    panel: <AudioPage />,
   },
   {
     index: 1,
@@ -44,12 +50,6 @@ const tabs: {
   },
   {
     index: 2,
-    label: 'Audio',
-    icon: <GraphicEqOutlinedIcon />,
-    panel: <AudioPage />,
-  },
-  {
-    index: 3,
     label: 'About',
     icon: <InfoOutlinedIcon />,
     panel: <AboutPage />,
@@ -73,7 +73,11 @@ const SettingTabPanel = (props: {
       {...other}
     >
       {value === index && (
-        <Stack sx={{ p: 3 }} direction="column">
+        <Stack
+          style={{ padding: '12px 24px 12px 24px' }}
+          sx={{ p: 3 }}
+          direction="column"
+        >
           <Typography variant="h6" gutterBottom component="div">
             {title}
           </Typography>
@@ -116,15 +120,29 @@ const SettingTabs = () => {
         aria-label="Vertical tabs example"
         sx={{ borderRight: 1, borderColor: 'divider' }}
         visibleScrollbar={false}
-        style={{ paddingTop: '24px', width: '140px', minWidth: '140px' }}
+        style={{ paddingTop: '0px', width: '140px', minWidth: '140px' }}
       >
         {tabs.map((tab) => (
           <Tab
+            style={{
+              padding: '16px 0px 16px 12px',
+              display: 'flex',
+              justifyContent: 'flex-start',
+              minHeight: '0px',
+            }}
             key={tab.index}
             icon={tab.icon}
             iconPosition="start"
             label={tab.label}
-            {...a11yProps(0)}
+            sx={{
+              '& .MuiButtonBase-root-MuiTab-root': {
+                padding: '0px 0px',
+              },
+              '& .MuiTab-iconWrapper': {
+                marginRight: '12px',
+              },
+            }}
+            {...a11yProps(tab.index)}
           />
         ))}
       </Tabs>
@@ -192,13 +210,6 @@ const SettingView = (props: { open: boolean; onClose: () => void }) => {
       PaperComponent={SettingPaperComponent}
       aria-labelledby="draggable-dialog-title"
     >
-      {/* <SettingTitle
-        id="draggable-dialog-title"
-        style={{ cursor: 'move' }}
-        onClose={onClose}
-      >
-        Setting
-      </SettingTitle> */}
       <SettingTabs />
       <IconButton
         aria-label="close"
