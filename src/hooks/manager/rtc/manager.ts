@@ -207,6 +207,19 @@ export class RtcManager extends EventEmitter {
     );
   };
 
+  setSpeakerVolume = (volume: number) => {
+    log.info('rtc manager set speaker volume', volume);
+    return this.engine.setAudioPlaybackVolume(volume);
+  };
+
+  getSpeakerVolume = () => this.engine.getAudioPlaybackVolume();
+
+  setMicrophoneVolume = (volume: number) => {
+    return this.engine.setAudioRecordingVolume(volume);
+  };
+
+  getMicrophoneVolume = () => this.engine.getAudioRecordingVolume();
+
   private registerEngineEvents = () => {
     this.engine.on('joinedChannel', (channel, uid, elapsed) => {
       log.info(

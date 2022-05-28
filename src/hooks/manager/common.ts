@@ -206,4 +206,10 @@ export class CommonManager extends EventEmitter {
 
     storage.setVideoEncoderConfigurationType(configurationType as number);
   };
+
+  setSpeakerVolume = (volume: number) => {
+    this.rtcManager.setSpeakerVolume(volume);
+  };
+
+  getSpeakerVolume = () => this.rtcManager.getSpeakerVolume();
 }
