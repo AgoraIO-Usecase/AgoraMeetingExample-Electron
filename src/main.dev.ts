@@ -69,6 +69,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      enableRemoteModule: true,
     },
   });
   mainWindow.webContents.openDevTools({

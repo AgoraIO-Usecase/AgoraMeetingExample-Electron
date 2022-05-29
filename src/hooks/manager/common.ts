@@ -2,6 +2,7 @@
 import { EventEmitter } from 'events';
 
 import log from 'electron-log';
+import { remote } from 'electron';
 import { RtcManager, RtcVideoEncoderConfigurationType } from './rtc';
 import { MeetingManager } from './meeting';
 import { AttendeeManager } from './attendee';
@@ -77,7 +78,7 @@ export class CommonManager extends EventEmitter {
 
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
-      './log/rtc.log'
+      `${remote.app.getPath('logs')}/rtc.log`
     );
     this.rtcManager.setVideoEncoderConfiguration(
       this.transVideoEncoderConfigruationType(

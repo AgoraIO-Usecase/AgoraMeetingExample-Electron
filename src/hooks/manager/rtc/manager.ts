@@ -70,7 +70,8 @@ export class RtcManager extends EventEmitter {
   initialize = (appId: string, logPath: string) => {
     if (this.state.isInitialized) return;
 
-    log.info(`rtc manager initialize with ${appId}`);
+    log.info(`rtc manager initialize with appId length ${appId.length}`);
+    log.info(`rtc manager initialize with logPath ${logPath}`);
 
     this.engine.initialize(appId, undefined, {
       level: 0x0001,
