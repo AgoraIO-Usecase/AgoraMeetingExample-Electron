@@ -3,6 +3,9 @@ import { AttendeeInfo, DeviceInfo, MeetingConnection } from '../manager';
 export enum StoreActionType {
   ACTION_TYPE_CONNECTION,
   ACTION_TYPE_INFO,
+  ACTION_TYPE_ATTENDEE_NEW,
+  ACTION_TYPE_ATTENDEE_UPDATE,
+  ACTION_TYPE_ATTENDEE_REMOVE,
 }
 
 export type StoreState = {
@@ -17,9 +20,21 @@ export type StoreState = {
   microphones?: DeviceInfo[];
 };
 
+export type StoreActionPayloadAttendee = {
+  position: number;
+  attendees: AttendeeInfo[];
+};
+
+export type StoreActionPayload =
+  | MeetingConnection
+  | StoreState
+  | string
+  | number
+  | StoreActionPayloadAttendee;
+
 export type StoreAction = {
   type: StoreActionType;
-  payload: MeetingConnection | StoreState;
+  payload: StoreActionPayload;
 };
 
 export type Store = {

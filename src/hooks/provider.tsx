@@ -19,6 +19,7 @@ export const RootProvider: FC = (props) => {
         payload: connection,
       });
     });
+
     commonManager.on('deviceList', (deviceType, currentDeviceId, devices) => {
       const newState: StoreState = {};
       switch (deviceType) {
@@ -42,30 +43,32 @@ export const RootProvider: FC = (props) => {
         payload: newState,
       });
     });
+
     commonManager.on('attendeeNew', (position, attendee) => {
-      const attendees = state.attendees || [];
-      attendees.splice(position, 1, attendee);
       dispatch({
-        type: StoreActionType.ACTION_TYPE_INFO,
-        payload: { attendees },
+        type: StoreActionType.ACTION_TYPE_ATTENDEE_NEW,
+        payload: {
+          position,
+          attendees: [attendee],
+        },
       });
     });
     commonManager.on('attendeeUpdate', (position, attendee) => {
-      const attendees = state.attendees || [];
-      attendees[position] = { ...attendees[position], ...attendee };
-
       dispatch({
-        type: StoreActionType.ACTION_TYPE_INFO,
-        payload: { attendees },
+        type: StoreActionType.ACTION_TYPE_ATTENDEE_UPDATE,
+        payload: {
+          position,
+          attendees: [attendee],
+        },
       });
     });
     commonManager.on('attendeeRemove', (position) => {
-      const attendees = state.attendees || [];
-      attendees.splice(position, 1);
-
       dispatch({
-        type: StoreActionType.ACTION_TYPE_INFO,
-        payload: { attendees },
+        type: StoreActionType.ACTION_TYPE_ATTENDEE_REMOVE,
+        payload: {
+          position,
+          attendees: [],
+        },
       });
     });
 
