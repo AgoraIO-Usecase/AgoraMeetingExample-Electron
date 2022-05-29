@@ -26,6 +26,7 @@ import {
   RtcVersion,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
+import { readImage } from './utils';
 
 export declare interface RtcManager {
   on(
@@ -254,6 +255,60 @@ export class RtcManager extends EventEmitter {
     if (enable) return this.engine.startAudioRecordingDeviceTest(200);
 
     return this.engine.stopAudioRecordingDeviceTest();
+  };
+
+  getScreenList = async () => {
+    let myResolve: any;
+    const promise = new Promise((resolve, reject) => {
+      myResolve = resolve;
+    });
+    this.engine.getScreenDisplaysInfo((list) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      myResolve(list);
+    });
+    const list = (await promise) as { image: Uint8Array; displayId: number }[];
+    const imageListPromise = list.map((item) => readImage(item.image));
+    const imageList = await Promise.all(imageListPromise);
+    const screenInfoList = list.map(({ displayId }, index) => ({
+      name: `Display ${index + 1}`,
+      image: imageList[index],
+      displayId,
+    }));
+
+    return screenInfoList;
+  };
+
+  getWindowList = async () => {
+    let myResolve: any;
+    const promise = new Promise((resolve, reject) => {
+      myResolve = resolve;
+    });
+
+    this.engine.getScreenWindowsInfo((list) => {
+      myResolve(list);
+    });
+
+    const list = (await promise) as {
+      ownerName: string;
+      name: string;
+      windowId: number;
+      image: Uint8Array;
+    }[];
+
+    const imageListPromise = list.map((item) => readImage(item.image));
+    const imageList = await Promise.all(imageListPromise);
+
+    const windowInfoList = list.map(({ ownerName, name, windowId }, index) => {
+      return {
+        ownerName,
+        image: imageList[index],
+        windowId,
+        name,
+      };
+    });
+
+    return windowInfoList;
   };
 
   private registerEngineEvents = () => {

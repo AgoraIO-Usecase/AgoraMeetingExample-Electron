@@ -259,4 +259,14 @@ export class CommonManager extends EventEmitter {
 
   setMicrophoneTest = (enable: boolean) =>
     this.rtcManager.setMicrophoneTest(enable);
+
+  getScreenList = async () => {
+    const screenList = await this.rtcManager.getScreenList();
+    return screenList;
+  };
+
+  getWindowList = async () => {
+    const windowList = await this.rtcManager.getWindowList();
+    return windowList;
+  };
 }

@@ -47,10 +47,17 @@ const VideoPage = () => {
   return (
     <Stack spacing={2}>
       <Stack spacing={1}>
-        <div
-          id="videobox-preview"
-          style={{ width: '320px', height: '240px', background: '#F3F3F3' }}
-        />
+        {commonManager.isInMeeting() ? (
+          <></>
+        ) : (
+          <div
+            id="videobox-preview"
+            style={{ width: '320px', height: '240px', background: '#F3F3F3' }}
+          />
+        )}
+        <Typography variant="body2" gutterBottom display="block">
+          Camera
+        </Typography>
         <DeviceSelect
           id="select-camera"
           defaultValue={state.currentCameraId}

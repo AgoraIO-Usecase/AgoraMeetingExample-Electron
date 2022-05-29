@@ -70,15 +70,27 @@ const SettingTabPanel = (props: {
       hidden={value !== index}
       id={`vertical-tabpanel-${index}`}
       aria-labelledby={`vertical-tab-${index}`}
+      style={{ width: '100%', height: '100%' }}
       {...other}
     >
       {value === index && (
         <Stack
-          style={{ padding: '12px 24px 12px 24px' }}
+          style={{
+            padding: '12px 24px 12px 24px',
+            width: '100%',
+            height: '100%',
+            boxSizing: 'border-box',
+          }}
           sx={{ p: 3 }}
           direction="column"
         >
-          <Typography variant="h6" gutterBottom component="div">
+          <Typography
+            id="draggable-dialog-title"
+            variant="h6"
+            gutterBottom
+            component="div"
+            style={{ userSelect: 'none', cursor: 'move' }}
+          >
             {title}
           </Typography>
           {children}
@@ -194,6 +206,7 @@ const SettingPaperComponent = (props: PaperProps) => {
     <Draggable
       handle="#draggable-dialog-title"
       cancel={'[class*="MuiDialogContent-root"]'}
+      bounds="#draggable-dialog"
     >
       <Paper {...props} />
     </Draggable>
@@ -205,10 +218,9 @@ const SettingView = (props: { open: boolean; onClose: () => void }) => {
 
   return (
     <Dialog
+      id="draggable-dialog"
       open={open}
-      onClose={onClose}
       PaperComponent={SettingPaperComponent}
-      aria-labelledby="draggable-dialog-title"
     >
       <SettingTabs />
       <IconButton

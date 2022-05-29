@@ -95,7 +95,6 @@ const AudioPage = () => {
 
   return (
     <Stack spacing={2} width="320px">
-      <Stack />
       <Stack spacing={1}>
         <Stack spacing={1}>
           <Typography variant="body2" gutterBottom display="block">

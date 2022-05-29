@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import { desktopCapturer } from 'electron';
 import HeaderBar from '../components/header';
 import useStyle from './style';
 import {
@@ -23,6 +24,7 @@ import {
   useStore,
 } from '../../hooks';
 
+
 const MainView = () => {
   const style = useStyle();
   const navigate = useNavigate();
@@ -37,6 +39,32 @@ const MainView = () => {
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNicknameInvalid, setNicknameInvalid] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    commonManager
+      .getScreenList()
+      .then((value) => {
+        console.info('screenshare screen list', value);
+        return 0;
+      })
+      .catch(() => {});
+
+    commonManager
+      .getWindowList()
+      .then((value) => {
+        console.info('screenshare window list', value);
+        return 0;
+      })
+      .catch(() => {});
+
+    desktopCapturer
+      .getSources({ types: ['window', 'screen'] })
+      .then((sources) => {
+        console.info('screenshare sources', sources);
+        return 0;
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (state.connection === MeetingConnection.Connecting && loading !== true) {
