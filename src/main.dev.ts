@@ -72,10 +72,12 @@ const createWindow = async () => {
       enableRemoteModule: true,
     },
   });
-  mainWindow.webContents.openDevTools({
-    mode: 'right',
-    activate: true,
-  });
+
+  if (process.env.NODE_ENV !== 'production')
+    mainWindow.webContents.openDevTools({
+      mode: 'right',
+      activate: true,
+    });
 
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
