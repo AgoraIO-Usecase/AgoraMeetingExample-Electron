@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, globalShortcut } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import './utils/logtransports';
@@ -129,6 +129,15 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+app.on('ready', () => {
+  globalShortcut.register('ctrl+p', () => {
+    mainWindow?.webContents.openDevTools({
+      mode: 'right',
+      activate: true,
+    });
+  });
 });
 
 log.info('app initialized..............');
