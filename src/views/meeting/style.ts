@@ -13,9 +13,6 @@ const useStyle = makeStyles(() => {
       padding: 6,
       height: 52,
     },
-    viewContainer: {
-      background: '#F3F3F3',
-    },
     toolBar: { padding: 6, boxSizing: 'border-box' },
     toolButton: {
       // border: '1px solid #E0E3E7 !important',

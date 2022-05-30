@@ -167,6 +167,8 @@
     "@types/react-dom": "^16.9.9",
     "@types/react-router-dom": "^5.3.3",
     "@types/react-test-renderer": "^16.9.3",
+    "@types/react-virtualized-auto-sizer": "^1.0.1",
+    "@types/react-window": "^1.8.5",
     "@types/webpack-env": "^1.15.2",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
@@ -243,6 +245,8 @@
     "react-dom": "^17.0.1",
     "react-draggable": "^4.4.5",
     "react-router-dom": "^6.3.0",
+    "react-virtualized-auto-sizer": "^1.0.6",
+    "react-window": "^1.8.7",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19"
   },

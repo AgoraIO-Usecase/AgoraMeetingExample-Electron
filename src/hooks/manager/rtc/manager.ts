@@ -367,10 +367,11 @@ export class RtcManager extends EventEmitter {
 
         log.info('local video state changed,', localVideoState, err, isOn);
 
-        this.updateUser({
-          ...this.getSelfUser(),
-          isCameraOn: isOn,
-        });
+        if (isOn !== this.getSelfUser().isCameraOn)
+          this.updateUser({
+            ...this.getSelfUser(),
+            isCameraOn: isOn,
+          });
       }
     );
 
@@ -383,10 +384,11 @@ export class RtcManager extends EventEmitter {
 
         log.info('local audio state changed,', state, err, isOn);
 
-        this.updateUser({
-          ...this.getSelfUser(),
-          isAudioOn: isOn,
-        });
+        if (isOn !== this.getSelfUser().isAudioOn)
+          this.updateUser({
+            ...this.getSelfUser(),
+            isAudioOn: isOn,
+          });
       }
     );
 

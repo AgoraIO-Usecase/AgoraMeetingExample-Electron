@@ -10,9 +10,9 @@ import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 
 import HeaderBar from '../components/header';
-import VideoBox from '../components/video';
-import useStyle from './style';
+import AttendeeView from './attendees';
 import { useCommonManager, useStore } from '../../hooks';
+import useStyle from './style';
 
 const MeetingView = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const MeetingView = () => {
     if (state.attendees && state.attendees.length) return state.attendees[0];
 
     return { isAudioOn: false, isCameraOn: false, isScreenSharing: false };
-  }, [state.attendees]);
+  }, [state]);
 
   const onMicrophoneClicked = () => {
     commonManager.enableAudio(!selfUser.isAudioOn);
@@ -50,10 +50,8 @@ const MeetingView = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <HeaderBar title="AgoraMeeting" fixed={false} layouts />
-      <Stack className={style.viewContainer} width="100%" height="100%">
-        {selfUser.isCameraOn ? <VideoBox fit /> : <></>}
-      </Stack>
+      <HeaderBar title="AgoraMeeting" fixed={false} />
+      <AttendeeView />
       <Stack
         className={style.toolBar}
         width="100%"
