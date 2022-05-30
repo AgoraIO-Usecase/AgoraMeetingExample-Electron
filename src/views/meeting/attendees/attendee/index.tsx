@@ -3,41 +3,59 @@ import { Stack, Typography } from '@mui/material';
 
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+
 import { AttendeeInfo, useCommonManager } from '../../../../hooks';
 import useStyle from './style';
+import { generateVideoboxId } from '../utils';
 
 export declare type VideoBoxProps = {
   uid?: number | undefined;
   isSelf: boolean;
-  fit?: boolean;
+  isMain?: boolean;
 };
 
 const VideoBox = (props: VideoBoxProps) => {
   const style = useStyle();
-  const { uid, isSelf, fit } = props;
+  const { uid, isSelf, isMain } = props;
   const commonManager = useCommonManager();
-  const domId = useMemo(() => {
-    return uid === undefined ? 'videobox-local' : `videobox-${uid as number}`;
-  }, [uid]);
+  const domId = useMemo(
+    () => generateVideoboxId(uid || 0, isMain || false),
+    [uid]
+  );
+  const otherDomId = useMemo(
+    () => generateVideoboxId(uid || 0, !isMain),
+    [uid]
+  );
 
   useEffect(() => {
     const dom = document.getElementById(domId);
+    const otherDom = document.getElementById(otherDomId);
+
+    // videobox in main video container may create before in attendee list
+    const isAppend = otherDom !== null;
+
     if (isSelf) {
-      commonManager.setupLocalVideoRenderer(dom!, fit === true);
+      commonManager.setupLocalVideoRenderer(dom!, isMain || false, isAppend);
     } else {
-      commonManager.setupRemoteVideoRenderer(uid!, dom!, fit === true);
+      commonManager.setupRemoteVideoRenderer(
+        uid!,
+        dom!,
+        isMain || false,
+        isAppend
+      );
     }
-  }, []);
+  }, [uid]);
 
   return <div className={style.videobox} id={domId} />;
 };
 
-export type AttendeeViewProps = {
-  isMain: boolean;
+export type AttendeeItemProps = {
+  isMain?: boolean;
   attendee: AttendeeInfo;
 };
 
-const AttendeeItem = (props: AttendeeViewProps) => {
+const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, attendee } = props;
   const { uid, nickname, isSelf, isCameraOn, isAudioOn } = attendee;
@@ -49,6 +67,18 @@ const AttendeeItem = (props: AttendeeViewProps) => {
   return (
     <Stack className={style.wrapper}>
       <Stack className={style.container} justifyContent="flex-end">
+        {!isCameraOn ? (
+          <Stack
+            width="100%"
+            height="100%"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <AccountCircleOutlinedIcon fontSize="large" />
+          </Stack>
+        ) : (
+          <></>
+        )}
         <Stack
           className={style.toolbar}
           direction="row"
@@ -63,17 +93,17 @@ const AttendeeItem = (props: AttendeeViewProps) => {
           >
             {title}
           </Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            {isAudioOn ? <MicNoneOutlinedIcon color="primary" /> : <></>}
-            {isCameraOn ? <VideocamOutlinedIcon color="primary" /> : <></>}
-          </Stack>
+          {isMain ? (
+            <></>
+          ) : (
+            <Stack direction="row" spacing={1} alignItems="center">
+              {isAudioOn ? <MicNoneOutlinedIcon color="primary" /> : <></>}
+              {isCameraOn ? <VideocamOutlinedIcon color="primary" /> : <></>}
+            </Stack>
+          )}
         </Stack>
-        {attendee.isCameraOn ? (
-          <VideoBox
-            uid={attendee.uid}
-            isSelf={attendee.isSelf || false}
-            fit={isMain}
-          />
+        {isCameraOn ? (
+          <VideoBox uid={uid} isSelf={isSelf || false} isMain={isMain} />
         ) : (
           <></>
         )}

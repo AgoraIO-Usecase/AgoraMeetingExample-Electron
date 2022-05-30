@@ -11,7 +11,6 @@ const useStyle = makeStyles(() => {
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
-      background: '#F3F3F3',
     },
     videoBoxListContainer: {
       width: '160px',

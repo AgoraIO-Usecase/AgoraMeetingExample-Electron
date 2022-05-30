@@ -184,16 +184,35 @@ export class RtcManager extends EventEmitter {
     else this.engine.stopPreview();
   };
 
-  setupLocalVideoRenderer = (view: Element, isFit: boolean) => {
+  setupLocalVideoRenderer = (
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
     log.info('rtc manager setup local video renderer');
-    this.engine.setupLocalVideo(view);
+    this.engine.setupLocalVideo(view, { append: isAppend });
     this.engine.setupViewContentMode('local', isFit ? 1 : 0, undefined);
   };
 
-  setupRemoteVideoRenderer = (uid: number, view: Element, isFit: boolean) => {
+  destroyLocalVideoRenderer = (view: Element) => {
+    log.info('rtc manager destroy local video renderer');
+    this.engine.destroyRenderView('local', undefined, view);
+  };
+
+  setupRemoteVideoRenderer = (
+    uid: number,
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
     log.info(`rtc manager setup remote video renderer for ${uid}`);
-    this.engine.setupRemoteVideo(uid, view);
+    this.engine.setupRemoteVideo(uid, view, undefined, { append: isAppend });
     this.engine.setupViewContentMode(uid, isFit ? 1 : 0, undefined);
+  };
+
+  destroyRemoteVideoRenderer = (uid: number, view: Element) => {
+    log.info('rtc manager destroy remote video renderer');
+    this.engine.destroyRenderView(uid, undefined, view);
   };
 
   setCurrentCamera = (deviceId: string) => this.engine.setVideoDevice(deviceId);

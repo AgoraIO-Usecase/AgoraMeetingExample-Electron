@@ -181,14 +181,37 @@ export class CommonManager extends EventEmitter {
     this.rtcManager.setVideoPreview(enable);
   };
 
-  setupLocalVideoRenderer = (view: Element, isFit: boolean) => {
-    log.info('common manager setup local video renderer');
-    this.rtcManager.setupLocalVideoRenderer(view, isFit);
+  setupLocalVideoRenderer = (
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
+    log.info('common manager setup local video renderer', isFit, isAppend);
+    this.rtcManager.setupLocalVideoRenderer(view, isFit, isAppend);
   };
 
-  setupRemoteVideoRenderer = (uid: number, view: Element, isFit: boolean) => {
-    log.info(`common manager setup remote video renderer for ${uid}`);
-    this.rtcManager.setupRemoteVideoRenderer(uid, view, isFit);
+  destroyLocalVideoRenderer = (view: Element) => {
+    log.info('rtc manager destroy local video renderer');
+    this.rtcManager.destroyLocalVideoRenderer(view);
+  };
+
+  setupRemoteVideoRenderer = (
+    uid: number,
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
+    log.info(
+      `common manager setup remote video renderer for ${uid}`,
+      isFit,
+      isAppend
+    );
+    this.rtcManager.setupRemoteVideoRenderer(uid, view, isFit, isAppend);
+  };
+
+  destroyRemoteVideoRenderer = (uid: number, view: Element) => {
+    log.info('rtc manager destroy remote video renderer');
+    this.rtcManager.destroyRemoteVideoRenderer(uid, view);
   };
 
   setDevice = (deviceType: DeviceType, deviceId: string) => {
