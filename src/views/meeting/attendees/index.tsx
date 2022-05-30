@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import { ListItem, Stack, Slide } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ListItem, Stack, Slide, IconButton } from '@mui/material';
+import NavigateBeforeOutlinedIcon from '@mui/icons-material/NavigateBeforeOutlined';
+import NavigateNextOutlinedIcon from '@mui/icons-material/NavigateNextOutlined';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -16,6 +18,7 @@ const renderRow = (
 ) => {
   const { index, style, data } = props;
   const { state, onItemClicked } = data;
+
   return (
     <ListItem
       style={style}
@@ -34,8 +37,19 @@ const AttendeeView = () => {
   const { state } = useStore();
   const commonManager = useCommonManager();
   const [mainViewIndex, setMainViewIndex] = useState(0);
-  const showAttendeeList = useMemo(() => {
+  const needShowAttendeeList = useMemo(() => {
     return state.attendees.length > 1;
+  }, [state]);
+  const [showAttendeeList, setShowAttendeeList] =
+    useState(needShowAttendeeList);
+
+  useEffect(() => {
+    setShowAttendeeList(needShowAttendeeList);
+  }, [needShowAttendeeList]);
+
+  useEffect(() => {
+    if (mainViewIndex >= state.attendees.length)
+      setMainViewIndex(state.attendees.length - 1);
   }, [state]);
 
   const onItemClicked = (index: number) => {
@@ -53,10 +67,35 @@ const AttendeeView = () => {
     setMainViewIndex(index);
   };
 
+  const onSlideButtonClicked = () => {
+    setShowAttendeeList(!showAttendeeList);
+  };
+
   return (
     <Stack direction="row" className={style.wrapper}>
       <Stack className={style.videoBoxMainContainer}>
-        <AttendeeItem isMain attendee={state.attendees[mainViewIndex]} />
+        {mainViewIndex < state.attendees.length ? (
+          <AttendeeItem isMain attendee={state.attendees[mainViewIndex]} />
+        ) : (
+          <></>
+        )}
+        <Stack
+          className={style.videoBoxListSwitchContainer}
+          alignItems="center"
+          justifyContent="center"
+        >
+          {needShowAttendeeList ? (
+            <IconButton onClick={onSlideButtonClicked}>
+              {showAttendeeList ? (
+                <NavigateBeforeOutlinedIcon color="primary" />
+              ) : (
+                <NavigateNextOutlinedIcon color="primary" />
+              )}
+            </IconButton>
+          ) : (
+            <></>
+          )}
+        </Stack>
       </Stack>
       <Slide direction="left" in={showAttendeeList} mountOnEnter unmountOnExit>
         <Stack className={style.videoBoxListContainer}>
