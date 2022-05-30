@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ListItem, Stack } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { ListItem, Stack, Slide } from '@mui/material';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -34,6 +34,9 @@ const AttendeeView = () => {
   const { state } = useStore();
   const commonManager = useCommonManager();
   const [mainViewIndex, setMainViewIndex] = useState(0);
+  const showAttendeeList = useMemo(() => {
+    return state.attendees.length > 1;
+  }, [state]);
 
   const onItemClicked = (index: number) => {
     if (mainViewIndex === index) return;
@@ -55,7 +58,7 @@ const AttendeeView = () => {
       <Stack className={style.videoBoxMainContainer}>
         <AttendeeItem isMain attendee={state.attendees[mainViewIndex]} />
       </Stack>
-      {state.attendees.length > 1 ? (
+      <Slide direction="left" in={showAttendeeList} mountOnEnter unmountOnExit>
         <Stack className={style.videoBoxListContainer}>
           <AutoSizer>
             {({ height, width }) => (
@@ -71,9 +74,7 @@ const AttendeeView = () => {
             )}
           </AutoSizer>
         </Stack>
-      ) : (
-        <></>
-      )}
+      </Slide>
     </Stack>
   );
 };

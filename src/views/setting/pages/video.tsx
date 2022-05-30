@@ -36,7 +36,7 @@ const VideoPage = () => {
     const dom = document.getElementById('videobox-preview');
     if (!commonManager.isInMeeting()) {
       commonManager.setVideoPreview(true);
-      commonManager.setupLocalVideoRenderer(dom!, true);
+      commonManager.setupLocalVideoRenderer(dom!, true, false);
     }
 
     return () => {
@@ -45,7 +45,7 @@ const VideoPage = () => {
   }, []);
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} width="320px">
       <Stack spacing={1}>
         {commonManager.isInMeeting() ? (
           <></>
