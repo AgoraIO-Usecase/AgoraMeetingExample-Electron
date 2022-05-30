@@ -87,9 +87,9 @@ const AttendeeView = () => {
           {needShowAttendeeList ? (
             <IconButton onClick={onSlideButtonClicked}>
               {showAttendeeList ? (
-                <NavigateBeforeOutlinedIcon color="primary" />
+                <NavigateBeforeOutlinedIcon color="primary" fontSize="large" />
               ) : (
-                <NavigateNextOutlinedIcon color="primary" />
+                <NavigateNextOutlinedIcon color="primary" fontSize="large" />
               )}
             </IconButton>
           ) : (

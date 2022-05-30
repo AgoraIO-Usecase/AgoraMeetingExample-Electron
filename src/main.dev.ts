@@ -75,7 +75,7 @@ const createWindow = async () => {
 
   if (process.env.NODE_ENV !== 'production')
     mainWindow.webContents.openDevTools({
-      mode: 'right',
+      mode: 'detach',
       activate: true,
     });
 
@@ -136,7 +136,7 @@ app.on('activate', () => {
 app.on('ready', () => {
   globalShortcut.register('ctrl+p', () => {
     mainWindow?.webContents.openDevTools({
-      mode: 'right',
+      mode: 'detach',
       activate: true,
     });
   });

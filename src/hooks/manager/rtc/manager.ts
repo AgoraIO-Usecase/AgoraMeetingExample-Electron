@@ -24,6 +24,7 @@ import {
   RtcUser,
   RtcAudioVolumeIndication,
   RtcVersion,
+  RtcDataStreamMessage,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -57,10 +58,14 @@ export class RtcManager extends EventEmitter {
     isInitialized: boolean;
     connection: RtcConnection;
     users: RtcUser[];
+    dataStreamId: number;
+    dataStreamTimerId?: NodeJS.Timeout;
   } = {
     isInitialized: false,
     connection: RtcConnection.Disconnected,
     users: [],
+    dataStreamId: 0,
+    dataStreamTimerId: undefined,
   };
 
   constructor() {
@@ -338,7 +343,15 @@ export class RtcManager extends EventEmitter {
         )} elapsed: ${elapsed}`
       );
 
+      this.startDataStreamSender();
       this.setConnection(RtcConnection.Connected);
+    });
+
+    this.engine.on('connectionStateChanged', (state, reason) => {
+      // disconnected || failed
+      if (state === 1 || state === 5) {
+        this.stopDataStreamSender();
+      }
     });
 
     this.engine.on('userJoined', (uid) => {
@@ -481,6 +494,10 @@ export class RtcManager extends EventEmitter {
         this.emit('volumeIndications', speakers as RtcAudioVolumeIndication[]);
       }
     );
+
+    this.engine.on('streamMessage', (uid, streamId, msg, len) => {
+      this.onDataStreamMessage(msg);
+    });
   };
 
   private preConfigEngine = () => {
@@ -528,6 +545,9 @@ export class RtcManager extends EventEmitter {
     return this.state.users[0];
   };
 
+  private getUserIndex = (uid: number): number =>
+    this.state.users.findIndex((item) => item.uid === uid);
+
   private addUser = (user: RtcUser) => {
     const index = this.state.users.findIndex((item) => item.uid === user.uid);
     if (index === -1) this.state.users.push(user);
@@ -549,5 +569,59 @@ export class RtcManager extends EventEmitter {
     this.state.users = newUsers;
 
     this.emit('userRemove', uid);
+  };
+
+  private onDataStreamMessage = (msg: string) => {
+    try {
+      const data = JSON.parse(msg) as RtcDataStreamMessage;
+      const { info, control } = data;
+
+      const userIndex = this.getUserIndex(info.uid);
+      if (
+        userIndex &&
+        (this.state.users[userIndex].nickname !== info.nickname ||
+          this.state.users[userIndex].parentId !== info.parentId ||
+          this.state.users[userIndex].shareId !== info.shareId)
+      ) {
+        this.updateUser({
+          uid: info.uid,
+          nickname: info.nickname,
+          parentId: info.parentId,
+          shareId: info.shareId,
+        });
+      }
+    } catch (e) {
+      log.error('rtc manager unpack data stream message failed', e, msg);
+    }
+  };
+
+  private sendDataStreamMessage = () => {
+    const data: RtcDataStreamMessage = {
+      info: this.getSelfUser(),
+      control: {},
+    };
+
+    const msg = JSON.stringify(data);
+
+    if (this.isInChannel())
+      this.engine.sendStreamMessage(this.state.dataStreamId, msg);
+  };
+
+  private startDataStreamSender = () => {
+    this.state.dataStreamId = this.engine.createDataStreamWithConfig({
+      syncWithAudio: false,
+      ordered: true,
+    });
+
+    this.state.dataStreamTimerId = setInterval(() => {
+      this.sendDataStreamMessage();
+    }, 1000);
+  };
+
+  private stopDataStreamSender = () => {
+    if (this.state.dataStreamTimerId)
+      clearInterval(this.state.dataStreamTimerId);
+
+    this.state.dataStreamTimerId = undefined;
   };
 }

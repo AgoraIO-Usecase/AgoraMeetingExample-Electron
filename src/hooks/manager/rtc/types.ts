@@ -61,3 +61,8 @@ export interface RtcAudioVolumeIndication {
   volume: number;
   vad: number;
 }
+
+export type RtcDataStreamMessage = {
+  info: RtcUser;
+  control: any;
+};
