@@ -1,15 +1,22 @@
 import React, { FC, useEffect, useMemo, useReducer } from 'react';
 import {
+  StoreActionPayloadDevice,
   StoreActionType,
   StoreContext,
   StoreReducer,
-  StoreState,
 } from './store';
-import { CommonManager, CommonManagerContext, DeviceType } from './manager';
+import {
+  CommonManager,
+  CommonManagerContext,
+  MeetingConnection,
+} from './manager';
 
 export const RootProvider: FC = (props) => {
   const { children } = props;
-  const [state, dispatch] = useReducer(StoreReducer, {});
+  const [state, dispatch] = useReducer(StoreReducer, {
+    connection: MeetingConnection.Disconnected,
+    attendees: [],
+  });
   const commonManager = useMemo(() => new CommonManager(), []);
 
   useEffect(() => {
@@ -21,26 +28,15 @@ export const RootProvider: FC = (props) => {
     });
 
     commonManager.on('deviceList', (deviceType, currentDeviceId, devices) => {
-      const newState: StoreState = {};
-      switch (deviceType) {
-        case DeviceType.Camera:
-          newState.cameras = devices;
-          newState.currentCameraId = currentDeviceId;
-          break;
-        case DeviceType.Speaker:
-          newState.speakers = devices;
-          newState.currentSpeakerId = currentDeviceId;
-          break;
-        case DeviceType.Microphone:
-          newState.microphones = devices;
-          newState.currentMicrophoneId = currentDeviceId;
-          break;
-        default:
-          break;
-      }
+      const actionPayloadDevice: StoreActionPayloadDevice = {
+        type: deviceType,
+        currentDeviceId,
+        devices,
+      };
+
       dispatch({
-        type: StoreActionType.ACTION_TYPE_INFO,
-        payload: newState,
+        type: StoreActionType.ACTION_TYPE_DEVICE,
+        payload: actionPayloadDevice,
       });
     });
 

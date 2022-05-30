@@ -1,16 +1,21 @@
-import { AttendeeInfo, DeviceInfo, MeetingConnection } from '../manager';
+import {
+  AttendeeInfo,
+  DeviceInfo,
+  DeviceType,
+  MeetingConnection,
+} from '../manager';
 
 export enum StoreActionType {
   ACTION_TYPE_CONNECTION,
-  ACTION_TYPE_INFO,
+  ACTION_TYPE_DEVICE,
   ACTION_TYPE_ATTENDEE_NEW,
   ACTION_TYPE_ATTENDEE_UPDATE,
   ACTION_TYPE_ATTENDEE_REMOVE,
 }
 
 export type StoreState = {
-  connection?: MeetingConnection;
-  attendees?: AttendeeInfo[];
+  connection: MeetingConnection;
+  attendees: AttendeeInfo[];
 
   currentCameraId?: string;
   currentSpeakerId?: string;
@@ -25,12 +30,17 @@ export type StoreActionPayloadAttendee = {
   attendees: AttendeeInfo[];
 };
 
+export type StoreActionPayloadDevice = {
+  type: DeviceType;
+  currentDeviceId: string;
+  devices: DeviceInfo[];
+};
+
 export type StoreActionPayload =
-  | MeetingConnection
-  | StoreState
   | string
-  | number
-  | StoreActionPayloadAttendee;
+  | MeetingConnection
+  | StoreActionPayloadAttendee
+  | StoreActionPayloadDevice;
 
 export type StoreAction = {
   type: StoreActionType;

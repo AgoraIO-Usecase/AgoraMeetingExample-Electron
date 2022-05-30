@@ -1,10 +1,11 @@
 import log from 'electron-log';
-import { MeetingConnection } from '../manager';
+import { DeviceType, MeetingConnection } from '../manager';
 import {
   StoreActionType,
   StoreAction,
   StoreState,
   StoreActionPayloadAttendee,
+  StoreActionPayloadDevice,
 } from './types';
 
 const onMeetingConnection = (
@@ -12,7 +13,7 @@ const onMeetingConnection = (
   connection: MeetingConnection
 ) => {
   // clear state when meeting connection state is connecting
-  if (connection === MeetingConnection.Connecting)
+  if (connection === MeetingConnection.Disconnected)
     return {
       ...state,
       connection,
@@ -20,6 +21,22 @@ const onMeetingConnection = (
     };
 
   return { ...state, connection };
+};
+
+const onDevice = (state: StoreState, payload: StoreActionPayloadDevice) => {
+  const { type, currentDeviceId, devices } = payload;
+  if (type === DeviceType.Camera) {
+    state.currentCameraId = currentDeviceId;
+    state.cameras = devices;
+  } else if (type === DeviceType.Microphone) {
+    state.currentMicrophoneId = currentDeviceId;
+    state.microphones = devices;
+  } else if (type === DeviceType.Speaker) {
+    state.currentSpeakerId = currentDeviceId;
+    state.speakers = devices;
+  }
+
+  return state;
 };
 
 const onAttendeeNew = (
@@ -31,17 +48,7 @@ const onAttendeeNew = (
 
   if (!attendees.length) return oldState;
 
-  console.warn('attendeeNew', position, oldState.attendees);
-
   newAttendees.splice(position, 0, attendees[0]);
-
-  console.warn(
-    'attendeeNew',
-    position,
-    newAttendees[0],
-    newAttendees[1],
-    newAttendees.length
-  );
 
   return { ...oldState, attendees: newAttendees };
 };
@@ -57,14 +64,6 @@ const onAttendeeUpdate = (
 
   newAttendees[position] = { ...newAttendees[position], ...attendees[0] };
 
-  console.warn(
-    'attendeeUpdate',
-    position,
-    oldState.attendees,
-    newAttendees,
-    newAttendees.length
-  );
-
   return { ...oldState, attendees: newAttendees };
 };
 
@@ -76,14 +75,6 @@ const onAttendeeRemove = (
   const { position } = payload;
 
   newAttendees.splice(position, 1);
-
-  console.warn(
-    'attendeeRemove',
-    position,
-    oldState.attendees,
-    newAttendees,
-    newAttendees.length
-  );
 
   return { ...oldState, attendees: newAttendees };
 };
@@ -97,12 +88,10 @@ export const StoreReducer = (
 
   switch (type) {
     case StoreActionType.ACTION_TYPE_CONNECTION:
-      console.warn('meetingConnection', payload);
       newState = onMeetingConnection(state, payload as MeetingConnection);
       break;
-    case StoreActionType.ACTION_TYPE_INFO:
-      console.warn('meetingInfo');
-      newState = { ...state, ...(action.payload as StoreState) };
+    case StoreActionType.ACTION_TYPE_DEVICE:
+      newState = onDevice(state, payload as StoreActionPayloadDevice);
       break;
     case StoreActionType.ACTION_TYPE_ATTENDEE_NEW:
       newState = onAttendeeNew(
