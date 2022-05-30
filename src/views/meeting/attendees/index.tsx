@@ -55,21 +55,25 @@ const AttendeeView = () => {
       <Stack className={style.videoBoxMainContainer}>
         <AttendeeItem isMain attendee={state.attendees[mainViewIndex]} />
       </Stack>
-      <Stack className={style.videoBoxListContainer}>
-        <AutoSizer>
-          {({ height, width }) => (
-            <FixedSizeList
-              height={height}
-              itemCount={state.attendees.length}
-              itemSize={160}
-              width={width}
-              itemData={{ state, onItemClicked }}
-            >
-              {renderRow}
-            </FixedSizeList>
-          )}
-        </AutoSizer>
-      </Stack>
+      {state.attendees.length > 1 ? (
+        <Stack className={style.videoBoxListContainer}>
+          <AutoSizer>
+            {({ height, width }) => (
+              <FixedSizeList
+                height={height}
+                itemCount={state.attendees.length}
+                itemSize={160}
+                width={width}
+                itemData={{ state, onItemClicked }}
+              >
+                {renderRow}
+              </FixedSizeList>
+            )}
+          </AutoSizer>
+        </Stack>
+      ) : (
+        <></>
+      )}
     </Stack>
   );
 };

@@ -50,7 +50,7 @@ const MeetingView = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <HeaderBar title="AgoraMeeting" fixed={false} />
+      <HeaderBar title={commonManager.getChannelName()} fixed={false} />
       <AttendeeView />
       <Stack
         className={style.toolBar}

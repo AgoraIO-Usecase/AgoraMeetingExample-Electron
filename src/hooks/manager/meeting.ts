@@ -20,13 +20,13 @@ export class MeetingManager extends EventEmitter {
 
   private state: {
     isInitialized: boolean;
-    isScreenSharing: boolean;
 
+    channelName: string;
     connection: MeetingConnection;
   } = {
     isInitialized: false,
-    isScreenSharing: false,
 
+    channelName: '',
     connection: MeetingConnection.Disconnected,
   };
 
@@ -58,7 +58,7 @@ export class MeetingManager extends EventEmitter {
   };
 
   reset = () => {
-    this.state.isScreenSharing = false;
+    this.state.channelName = '';
     this.state.connection = MeetingConnection.Disconnected;
   };
 
@@ -76,12 +76,13 @@ export class MeetingManager extends EventEmitter {
       return;
     }
 
-    const { id, nickname, isCameraOn, isAudioOn } = params;
+    const { channelName, nickname, isCameraOn, isAudioOn } = params;
 
     log.info('meeting manager join meeting with params:', params);
 
+    this.state.channelName = channelName;
     this.rtcManager.joinChannel({
-      channelName: id,
+      channelName,
       uid: Number(`${new Date().getTime()}`.slice(7)),
       nickname,
       isCameraOn,
@@ -99,6 +100,8 @@ export class MeetingManager extends EventEmitter {
 
     this.rtcManager.leaveChannel();
   };
+
+  getChannelName = () => this.state.channelName;
 
   private registerRtcEvents = () => {
     this.rtcManager.on(

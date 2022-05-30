@@ -147,15 +147,7 @@ export class CommonManager extends EventEmitter {
 
     log.info('common manager join meeting with params:', params);
 
-    // only join rtc for now
-    const { channelName, nickname, isCameraOn, isAudioOn } = params;
-    this.rtcManager.joinChannel({
-      channelName,
-      uid: Number(`${new Date().getTime()}`.slice(7)),
-      nickname,
-      isCameraOn,
-      isAudioOn,
-    });
+    this.meetingManager.joinMeeting(params);
   };
 
   leaveMeeting = () => {
@@ -165,6 +157,8 @@ export class CommonManager extends EventEmitter {
   isInMeeting = () => {
     return this.meetingManager.isInMeeting();
   };
+
+  getChannelName = () => this.meetingManager.getChannelName();
 
   enableAudio = (enable: boolean) => {
     log.info('common manager enable audio', enable);
