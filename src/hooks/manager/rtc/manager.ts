@@ -596,6 +596,10 @@ export class RtcManager extends EventEmitter {
         // REMOTE_VIDEO_STATE_STOPPED(0) REMOTE_VIDEO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
+        const userIndex = this.getUserIndex(uid);
+        if (userIndex === -1 || this.state.users[userIndex].isCameraOn === isOn)
+          return;
+
         log.info('remote video state changed,', uid, state, reason, isOn);
 
         this.updateUser({
@@ -616,6 +620,9 @@ export class RtcManager extends EventEmitter {
 
         // REMOTE_AUDIO_STATE_STOPPED(0) REMOTE_AUDIO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
+        const userIndex = this.getUserIndex(uid);
+        if (userIndex === -1 || this.state.users[userIndex].isAudioOn === isOn)
+          return;
 
         log.info('remote audio state changed,', uid, state, reason, isOn);
 
@@ -771,19 +778,34 @@ export class RtcManager extends EventEmitter {
       const { info, control } = data;
 
       const userIndex = this.getUserIndex(info.uid);
+      if (userIndex === -1) return;
+
       if (
-        userIndex &&
-        (this.state.users[userIndex].nickname !== info.nickname ||
-          this.state.users[userIndex].parentId !== info.parentId ||
-          this.state.users[userIndex].shareId !== info.shareId)
-      ) {
+        this.state.users[userIndex].nickname !== info.nickname ||
+        this.state.users[userIndex].parentId !== info.parentId ||
+        this.state.users[userIndex].shareId !== info.shareId
+      )
         this.updateUser({
           uid: info.uid,
           nickname: info.nickname,
           parentId: info.parentId,
           shareId: info.shareId,
         });
-      }
+
+      // update share user
+      if (info.shareId === undefined || info.shareId === 0) return;
+
+      const shareUserIndex = this.getUserIndex(info.shareId);
+      if (shareUserIndex === -1) return;
+      if (
+        this.state.users[shareUserIndex].nickname !== info.nickname ||
+        this.state.users[shareUserIndex].parentId !== info.uid
+      )
+        this.updateUser({
+          uid: info.shareId,
+          nickname: info.nickname,
+          parentId: info.uid,
+        });
     } catch (e) {
       log.error('rtc manager unpack data stream message failed', e, msg);
     }
