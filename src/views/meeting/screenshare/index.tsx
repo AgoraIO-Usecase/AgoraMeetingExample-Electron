@@ -151,17 +151,20 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   const [currentSelected, setCurrentSelected] = useState(-1);
 
   useEffect(() => {
-    commonManager
-      .getScreenCaptureSources()
-      .then((value) => {
-        console.info('screenshare sources', value);
-        setSources(value as never[]);
-        return 0;
-      })
-      .catch((e) => {
-        console.error('screenshare error', e);
-      });
-  }, []);
+    if (open)
+      setTimeout(() => {
+        commonManager
+          .getScreenCaptureSources()
+          .then((value) => {
+            console.info('screenshare sources', value);
+            setSources(value as never[]);
+            return 0;
+          })
+          .catch((e) => {
+            console.error('screenshare error', e);
+          });
+      }, 200);
+  }, [open]);
 
   const onItemClicked = (index: number) => {
     setCurrentSelected(index);
