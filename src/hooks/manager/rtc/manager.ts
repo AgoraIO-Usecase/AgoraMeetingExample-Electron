@@ -757,10 +757,10 @@ export class RtcManager extends EventEmitter {
   private removeUser = (uid: number) => {
     const newUsers = this.state.users.filter((item) => item.uid !== uid);
 
-    this.state.users = newUsers;
-
     // no user deleted
     if (this.state.users.length === newUsers.length) return;
+
+    this.state.users = newUsers;
 
     this.emit('userRemove', uid);
   };
