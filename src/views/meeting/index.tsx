@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -13,6 +13,7 @@ import HeaderBar from '../components/header';
 import AttendeeView from './attendees';
 import { useCommonManager, useStore } from '../../hooks';
 import useStyle from './style';
+import ScreenShareDialog from './screenshare';
 
 const MeetingView = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const MeetingView = () => {
 
     return { isAudioOn: false, isCameraOn: false, isScreenSharing: false };
   }, [state]);
+  const [openScreenShareDialog, setOpenScreenShareDialog] = useState(false);
 
   const onMicrophoneClicked = () => {
     commonManager.enableAudio(!selfUser.isAudioOn);
@@ -33,7 +35,9 @@ const MeetingView = () => {
     commonManager.enableVideo(!selfUser.isCameraOn);
   };
 
-  const onScreenShareClicked = () => {};
+  const onScreenShareClicked = () => {
+    setOpenScreenShareDialog(true);
+  };
 
   const onLeaveMeetingClicked = () => {
     commonManager.leaveMeeting();
@@ -88,6 +92,10 @@ const MeetingView = () => {
           <LocalPhoneOutlinedIcon color="error" />
         </IconButton>
       </Stack>
+      <ScreenShareDialog
+        open={openScreenShareDialog}
+        onClose={() => setOpenScreenShareDialog(false)}
+      />
     </Stack>
   );
 };

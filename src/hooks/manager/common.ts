@@ -78,7 +78,7 @@ export class CommonManager extends EventEmitter {
 
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
-      `${remote.app.getPath('logs')}/rtc.log`
+      `${remote.app.getPath('logs')}/`
     );
     this.rtcManager.setVideoEncoderConfiguration(
       this.transVideoEncoderConfigruationType(
@@ -285,5 +285,30 @@ export class CommonManager extends EventEmitter {
   getWindowList = async () => {
     const windowList = await this.rtcManager.getWindowList();
     return windowList;
+  };
+
+  getScreenCaptureSources = async () => {
+    const sources = await this.rtcManager.getScreenCaptureSources(
+      { width: 480, height: 480 },
+      { width: 32, height: 32 },
+      true
+    );
+
+    return sources;
+  };
+
+  getScreenCaptureSourcesNew = () =>
+    this.rtcManager.getScreenCaptureSourcesNew(
+      { width: 480, height: 480 },
+      { width: 32, height: 32 },
+      true
+    );
+
+  startScreenShare = (params: { windowId?: number; displayId?: number }) => {
+    this.rtcManager.startScreenShare(params);
+  };
+
+  stopScreenShare = () => {
+    this.rtcManager.stopScreenShare();
   };
 }

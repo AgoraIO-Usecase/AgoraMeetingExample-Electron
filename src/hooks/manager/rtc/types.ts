@@ -66,3 +66,15 @@ export type RtcDataStreamMessage = {
   info: RtcUser;
   control: any;
 };
+
+export enum RtcScreenShareState {
+  Idle,
+  Waitting,
+  Running,
+}
+
+export enum RtcScreenShareStateReason {
+  None,
+  Error,
+  WindowClosed,
+}

@@ -12,8 +12,10 @@ import {
   RemoteVideoState,
   RemoteVideoStateReason,
   RtcStats,
+  SIZE,
 } from 'agora-electron-sdk/types/Api/native_type';
 
+import { Image } from 'image-js';
 import {
   RtcConnection,
   RtcConnectionReason,
@@ -28,6 +30,7 @@ import {
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
+import { RtcScreenShareManager } from './screenshare';
 
 export declare interface RtcManager {
   on(
@@ -53,15 +56,20 @@ export declare interface RtcManager {
 
 export class RtcManager extends EventEmitter {
   private engine!: AgoraRtcEngine;
+  private screenshareManager!: RtcScreenShareManager;
 
   private state: {
     isInitialized: boolean;
+
+    channelName: string;
     connection: RtcConnection;
     users: RtcUser[];
     dataStreamId: number;
     dataStreamTimerId?: NodeJS.Timeout;
   } = {
     isInitialized: false,
+
+    channelName: '',
     connection: RtcConnection.Disconnected,
     users: [],
     dataStreamId: 0,
@@ -71,6 +79,7 @@ export class RtcManager extends EventEmitter {
   constructor() {
     super();
     this.engine = new AgoraRtcEngine();
+    this.screenshareManager = new RtcScreenShareManager(this.engine);
   }
 
   initialize = (appId: string, logPath: string) => {
@@ -81,14 +90,18 @@ export class RtcManager extends EventEmitter {
 
     this.engine.initialize(appId, undefined, {
       level: 0x0001,
-      filePath: logPath,
+      filePath: `${logPath}rtc.log`,
       fileSize: 2000,
     });
+    this.engine.setAddonLogFile(`${logPath}addon.log`);
+
     this.registerEngineEvents();
     this.preConfigEngine();
     this.refreshDeviceList(RtcDeviceType.Camera);
     this.refreshDeviceList(RtcDeviceType.Speaker);
     this.refreshDeviceList(RtcDeviceType.Microphone);
+
+    this.screenshareManager.initialize(appId, logPath);
 
     this.state.isInitialized = true;
   };
@@ -98,9 +111,12 @@ export class RtcManager extends EventEmitter {
 
     log.info('rtc manager release');
 
+    if (this.isInChannel()) this.leaveChannel();
+
     this.removeAllListeners();
     this.reset();
 
+    this.screenshareManager.release();
     this.engine.release();
 
     this.state.isInitialized = false;
@@ -130,6 +146,7 @@ export class RtcManager extends EventEmitter {
     log.info('rtc manager join channel', params);
 
     const { channelName, nickname, uid, isCameraOn, isAudioOn } = params;
+    this.state.channelName = channelName;
 
     this.engine.enableAudioVolumeIndication(200, 3, false);
     this.engine.enableDualStreamMode(true);
@@ -291,7 +308,16 @@ export class RtcManager extends EventEmitter {
       // @ts-ignore:next-line
       myResolve(list);
     });
-    const list = (await promise) as { image: Uint8Array; displayId: number }[];
+    const list = (await promise) as {
+      image: Uint8Array;
+      displayId: {
+        width: number;
+        height: number;
+        x: number;
+        y: number;
+        id: number;
+      };
+    }[];
     const imageListPromise = list.map((item) => readImage(item.image));
     const imageList = await Promise.all(imageListPromise);
     const screenInfoList = list.map(({ displayId }, index) => ({
@@ -333,6 +359,121 @@ export class RtcManager extends EventEmitter {
     });
 
     return windowInfoList;
+  };
+
+  getScreenCaptureSources = async (
+    thumbSize: SIZE,
+    iconSize: SIZE,
+    includeScreen: boolean
+  ) => {
+    const originSources = this.engine.getScreenCaptureSources(
+      thumbSize,
+      iconSize,
+      includeScreen
+    ) as {
+      type: number;
+      sourceId: number;
+      sourceName: string;
+      sourceTitle: string;
+      processPath: string;
+      primaryMonitor: boolean;
+      iconImage?: { buffer: Uint8Array; width: number; height: number };
+      thumbImage?: { buffer: Uint8Array; width: number; height: number };
+    }[];
+
+    const transformedSourceIconsPromise = originSources.map((item) => {
+      if (item.iconImage) return Image.load(item.iconImage.buffer);
+
+      return new Promise((resolve, reject) => {
+        resolve(undefined);
+      });
+    });
+
+    const transformedSourceThumbPromise = originSources.map((item) => {
+      if (item.thumbImage) return Image.load(item.thumbImage.buffer);
+
+      return new Promise((resolve, reject) => {
+        resolve(undefined);
+      });
+    });
+
+    const transformedSourceIcons = await Promise.all(
+      transformedSourceIconsPromise
+    );
+    const transformedSourceThumb = await Promise.all(
+      transformedSourceThumbPromise
+    );
+
+    const transformedSources = originSources.map((item, index) => {
+      return {
+        ...item,
+        icon: transformedSourceIcons[index],
+        thumb: transformedSourceThumb[index],
+      };
+    });
+
+    return transformedSources;
+  };
+
+  getScreenCaptureSourcesNew = (
+    thumbSize: SIZE,
+    iconSize: SIZE,
+    includeScreen: boolean
+  ) => {
+    const originSources = this.engine.getScreenCaptureSources(
+      thumbSize,
+      iconSize,
+      includeScreen
+    ) as {
+      type: number;
+      sourceId: number;
+      sourceName: string;
+      sourceTitle: string;
+      processPath: string;
+      primaryMonitor: boolean;
+      iconImage?: { buffer: Uint8Array; width: number; height: number };
+      thumbImage?: { buffer: Uint8Array; width: number; height: number };
+    }[];
+
+    const transformedSources = originSources.map((item, index) => {
+      const icon = item.iconImage
+        ? new Image(
+            item.iconImage.width,
+            item.iconImage.height,
+            item.iconImage.buffer
+          )
+        : undefined;
+
+      const thumb = item.thumbImage
+        ? new Image(
+            item.thumbImage.width,
+            item.thumbImage.height,
+            item.thumbImage.buffer
+          )
+        : undefined;
+      return {
+        ...item,
+        icon,
+        thumb,
+      };
+    });
+
+    return transformedSources;
+  };
+
+  startScreenShare = (params: { windowId?: number; displayId?: number }) => {
+    log.info('rtc manager start screenshare', params);
+
+    this.screenshareManager.start(
+      this.state.channelName,
+      Number(`${new Date().getTime()}`.slice(7)),
+      params
+    );
+  };
+
+  stopScreenShare = () => {
+    log.info('rtc manager stop screenshare');
+    this.screenshareManager.stop();
   };
 
   private registerEngineEvents = () => {
@@ -431,7 +572,8 @@ export class RtcManager extends EventEmitter {
         state: RemoteVideoState,
         reason: RemoteVideoStateReason
       ) => {
-        const isOn = state !== 0 && state !== 3 && state !== 4;
+        // REMOTE_VIDEO_STATE_STOPPED(0) REMOTE_VIDEO_STATE_FAILED(4)
+        const isOn = state !== 0 && state !== 4;
 
         log.info('remote video state changed,', uid, state, reason, isOn);
 
@@ -449,7 +591,8 @@ export class RtcManager extends EventEmitter {
         state: RemoteAudioState,
         reason: RemoteAudioStateReason
       ) => {
-        const isOn = state !== 0 && state !== 3 && state !== 4;
+        // REMOTE_AUDIO_STATE_STOPPED(0) REMOTE_AUDIO_STATE_FAILED(4)
+        const isOn = state !== 0 && state !== 4;
 
         log.info('remote audio state changed,', uid, state, reason, isOn);
 
