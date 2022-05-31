@@ -531,6 +531,8 @@ export class RtcManager extends EventEmitter {
     });
 
     this.engine.on('userOffline', (uid, reason) => {
+      if (this.state.shareId === uid) return;
+
       log.info(`rtc manager on userOffline ---- ${uid}  reason: ${reason}`);
       this.removeUser(uid);
     });
@@ -669,7 +671,7 @@ export class RtcManager extends EventEmitter {
   };
 
   private generateRtcScreenShareUid = () => {
-    return Number(`${new Date().getTime()}`.slice(8));
+    return Number(`${new Date().getTime()}`.slice(3));
   };
 
   private preConfigEngine = () => {
@@ -754,7 +756,11 @@ export class RtcManager extends EventEmitter {
 
   private removeUser = (uid: number) => {
     const newUsers = this.state.users.filter((item) => item.uid !== uid);
+
     this.state.users = newUsers;
+
+    // no user deleted
+    if (this.state.users.length === newUsers.length) return;
 
     this.emit('userRemove', uid);
   };

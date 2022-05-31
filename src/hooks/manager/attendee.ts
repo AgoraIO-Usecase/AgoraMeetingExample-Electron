@@ -99,6 +99,8 @@ export class AttendeeManager extends EventEmitter {
     });
     this.state.attendees = newUsers;
 
+    if (oldIndex === -1) return;
+
     this.emit('remove', oldIndex);
   };
 
