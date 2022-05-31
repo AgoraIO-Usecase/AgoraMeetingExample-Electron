@@ -3,6 +3,7 @@ import {
   DeviceInfo,
   DeviceType,
   MeetingConnection,
+  ScreenShareState,
 } from '../manager';
 
 export enum StoreActionType {
@@ -11,6 +12,7 @@ export enum StoreActionType {
   ACTION_TYPE_ATTENDEE_NEW,
   ACTION_TYPE_ATTENDEE_UPDATE,
   ACTION_TYPE_ATTENDEE_REMOVE,
+  ACTION_TYPE_SCREENSHARE_STATE,
 }
 
 export type StoreState = {
@@ -23,6 +25,8 @@ export type StoreState = {
   cameras?: DeviceInfo[];
   speakers?: DeviceInfo[];
   microphones?: DeviceInfo[];
+
+  screenshareState: ScreenShareState;
 };
 
 export type StoreActionPayloadAttendee = {
@@ -40,7 +44,8 @@ export type StoreActionPayload =
   | string
   | MeetingConnection
   | StoreActionPayloadAttendee
-  | StoreActionPayloadDevice;
+  | StoreActionPayloadDevice
+  | ScreenShareState;
 
 export type StoreAction = {
   type: StoreActionType;

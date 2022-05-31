@@ -27,6 +27,8 @@ import {
   RtcAudioVolumeIndication,
   RtcVersion,
   RtcDataStreamMessage,
+  RtcScreenShareState,
+  RtcScreenShareStateReason,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -52,6 +54,15 @@ export declare interface RtcManager {
     evt: 'volumeIndications',
     cb: (indications: RtcAudioVolumeIndication[]) => void
   ): this;
+  on(
+    evt: 'screenshareState',
+    cb: (state: RtcScreenShareState, reason: RtcScreenShareStateReason) => void
+  ): this;
+
+  on(
+    evt: 'screenshareError',
+    cb: (reason: RtcScreenShareStateReason) => void
+  ): this;
 }
 
 export class RtcManager extends EventEmitter {
@@ -61,6 +72,7 @@ export class RtcManager extends EventEmitter {
   private state: {
     isInitialized: boolean;
 
+    uid: number;
     channelName: string;
     connection: RtcConnection;
     users: RtcUser[];
@@ -69,6 +81,7 @@ export class RtcManager extends EventEmitter {
   } = {
     isInitialized: false,
 
+    uid: 0,
     channelName: '',
     connection: RtcConnection.Disconnected,
     users: [],
@@ -101,7 +114,8 @@ export class RtcManager extends EventEmitter {
     this.refreshDeviceList(RtcDeviceType.Speaker);
     this.refreshDeviceList(RtcDeviceType.Microphone);
 
-    this.screenshareManager.initialize(appId, logPath);
+    this.state.uid = this.generateRtcUid();
+    this.initializeScreenShareManager(appId, logPath);
 
     this.state.isInitialized = true;
   };
@@ -119,6 +133,7 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.release();
     this.engine.release();
 
+    this.state.uid = 0;
     this.state.isInitialized = false;
   };
 
@@ -145,7 +160,7 @@ export class RtcManager extends EventEmitter {
 
     log.info('rtc manager join channel', params);
 
-    const { channelName, nickname, uid, isCameraOn, isAudioOn } = params;
+    const { channelName, nickname, isCameraOn, isAudioOn } = params;
     this.state.channelName = channelName;
 
     this.engine.enableAudioVolumeIndication(200, 3, false);
@@ -153,11 +168,11 @@ export class RtcManager extends EventEmitter {
     this.engine.enableLocalVideo(isCameraOn);
     this.engine.enableLocalAudio(isAudioOn);
 
-    this.engine.joinChannel('', channelName, '', uid);
+    this.engine.joinChannel('', channelName, '', this.state.uid);
 
     this.setConnection(RtcConnection.Connecting);
     this.addUser({
-      uid,
+      uid: this.state.uid,
       nickname,
       shareId: 0,
       parentId: 0,
@@ -464,11 +479,7 @@ export class RtcManager extends EventEmitter {
   startScreenShare = (params: { windowId?: number; displayId?: number }) => {
     log.info('rtc manager start screenshare', params);
 
-    this.screenshareManager.start(
-      this.state.channelName,
-      Number(`${new Date().getTime()}`.slice(7)),
-      params
-    );
+    this.screenshareManager.start(this.state.channelName, params);
   };
 
   stopScreenShare = () => {
@@ -643,11 +654,33 @@ export class RtcManager extends EventEmitter {
     });
   };
 
+  private generateRtcUid = () => {
+    return Number(`${new Date().getTime()}`.slice(7));
+  };
+
+  private generateRtcScreenShareUid = () => {
+    return Number(`${new Date().getTime()}`.slice(8));
+  };
+
   private preConfigEngine = () => {
     this.engine.setChannelProfile(1);
     this.engine.setClientRole(1);
     this.engine.enableAudio();
     this.engine.enableVideo();
+  };
+
+  private initializeScreenShareManager = (appId: string, logPath: string) => {
+    this.screenshareManager.initialize(
+      appId,
+      logPath,
+      this.generateRtcScreenShareUid()
+    );
+    this.screenshareManager.on('state', (state, reason) => {
+      this.emit('screenshareState', state, reason);
+    });
+    this.screenshareManager.on('error', (reason) => {
+      this.emit('screenshareError', reason);
+    });
   };
 
   private refreshDeviceList = (deviceType: RtcDeviceType) => {

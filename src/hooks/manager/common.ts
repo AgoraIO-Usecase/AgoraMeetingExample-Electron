@@ -14,6 +14,8 @@ import {
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
+  ScreenShareState,
+  ScreenShareStateReason,
   Version,
   VideoEncoderConfigurationType,
   VolumeIndication,
@@ -47,6 +49,14 @@ export interface CommonManager {
     evt: 'volumeIndications',
     cb: (indications: VolumeIndication[]) => void
   ): this;
+  on(
+    evt: 'screenshareState',
+    cb: (state: ScreenShareState, reason: ScreenShareStateReason) => void
+  ): this;
+  on(
+    evt: 'screenshareError',
+    cb: (reason: ScreenShareStateReason) => void
+  ): this;
 }
 
 export class CommonManager extends EventEmitter {
@@ -74,6 +84,14 @@ export class CommonManager extends EventEmitter {
     });
     this.rtcManager.on('volumeIndications', (indications) => {
       this.emit('volumeIndications', indications as VolumeIndication[]);
+    });
+    this.rtcManager.on('screenshareState', (state, reason) => {
+      log.info('common manager on screenshareState', state, reason);
+      this.emit('screenshareState', state, reason);
+    });
+    this.rtcManager.on('screenshareError', (reason) => {
+      log.error('common manager on screenshareError', reason);
+      this.emit('screenshareError', reason);
     });
 
     this.rtcManager.initialize(

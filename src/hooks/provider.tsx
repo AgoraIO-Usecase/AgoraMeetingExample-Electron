@@ -9,6 +9,7 @@ import {
   CommonManager,
   CommonManagerContext,
   MeetingConnection,
+  ScreenShareState,
 } from './manager';
 
 export const RootProvider: FC = (props) => {
@@ -16,6 +17,7 @@ export const RootProvider: FC = (props) => {
   const [state, dispatch] = useReducer(StoreReducer, {
     connection: MeetingConnection.Disconnected,
     attendees: [],
+    screenshareState: ScreenShareState.Idle,
   });
   const commonManager = useMemo(() => new CommonManager(), []);
 
@@ -65,6 +67,12 @@ export const RootProvider: FC = (props) => {
           position,
           attendees: [],
         },
+      });
+    });
+    commonManager.on('screenshareState', (screenshareState, reason) => {
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
+        payload: screenshareState,
       });
     });
 

@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { DeviceType, MeetingConnection } from '../manager';
+import { DeviceType, MeetingConnection, ScreenShareState } from '../manager';
 import {
   StoreActionType,
   StoreAction,
@@ -110,6 +110,12 @@ export const StoreReducer = (
         state,
         action.payload as StoreActionPayloadAttendee
       );
+      break;
+    case StoreActionType.ACTION_TYPE_SCREENSHARE_STATE:
+      newState = {
+        ...state,
+        screenshareState: action.payload as ScreenShareState,
+      };
       break;
     default:
       log.error('reducer invalid action type', type, payload);

@@ -44,7 +44,6 @@ export interface RtcUser {
 
 export interface RtcJoinParams {
   channelName: string;
-  uid: number;
   nickname: string;
   isCameraOn: boolean;
   isAudioOn: boolean;

@@ -18,12 +18,14 @@ export class RtcScreenShareManager extends EventEmitter {
 
   private props: {
     isInitialized: boolean;
+    uid: number;
 
     displayId?: number | undefined;
     windowId?: number | undefined;
     state: RtcScreenShareState;
   } = {
     isInitialized: false,
+    uid: 0,
 
     displayId: undefined,
     windowId: undefined,
@@ -35,7 +37,7 @@ export class RtcScreenShareManager extends EventEmitter {
     this.engine = engine;
   }
 
-  initialize = (appId: string, logPath: string) => {
+  initialize = (appId: string, logPath: string, uid: number) => {
     if (this.props.isInitialized) return;
 
     log.info('screenshare manager intialize');
@@ -47,6 +49,7 @@ export class RtcScreenShareManager extends EventEmitter {
 
     this.registerEngineEvents();
 
+    this.props.uid = uid;
     this.props.isInitialized = true;
   };
 
@@ -61,14 +64,19 @@ export class RtcScreenShareManager extends EventEmitter {
 
     this.props.displayId = undefined;
     this.props.windowId = undefined;
+
+    this.removeAllListeners();
+
+    this.props.uid = 0;
     this.props.isInitialized = false;
   };
 
-  isRunning = () => this.props.state === RtcScreenShareState.Running;
+  isRunning = () => this.props.state !== RtcScreenShareState.Idle;
+
+  getUid = () => this.props.uid;
 
   start = (
     channelName: string,
-    uid: number,
     params: { windowId?: number; displayId?: number }
   ) => {
     if (this.isRunning()) return;
@@ -81,7 +89,7 @@ export class RtcScreenShareManager extends EventEmitter {
     // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
     // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
     this.engine.videoSourceSetVideoProfile(43, false);
-    this.engine.videoSourceJoin('', channelName, '', uid, {
+    this.engine.videoSourceJoin('', channelName, '', this.props.uid, {
       autoSubscribeAudio: false,
       autoSubscribeVideo: false,
       publishLocalAudio: false,
@@ -115,18 +123,28 @@ export class RtcScreenShareManager extends EventEmitter {
       excludeWindowCount: 0,
     };
 
+    let ret = 0;
     if (displayId) {
-      this.engine.videoSourceStartScreenCaptureByDisplayId(
+      ret = this.engine.videoSourceStartScreenCaptureByDisplayId(
         { id: displayId, x: 0, y: 0, width: 0, height: 0 },
         { x: 0, y: 0, width: 0, height: 0 },
         captureParam
       );
     } else if (windowId) {
-      this.engine.videoSourceStartScreenCaptureByWindow(
+      ret = this.engine.videoSourceStartScreenCaptureByWindow(
         windowId,
         { x: 0, y: 0, width: 0, height: 0 },
         captureParam
       );
+    }
+
+    if (ret === 0)
+      this.setState(
+        RtcScreenShareState.Running,
+        RtcScreenShareStateReason.None
+      );
+    else {
+      this.stop(RtcScreenShareStateReason.Error);
     }
   };
 

@@ -83,7 +83,6 @@ export class MeetingManager extends EventEmitter {
     this.state.channelName = channelName;
     this.rtcManager.joinChannel({
       channelName,
-      uid: Number(`${new Date().getTime()}`.slice(7)),
       nickname,
       isCameraOn,
       isAudioOn,

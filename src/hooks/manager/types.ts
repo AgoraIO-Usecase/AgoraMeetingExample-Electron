@@ -65,3 +65,15 @@ export type VolumeIndication = {
   volume: number;
   vad: number;
 };
+
+export enum ScreenShareState {
+  Idle,
+  Waitting,
+  Running,
+}
+
+export enum ScreenShareStateReason {
+  None,
+  Error,
+  WindowClosed,
+}

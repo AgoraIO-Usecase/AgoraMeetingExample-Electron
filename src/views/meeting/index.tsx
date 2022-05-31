@@ -11,7 +11,7 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 
 import HeaderBar from '../components/header';
 import AttendeeView from './attendees';
-import { useCommonManager, useStore } from '../../hooks';
+import { ScreenShareState, useCommonManager, useStore } from '../../hooks';
 import useStyle from './style';
 import ScreenShareDialog from './screenshare';
 
@@ -36,7 +36,10 @@ const MeetingView = () => {
   };
 
   const onScreenShareClicked = () => {
-    setOpenScreenShareDialog(true);
+    if (state.screenshareState === ScreenShareState.Idle)
+      setOpenScreenShareDialog(true);
+    else if (state.screenshareState === ScreenShareState.Running)
+      commonManager.stopScreenShare();
   };
 
   const onLeaveMeetingClicked = () => {
@@ -79,7 +82,7 @@ const MeetingView = () => {
           )}
         </IconButton>
         <IconButton className={style.toolButton} onClick={onScreenShareClicked}>
-          {selfUser.isScreenSharing ? (
+          {state.screenshareState === ScreenShareState.Running ? (
             <ScreenShareOutlinedIcon color="success" />
           ) : (
             <ScreenShareOutlinedIcon color="primary" />
