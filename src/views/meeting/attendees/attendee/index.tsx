@@ -1,9 +1,11 @@
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useMemo } from 'react';
 import { Stack, Typography } from '@mui/material';
 
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 
 import { AttendeeInfo, useCommonManager } from '../../../../hooks';
 import useStyle from './style';
@@ -58,7 +60,7 @@ export type AttendeeItemProps = {
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, attendee } = props;
-  const { uid, nickname, isSelf, isCameraOn, isAudioOn } = attendee;
+  const { uid, nickname, isSelf, isCameraOn, isAudioOn, parentId } = attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
     [nickname, uid]
@@ -98,7 +100,15 @@ const AttendeeItem = (props: AttendeeItemProps) => {
           ) : (
             <Stack direction="row" spacing={1} alignItems="center">
               {isAudioOn ? <MicNoneOutlinedIcon color="primary" /> : <></>}
-              {isCameraOn ? <VideocamOutlinedIcon color="primary" /> : <></>}
+              {isCameraOn ? (
+                parentId && parentId !== 0 ? (
+                  <ScreenShareOutlinedIcon color="primary" />
+                ) : (
+                  <VideocamOutlinedIcon color="primary" />
+                )
+              ) : (
+                <></>
+              )}
             </Stack>
           )}
         </Stack>
