@@ -73,6 +73,7 @@ export class RtcManager extends EventEmitter {
     isInitialized: boolean;
 
     uid: number;
+    shareId: number;
     channelName: string;
     connection: RtcConnection;
     users: RtcUser[];
@@ -82,6 +83,7 @@ export class RtcManager extends EventEmitter {
     isInitialized: false,
 
     uid: 0,
+    shareId: 0,
     channelName: '',
     connection: RtcConnection.Disconnected,
     users: [],
@@ -115,6 +117,7 @@ export class RtcManager extends EventEmitter {
     this.refreshDeviceList(RtcDeviceType.Microphone);
 
     this.state.uid = this.generateRtcUid();
+    this.state.shareId = this.generateRtcScreenShareUid();
     this.initializeScreenShareManager(appId, logPath);
 
     this.state.isInitialized = true;
@@ -134,6 +137,7 @@ export class RtcManager extends EventEmitter {
     this.engine.release();
 
     this.state.uid = 0;
+    this.state.shareId = 0;
     this.state.isInitialized = false;
   };
 
@@ -508,6 +512,8 @@ export class RtcManager extends EventEmitter {
 
     this.engine.on('userJoined', (uid) => {
       log.info(`rtc manager on userJoined ---- ${uid}`);
+      if (uid === this.state.shareId) return;
+
       this.addUser({
         uid,
         nickname: '',
@@ -583,6 +589,8 @@ export class RtcManager extends EventEmitter {
         state: RemoteVideoState,
         reason: RemoteVideoStateReason
       ) => {
+        if (uid === this.state.shareId) return;
+
         // REMOTE_VIDEO_STATE_STOPPED(0) REMOTE_VIDEO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
@@ -602,6 +610,8 @@ export class RtcManager extends EventEmitter {
         state: RemoteAudioState,
         reason: RemoteAudioStateReason
       ) => {
+        if (uid === this.state.shareId) return;
+
         // REMOTE_AUDIO_STATE_STOPPED(0) REMOTE_AUDIO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
@@ -670,12 +680,13 @@ export class RtcManager extends EventEmitter {
   };
 
   private initializeScreenShareManager = (appId: string, logPath: string) => {
-    this.screenshareManager.initialize(
-      appId,
-      logPath,
-      this.generateRtcScreenShareUid()
-    );
+    this.screenshareManager.initialize(appId, logPath, this.state.shareId);
     this.screenshareManager.on('state', (state, reason) => {
+      if (state === RtcScreenShareState.Running) {
+        this.updateUser({ uid: this.state.uid, shareId: this.state.shareId });
+      } else if (state === RtcScreenShareState.Idle) {
+        this.updateUser({ uid: this.state.uid, shareId: 0 });
+      }
       this.emit('screenshareState', state, reason);
     });
     this.screenshareManager.on('error', (reason) => {
@@ -718,6 +729,7 @@ export class RtcManager extends EventEmitter {
 
   private getSelfUser = (): RtcUser => {
     if (!this.isInChannel()) return { uid: 0, isSelf: true };
+
     return this.state.users[0];
   };
 

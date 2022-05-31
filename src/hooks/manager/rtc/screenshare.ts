@@ -40,7 +40,7 @@ export class RtcScreenShareManager extends EventEmitter {
   initialize = (appId: string, logPath: string, uid: number) => {
     if (this.props.isInitialized) return;
 
-    log.info('screenshare manager intialize');
+    log.info('screenshare manager intialize with ', uid, logPath);
 
     this.engine.videoSourceInitialize(appId);
     this.engine.videoSourceSetLogFile(`${logPath}videosource.log`);
