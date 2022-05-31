@@ -36,7 +36,7 @@ const StyledScreenShareItem = styled(Stack)(({ theme }) => ({
   width: '176px',
   height: '160px',
   background: '#F2F2F2',
-  margin: '4px 4px',
+  margin: '3px 3px',
   cursor: 'pointer',
   display: 'flex',
   flexDirection: 'column',
@@ -90,8 +90,8 @@ const ScreenShareDialogItem = (props: {
     <StyledScreenShareItem
       style={{
         borderStyle: 'solid',
-        borderWidth: isSelected ? '1px' : '0px',
-        borderColor: '#1976d2',
+        borderWidth: isSelected ? '1px' : '1px',
+        borderColor: isSelected ? '#1976d2FF' : '#1976D200',
       }}
       onClick={() => onClick(index)}
     >
@@ -168,6 +168,11 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   };
 
   const onPreClose = () => {
+    setCurrentSelected(-1);
+    onClose();
+  };
+
+  const onPreOk = () => {
     if (currentSelected >= 0) {
       const source = sources[currentSelected] as {
         type: number;
@@ -179,8 +184,7 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
       });
     }
 
-    setCurrentSelected(-1);
-    onClose();
+    onPreClose();
   };
 
   return (
@@ -223,11 +227,7 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
         <Button autoFocus onClick={onPreClose}>
           Cancel
         </Button>
-        <Button
-          autoFocus
-          onClick={onPreClose}
-          disabled={currentSelected === -1}
-        >
+        <Button autoFocus onClick={onPreOk} disabled={currentSelected === -1}>
           OK
         </Button>
       </DialogActions>
