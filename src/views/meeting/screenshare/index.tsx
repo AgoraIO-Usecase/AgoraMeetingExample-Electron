@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
   Stack,
-  Tooltip,
+  Skeleton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -183,6 +183,7 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   };
 
   const onPreClose = () => {
+    setSources([]);
     setCurrentSelected(-1);
     onClose();
   };
@@ -220,6 +221,15 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
               />
             );
           })}
+          {sources.length ? (
+            <></>
+          ) : (
+            <Skeleton
+              sx={{ height: '360px', width: '100%' }}
+              animation="wave"
+              variant="rectangular"
+            />
+          )}
         </StyledScreenShareItemContainer>
       </DialogContent>
       <DialogActions>
