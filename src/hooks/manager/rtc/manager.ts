@@ -15,7 +15,6 @@ import {
   SIZE,
 } from 'agora-electron-sdk/types/Api/native_type';
 
-import { Image } from 'image-js';
 import {
   RtcConnection,
   RtcConnectionReason,
@@ -29,6 +28,7 @@ import {
   RtcDataStreamMessage,
   RtcScreenShareState,
   RtcScreenShareStateReason,
+  RtcScreenShareSource,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -317,69 +317,6 @@ export class RtcManager extends EventEmitter {
     return this.engine.stopAudioRecordingDeviceTest();
   };
 
-  getScreenList = async () => {
-    let myResolve: any;
-    const promise = new Promise((resolve, reject) => {
-      myResolve = resolve;
-    });
-    this.engine.getScreenDisplaysInfo((list) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
-      myResolve(list);
-    });
-    const list = (await promise) as {
-      image: Uint8Array;
-      displayId: {
-        width: number;
-        height: number;
-        x: number;
-        y: number;
-        id: number;
-      };
-    }[];
-    const imageListPromise = list.map((item) => readImage(item.image));
-    const imageList = await Promise.all(imageListPromise);
-    const screenInfoList = list.map(({ displayId }, index) => ({
-      name: `Display ${index + 1}`,
-      image: imageList[index],
-      displayId,
-    }));
-
-    return screenInfoList;
-  };
-
-  getWindowList = async () => {
-    let myResolve: any;
-    const promise = new Promise((resolve, reject) => {
-      myResolve = resolve;
-    });
-
-    this.engine.getScreenWindowsInfo((list) => {
-      myResolve(list);
-    });
-
-    const list = (await promise) as {
-      ownerName: string;
-      name: string;
-      windowId: number;
-      image: Uint8Array;
-    }[];
-
-    const imageListPromise = list.map((item) => readImage(item.image));
-    const imageList = await Promise.all(imageListPromise);
-
-    const windowInfoList = list.map(({ ownerName, name, windowId }, index) => {
-      return {
-        ownerName,
-        image: imageList[index],
-        windowId,
-        name,
-      };
-    });
-
-    return windowInfoList;
-  };
-
   getScreenCaptureSources = async (
     thumbSize: SIZE,
     iconSize: SIZE,
@@ -401,7 +338,7 @@ export class RtcManager extends EventEmitter {
     }[];
 
     const transformedSourceIconsPromise = originSources.map((item) => {
-      if (item.iconImage) return Image.load(item.iconImage.buffer);
+      if (item.iconImage) return readImage(item.iconImage.buffer);
 
       return new Promise((resolve, reject) => {
         resolve(undefined);
@@ -409,7 +346,7 @@ export class RtcManager extends EventEmitter {
     });
 
     const transformedSourceThumbPromise = originSources.map((item) => {
-      if (item.thumbImage) return Image.load(item.thumbImage.buffer);
+      if (item.thumbImage) return readImage(item.thumbImage.buffer);
 
       return new Promise((resolve, reject) => {
         resolve(undefined);
@@ -423,58 +360,22 @@ export class RtcManager extends EventEmitter {
       transformedSourceThumbPromise
     );
 
-    const transformedSources = originSources.map((item, index) => {
-      return {
-        ...item,
-        icon: transformedSourceIcons[index],
-        thumb: transformedSourceThumb[index],
-      };
-    });
+    const transformedSources: RtcScreenShareSource[] = [];
 
-    return transformedSources;
-  };
-
-  getScreenCaptureSourcesNew = (
-    thumbSize: SIZE,
-    iconSize: SIZE,
-    includeScreen: boolean
-  ) => {
-    const originSources = this.engine.getScreenCaptureSources(
-      thumbSize,
-      iconSize,
-      includeScreen
-    ) as {
-      type: number;
-      sourceId: number;
-      sourceName: string;
-      sourceTitle: string;
-      processPath: string;
-      primaryMonitor: boolean;
-      iconImage?: { buffer: Uint8Array; width: number; height: number };
-      thumbImage?: { buffer: Uint8Array; width: number; height: number };
-    }[];
-
-    const transformedSources = originSources.map((item, index) => {
-      const icon = item.iconImage
-        ? new Image(
-            item.iconImage.width,
-            item.iconImage.height,
-            item.iconImage.buffer
-          )
-        : undefined;
-
-      const thumb = item.thumbImage
-        ? new Image(
-            item.thumbImage.width,
-            item.thumbImage.height,
-            item.thumbImage.buffer
-          )
-        : undefined;
-      return {
-        ...item,
-        icon,
-        thumb,
-      };
+    originSources.map((item, index) => {
+      transformedSources.push({
+        id: item.sourceId,
+        title: item.sourceTitle.length ? item.sourceTitle : item.sourceName,
+        isDisplay: item.type === 1,
+        isPrimaryDisplay: item.primaryMonitor,
+        icon: transformedSourceIcons[index] as string,
+        iconWidth: item.iconImage ? item.iconImage.width : 0,
+        iconHeight: item.iconImage ? item.iconImage.height : 0,
+        thumb: transformedSourceThumb[index] as string,
+        thumbWidth: item.thumbImage ? item.thumbImage.width : 0,
+        thumbHeight: item.thumbImage ? item.thumbImage.height : 0,
+      });
+      return item;
     });
 
     return transformedSources;

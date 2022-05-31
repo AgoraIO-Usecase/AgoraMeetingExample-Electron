@@ -77,3 +77,16 @@ export enum RtcScreenShareStateReason {
   Error,
   WindowClosed,
 }
+
+export type RtcScreenShareSource = {
+  id: number;
+  title: string;
+  isDisplay: boolean;
+  isPrimaryDisplay: boolean;
+  icon?: string;
+  iconWidth: number;
+  iconHeight: number;
+  thumb: string;
+  thumbWidth: number;
+  thumbHeight: number;
+};

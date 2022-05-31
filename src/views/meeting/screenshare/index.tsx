@@ -12,8 +12,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
-import { Image } from 'image-js';
-import { useCommonManager } from '../../../hooks';
+import { ScreenShareSource, useCommonManager } from '../../../hooks';
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -77,15 +76,12 @@ const ScreenShareDialogTitle = (props: {
 };
 
 const ScreenShareDialogItem = (props: {
-  id: number;
   index: number;
   isSelected?: boolean;
-  icon?: Image | undefined;
-  thumb?: Image | undefined;
-  title?: string;
   onClick: (index: number) => void;
+  source: ScreenShareSource;
 }) => {
-  const { id, index, isSelected, icon, thumb, title, onClick } = props;
+  const { index, isSelected, onClick, source } = props;
   return (
     <StyledScreenShareItem
       style={{
@@ -95,12 +91,12 @@ const ScreenShareDialogItem = (props: {
       }}
       onClick={() => onClick(index)}
     >
-      {thumb ? (
+      {source.thumb ? (
         <img
-          width={thumb.width}
-          height={thumb.height}
-          src={thumb.toDataURL('image/png')}
-          alt={`${id}`}
+          width={source.thumbWidth}
+          height={source.thumbHeight}
+          src={source.thumb}
+          alt={`screenshare-source-${source.id}`}
           style={{
             maxWidth: '100%',
             maxHeight: '160px',
@@ -137,7 +133,7 @@ const ScreenShareDialogItem = (props: {
           variant="subtitle2"
           display="block"
         >
-          {title}
+          {source.title}
         </Typography>
       </Stack>
     </StyledScreenShareItem>
@@ -201,24 +197,11 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
       >
         <StyledScreenShareItemContainer>
           {sources.map((item, index) => {
-            const source = item as {
-              icon?: Image;
-              thumb?: Image;
-              sourceTitle: string;
-              sourceName: string;
-              sourceId: number;
-            };
-            const itemTitle = source.sourceTitle.length
-              ? source.sourceTitle
-              : source.sourceName;
             return (
               <ScreenShareDialogItem
                 key={`${index}`}
-                id={source.sourceId}
                 index={index}
-                icon={source.icon}
-                thumb={source.thumb}
-                title={itemTitle}
+                source={item}
                 isSelected={index === currentSelected}
                 onClick={onItemClicked}
               />

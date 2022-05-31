@@ -14,6 +14,7 @@ import {
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
+  ScreenShareSource,
   ScreenShareState,
   ScreenShareStateReason,
   Version,
@@ -295,16 +296,6 @@ export class CommonManager extends EventEmitter {
   setMicrophoneTest = (enable: boolean) =>
     this.rtcManager.setMicrophoneTest(enable);
 
-  getScreenList = async () => {
-    const screenList = await this.rtcManager.getScreenList();
-    return screenList;
-  };
-
-  getWindowList = async () => {
-    const windowList = await this.rtcManager.getWindowList();
-    return windowList;
-  };
-
   getScreenCaptureSources = async () => {
     const sources = await this.rtcManager.getScreenCaptureSources(
       { width: 480, height: 480 },
@@ -312,15 +303,8 @@ export class CommonManager extends EventEmitter {
       true
     );
 
-    return sources;
+    return sources as ScreenShareSource[];
   };
-
-  getScreenCaptureSourcesNew = () =>
-    this.rtcManager.getScreenCaptureSourcesNew(
-      { width: 480, height: 480 },
-      { width: 32, height: 32 },
-      true
-    );
 
   startScreenShare = (params: { windowId?: number; displayId?: number }) => {
     this.rtcManager.startScreenShare(params);
