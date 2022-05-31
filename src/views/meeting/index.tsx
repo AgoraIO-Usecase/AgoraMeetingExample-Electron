@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stack } from '@mui/material';
+import { Stack, Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import MicOffOutlinedIcon from '@mui/icons-material/MicOffOutlined';
@@ -67,33 +67,58 @@ const MeetingView = () => {
         alignItems="center"
         spacing={2}
       >
-        <IconButton className={style.toolButton} onClick={onMicrophoneClicked}>
-          {selfUser.isAudioOn ? (
-            <MicNoneOutlinedIcon color="primary" />
-          ) : (
-            <MicOffOutlinedIcon color="error" />
-          )}
-        </IconButton>
-        <IconButton className={style.toolButton} onClick={onCameraClicked}>
-          {selfUser.isCameraOn ? (
-            <VideocamOutlinedIcon color="primary" />
-          ) : (
-            <VideocamOffOutlinedIcon color="error" />
-          )}
-        </IconButton>
-        <IconButton className={style.toolButton} onClick={onScreenShareClicked}>
-          {state.screenshareState === ScreenShareState.Running ? (
-            <ScreenShareOutlinedIcon color="success" />
-          ) : (
-            <ScreenShareOutlinedIcon color="primary" />
-          )}
-        </IconButton>
-        <IconButton
-          className={style.toolButton}
-          onClick={onLeaveMeetingClicked}
+        <Tooltip
+          title={selfUser.isAudioOn ? 'Close Microphone' : 'Open Microphone'}
+          arrow
         >
-          <LocalPhoneOutlinedIcon color="error" />
-        </IconButton>
+          <IconButton
+            className={style.toolButton}
+            onClick={onMicrophoneClicked}
+          >
+            {selfUser.isAudioOn ? (
+              <MicNoneOutlinedIcon color="primary" />
+            ) : (
+              <MicOffOutlinedIcon color="error" />
+            )}
+          </IconButton>
+        </Tooltip>
+        <Tooltip
+          title={selfUser.isCameraOn ? 'TurnOff Camera' : 'TurnOn Camera'}
+          arrow
+        >
+          <IconButton className={style.toolButton} onClick={onCameraClicked}>
+            {selfUser.isCameraOn ? (
+              <VideocamOutlinedIcon color="primary" />
+            ) : (
+              <VideocamOffOutlinedIcon color="error" />
+            )}
+          </IconButton>
+        </Tooltip>
+        <Tooltip
+          title={
+            state.screenshareState ? 'Stop ScreenShare' : 'Start ScreenShare'
+          }
+          arrow
+        >
+          <IconButton
+            className={style.toolButton}
+            onClick={onScreenShareClicked}
+          >
+            {state.screenshareState === ScreenShareState.Running ? (
+              <ScreenShareOutlinedIcon color="success" />
+            ) : (
+              <ScreenShareOutlinedIcon color="primary" />
+            )}
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Leave" arrow>
+          <IconButton
+            className={style.toolButton}
+            onClick={onLeaveMeetingClicked}
+          >
+            <LocalPhoneOutlinedIcon color="error" />
+          </IconButton>
+        </Tooltip>
       </Stack>
       <ScreenShareDialog
         open={openScreenShareDialog}
