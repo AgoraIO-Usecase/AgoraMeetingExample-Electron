@@ -116,7 +116,7 @@ const ScreenShareDialogItem = (props: {
           boxSizing: 'border-box',
           width: '100%',
           height: '32px',
-          background: '#2F2B2B2B',
+          background: '#CECBCB',
           zIndex: '1000',
           padding: '0px 6px',
           position: 'absolute',

@@ -9,3 +9,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior-y: none;
 }
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 1px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(75, 70, 70, 0.795);
+  background-image: -webkit-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1),
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.1),
+    transparent 75%,
+    transparent
+  );
+}
