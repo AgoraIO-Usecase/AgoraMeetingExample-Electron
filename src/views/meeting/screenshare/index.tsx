@@ -96,7 +96,7 @@ const ScreenShareDialogItem = (props: {
           width={source.thumbWidth}
           height={source.thumbHeight}
           src={source.thumb}
-          alt={`screenshare-source-${source.id}`}
+          alt={`screenshare-thumb-${source.id}`}
           style={{
             maxWidth: '100%',
             maxHeight: '160px',
@@ -118,9 +118,25 @@ const ScreenShareDialogItem = (props: {
           position: 'absolute',
           bottom: '0px',
         }}
-        alignItems="flex-start"
-        justifyContent="center"
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-start"
+        spacing={1}
       >
+        {/* {source.icon ? (
+          <img
+            width={source.iconWidth}
+            height={source.iconHeight}
+            src={source.icon}
+            alt={`screenshare-icon-${source.id}`}
+            style={{
+              width: `${source.iconWidth}px`,
+              height: `${source.iconHeight}px`,
+            }}
+          />
+        ) : (
+          <></>
+        )} */}
         <Typography
           style={{
             width: '100%',
@@ -143,7 +159,7 @@ const ScreenShareDialogItem = (props: {
 const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   const { open, onClose } = props;
   const commonManager = useCommonManager();
-  const [sources, setSources] = useState([]);
+  const [sources, setSources] = useState<ScreenShareSource[]>([]);
   const [currentSelected, setCurrentSelected] = useState(-1);
 
   useEffect(() => {
@@ -153,7 +169,7 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
           .getScreenCaptureSources()
           .then((value) => {
             console.info('screenshare sources', value);
-            setSources(value as never[]);
+            setSources(value);
             return 0;
           })
           .catch((e) => {
@@ -173,13 +189,10 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
 
   const onPreOk = () => {
     if (currentSelected >= 0) {
-      const source = sources[currentSelected] as {
-        type: number;
-        sourceId: number;
-      };
+      const source = sources[currentSelected];
       commonManager.startScreenShare({
-        windowId: source.type === 0 ? source.sourceId : undefined,
-        displayId: source.type === 1 ? source.sourceId : undefined,
+        windowId: source.isDisplay ? undefined : source.id,
+        displayId: source.isDisplay ? source.id : undefined,
       });
     }
 
