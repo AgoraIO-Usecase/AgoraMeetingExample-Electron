@@ -124,13 +124,13 @@ export class RtcScreenShareManager extends EventEmitter {
     };
 
     let ret = 0;
-    if (displayId) {
+    if (displayId !== undefined) {
       ret = this.engine.videoSourceStartScreenCaptureByDisplayId(
         { id: displayId },
         { x: 0, y: 0, width: 0, height: 0 },
         captureParam
       );
-    } else if (windowId) {
+    } else if (windowId !== undefined) {
       ret = this.engine.videoSourceStartScreenCaptureByWindow(
         windowId,
         { x: 0, y: 0, width: 0, height: 0 },
