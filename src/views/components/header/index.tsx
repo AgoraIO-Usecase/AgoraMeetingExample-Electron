@@ -44,6 +44,7 @@ const HeaderBar = (props: HeaderBarProps) => {
           component="div"
           margin="0px 0px 0px 12px"
           whiteSpace="nowrap"
+          style={{ userSelect: 'none' }}
         >
           {`Channel: ${title}`}
         </Typography>

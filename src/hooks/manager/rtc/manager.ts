@@ -77,7 +77,7 @@ export class RtcManager extends EventEmitter {
     shareId: number;
     channelName: string;
     connection: RtcConnection;
-    users: RtcUser[];
+    users: { [key: string]: RtcUser | undefined };
     dataStreamId: number;
     dataStreamTimerId?: NodeJS.Timeout;
   } = {
@@ -87,7 +87,7 @@ export class RtcManager extends EventEmitter {
     shareId: 0,
     channelName: '',
     connection: RtcConnection.Disconnected,
-    users: [],
+    users: {},
     dataStreamId: 0,
     dataStreamTimerId: undefined,
   };
@@ -144,7 +144,7 @@ export class RtcManager extends EventEmitter {
 
   reset = () => {
     this.state.connection = RtcConnection.Disconnected;
-    this.state.users = [];
+    this.state.users = {};
   };
 
   isInitialized = () => {
@@ -520,16 +520,15 @@ export class RtcManager extends EventEmitter {
         // REMOTE_VIDEO_STATE_STOPPED(0) REMOTE_VIDEO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
-        const userIndex = this.getUserIndex(uid);
-        if (userIndex === -1 || this.state.users[userIndex].isCameraOn === isOn)
-          return;
+        const oldUsaer = this.getUser(uid);
+        if (oldUsaer && oldUsaer.isCameraOn !== isOn) {
+          log.info('remote video state changed,', uid, state, reason, isOn);
 
-        log.info('remote video state changed,', uid, state, reason, isOn);
-
-        this.updateUser({
-          uid,
-          isCameraOn: isOn,
-        });
+          this.updateUser({
+            uid,
+            isCameraOn: isOn,
+          });
+        }
       }
     );
 
@@ -544,16 +543,16 @@ export class RtcManager extends EventEmitter {
 
         // REMOTE_AUDIO_STATE_STOPPED(0) REMOTE_AUDIO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
-        const userIndex = this.getUserIndex(uid);
-        if (userIndex === -1 || this.state.users[userIndex].isAudioOn === isOn)
-          return;
 
-        log.info('remote audio state changed,', uid, state, reason, isOn);
+        const oldUsaer = this.getUser(uid);
+        if (oldUsaer && oldUsaer.isAudioOn !== isOn) {
+          log.info('remote audio state changed,', uid, state, reason, isOn);
 
-        this.updateUser({
-          uid,
-          isAudioOn: isOn,
-        });
+          this.updateUser({
+            uid,
+            isAudioOn: isOn,
+          });
+        }
       }
     );
 
@@ -661,37 +660,30 @@ export class RtcManager extends EventEmitter {
   };
 
   private getSelfUser = (): RtcUser => {
-    if (!this.isInChannel()) return { uid: 0, isSelf: true };
-
-    return this.state.users[0];
+    return this.getUser(this.state.uid) || { uid: 0, isSelf: true };
   };
 
-  private getUserIndex = (uid: number): number =>
-    this.state.users.findIndex((item) => item.uid === uid);
+  private getUser = (uid: number) => {
+    return this.state.users[uid];
+  };
 
   private addUser = (user: RtcUser) => {
-    const index = this.state.users.findIndex((item) => item.uid === user.uid);
-    if (index === -1) this.state.users.push(user);
-    else this.state.users[index] = { ...this.state.users[index], ...user };
+    this.state.users[user.uid] = { ...this.state.users[user.uid], ...user };
 
-    this.emit('userNew', user);
+    this.emit('userNew', this.state.users[user.uid]);
   };
 
   private updateUser = (user: RtcUser) => {
-    this.state.users = this.state.users.map((item) => {
-      if (item.uid === user.uid) return { ...item, ...user };
-      return item;
-    });
-    this.emit('userUpdate', user);
+    this.state.users[user.uid] = { ...this.state.users[user.uid], ...user };
+
+    this.emit('userUpdate', this.state.users[user.uid]);
   };
 
   private removeUser = (uid: number) => {
-    const newUsers = this.state.users.filter((item) => item.uid !== uid);
+    const oldUser = this.getUser(uid);
+    if (oldUser === undefined) return;
 
-    // no user deleted
-    if (this.state.users.length === newUsers.length) return;
-
-    this.state.users = newUsers;
+    this.state.users[uid] = undefined;
 
     this.emit('userRemove', uid);
   };
@@ -701,13 +693,13 @@ export class RtcManager extends EventEmitter {
       const data = JSON.parse(msg) as RtcDataStreamMessage;
       const { info, control } = data;
 
-      const userIndex = this.getUserIndex(info.uid);
-      if (userIndex === -1) return;
+      const oldUser = this.getUser(info.uid);
+      if (oldUser === undefined) return;
 
       if (
-        this.state.users[userIndex].nickname !== info.nickname ||
-        this.state.users[userIndex].parentId !== info.parentId ||
-        this.state.users[userIndex].shareId !== info.shareId
+        oldUser.nickname !== info.nickname ||
+        oldUser.parentId !== info.parentId ||
+        oldUser.shareId !== info.shareId
       )
         this.updateUser({
           uid: info.uid,
@@ -719,11 +711,11 @@ export class RtcManager extends EventEmitter {
       // update share user
       if (info.shareId === undefined || info.shareId === 0) return;
 
-      const shareUserIndex = this.getUserIndex(info.shareId);
-      if (shareUserIndex === -1) return;
+      const shareUser = this.getUser(info.shareId);
       if (
-        this.state.users[shareUserIndex].nickname !== info.nickname ||
-        this.state.users[shareUserIndex].parentId !== info.uid
+        shareUser &&
+        (shareUser.nickname !== info.nickname ||
+          shareUser.parentId !== info.uid)
       )
         this.updateUser({
           uid: info.shareId,
