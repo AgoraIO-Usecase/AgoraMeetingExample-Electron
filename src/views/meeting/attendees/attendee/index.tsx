@@ -37,6 +37,10 @@ const VideoBox = (props: VideoBoxProps) => {
     // videobox in main video container may create before in attendee list
     const isAppend = otherDom !== null;
 
+    if (isMain && !isSelf && uid !== undefined) {
+      commonManager.setRemoteVideoStreamType(uid, true);
+    }
+
     if (isSelf) {
       commonManager.setupLocalVideoRenderer(dom!, isMain || false, isAppend);
     } else {
@@ -47,6 +51,12 @@ const VideoBox = (props: VideoBoxProps) => {
         isAppend
       );
     }
+
+    return () => {
+      if (isMain && !isSelf && uid !== undefined) {
+        commonManager.setRemoteVideoStreamType(uid, false);
+      }
+    };
   }, [uid]);
 
   return <div className={style.videobox} id={domId} />;

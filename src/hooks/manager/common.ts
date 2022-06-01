@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 
 import log from 'electron-log';
 import { remote } from 'electron';
-import { RtcManager, RtcVideoEncoderConfigurationType } from './rtc';
+import { RtcManager, RtcVideoEncoderConfigurationType, RtcVideoStreamType } from './rtc';
 import { MeetingManager } from './meeting';
 import { AttendeeManager } from './attendee';
 import {
@@ -312,5 +312,12 @@ export class CommonManager extends EventEmitter {
 
   stopScreenShare = () => {
     this.rtcManager.stopScreenShare();
+  };
+
+  setRemoteVideoStreamType = (uid: number, isHigh: boolean) => {
+    this.rtcManager.setRemoteVideoStreamType(
+      uid,
+      isHigh ? RtcVideoStreamType.High : RtcVideoStreamType.Low
+    );
   };
 }

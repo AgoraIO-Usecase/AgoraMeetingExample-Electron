@@ -198,7 +198,7 @@ export class RtcScreenShareManager extends EventEmitter {
     });
 
     this.engine.on('videoSourceLocalVideoStats', (stats) => {
-      log.info('screenshare manager on videoSourceLocalVideoStats', stats);
+      // log.info('screenshare manager on videoSourceLocalVideoStats', stats);
     });
 
     this.engine.on('videoSourceRequestNewToken', () => {

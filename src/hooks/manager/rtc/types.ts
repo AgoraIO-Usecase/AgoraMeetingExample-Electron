@@ -90,3 +90,8 @@ export type RtcScreenShareSource = {
   thumbWidth: number;
   thumbHeight: number;
 };
+
+export enum RtcVideoStreamType {
+  Low,
+  High,
+}

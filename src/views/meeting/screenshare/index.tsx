@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
   Stack,
-  Skeleton
+  Skeleton,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';

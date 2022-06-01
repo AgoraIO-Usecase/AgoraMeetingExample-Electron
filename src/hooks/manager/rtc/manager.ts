@@ -29,6 +29,7 @@ import {
   RtcScreenShareState,
   RtcScreenShareStateReason,
   RtcScreenShareSource,
+  RtcVideoStreamType,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -392,6 +393,18 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.stop();
   };
 
+  setRemoteVideoStreamType = (uid: number, streamType: RtcVideoStreamType) => {
+    log.info(
+      'rtc manager set remote video stream type',
+      uid,
+      streamType === RtcVideoStreamType.High ? 'High' : 'Low'
+    );
+    this.engine.setRemoteVideoStreamType(
+      uid,
+      streamType === RtcVideoStreamType.High ? 0 : 1
+    );
+  };
+
   private registerEngineEvents = () => {
     this.engine.on('joinedChannel', (channel, uid, elapsed) => {
       log.info(
@@ -413,7 +426,17 @@ export class RtcManager extends EventEmitter {
 
     this.engine.on('userJoined', (uid) => {
       log.info(`rtc manager on userJoined ---- ${uid}`);
-      if (uid === this.state.shareId) return;
+      if (uid === this.state.shareId) {
+        // un subscribe self screenshare stream
+        // no need to do in electron sdk, already unscribed
+        // this.engine.muteRemoteAudioStream(uid, true);
+        // this.engine.muteRemoteVideoStream(uid, true);
+        return;
+      }
+
+      // we should set remote video stream type to low for sdk
+      // subscribe high stream by default
+      this.setRemoteVideoStreamType(uid, RtcVideoStreamType.Low);
 
       this.addUser({
         uid,
