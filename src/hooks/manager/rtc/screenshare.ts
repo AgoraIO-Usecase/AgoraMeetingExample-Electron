@@ -115,7 +115,7 @@ export class RtcScreenShareManager extends EventEmitter {
     const captureParam = {
       width: 0,
       height: 0,
-      bitrate: 2000,
+      bitrate: 1024,
       frameRate: 5,
       captureMouseCursor: true,
       windowFocus: false,
@@ -126,7 +126,7 @@ export class RtcScreenShareManager extends EventEmitter {
     let ret = 0;
     if (displayId) {
       ret = this.engine.videoSourceStartScreenCaptureByDisplayId(
-        { id: displayId, x: 0, y: 0, width: 0, height: 0 },
+        { id: displayId },
         { x: 0, y: 0, width: 0, height: 0 },
         captureParam
       );

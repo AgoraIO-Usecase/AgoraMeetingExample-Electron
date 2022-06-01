@@ -609,6 +609,11 @@ export class RtcManager extends EventEmitter {
     this.engine.setClientRole(1);
     this.engine.enableAudio();
     this.engine.enableVideo();
+
+    // set video encoder configuration for low stream
+    this.engine.setParameters(
+      '{"che.video.lowBitRateStreamParameter":{"width":480,"height":360,"frameRate":10,"bitRate":200}}'
+    );
   };
 
   private initializeScreenShareManager = (appId: string, logPath: string) => {

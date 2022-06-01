@@ -29,7 +29,7 @@ const MainView = () => {
   const { state } = useStore();
   const commonManager = useCommonManager();
   const [joinParams, setJoinParams] = useState<MeetingParams>({
-    channelName: 'HPL123',
+    channelName: '',
     nickname: getNickname(),
     isCameraOn: getUseCamera(),
     isAudioOn: getUseMicrophone(),
