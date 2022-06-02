@@ -15,6 +15,7 @@ import { app, BrowserWindow, shell, globalShortcut } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import './utils/logtransports';
+import './utils/crashreport';
 
 let mainWindow: BrowserWindow | null = null;
 

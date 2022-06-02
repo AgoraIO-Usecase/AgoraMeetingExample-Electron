@@ -3,7 +3,11 @@ import { EventEmitter } from 'events';
 
 import log from 'electron-log';
 import { remote } from 'electron';
-import { RtcManager, RtcVideoEncoderConfigurationType, RtcVideoStreamType } from './rtc';
+import {
+  RtcManager,
+  RtcVideoEncoderConfigurationType,
+  RtcVideoStreamType,
+} from './rtc';
 import { MeetingManager } from './meeting';
 import { AttendeeManager } from './attendee';
 import {
