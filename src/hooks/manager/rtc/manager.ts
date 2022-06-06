@@ -92,7 +92,7 @@ export class RtcManager extends EventEmitter {
     users: {},
     dataStreamId: 0,
     dataStreamTimerId: undefined,
-    clientRole: RtcClientRole.Audience,
+    clientRole: RtcClientRole.Host,
   };
 
   constructor() {
@@ -178,9 +178,11 @@ export class RtcManager extends EventEmitter {
     // in case that enable local may hear a pause in the remote audio playback
     // https://docs.agora.io/cn/Video/API%20Reference/electron/classes/agorartcengine.html#enablelocalaudio
     this.engine.enableLocalAudio(true);
-    this.engine.muteLocalAudioStream(!isAudioOn);
 
     this.engine.joinChannel('', channelName, '', this.state.uid);
+
+    // coz host will auto publish audio stream
+    this.engine.muteLocalAudioStream(!isAudioOn);
 
     this.setConnection(RtcConnection.Connecting);
     this.addUser({
@@ -510,12 +512,12 @@ export class RtcManager extends EventEmitter {
 
         log.info('local video state changed,', localVideoState, err, isOn);
 
-        // if (isOn !== this.getSelfUser().isCameraOn) {
-        //   this.updateUser({
-        //     ...this.getSelfUser(),
-        //     isCameraOn: isOn,
-        //   });
-        // }
+        if (isOn !== this.getSelfUser().isCameraOn) {
+          this.updateUser({
+            ...this.getSelfUser(),
+            isCameraOn: isOn,
+          });
+        }
       }
     );
 
@@ -802,7 +804,7 @@ export class RtcManager extends EventEmitter {
 
     this.state.dataStreamTimerId = setInterval(() => {
       this.sendDataStreamMessage();
-    }, 1000);
+    }, 2000);
   };
 
   private stopDataStreamSender = () => {
@@ -813,16 +815,19 @@ export class RtcManager extends EventEmitter {
   };
 
   private autoChangeClientRole = () => {
-    const self = this.getSelfUser();
-    let newClientRole = RtcClientRole.Audience;
-    if (self.isAudioOn || self.isCameraOn) newClientRole = RtcClientRole.Host;
-    if (newClientRole !== this.state.clientRole) {
-      this.engine.setClientRole(newClientRole as number);
-      this.state.clientRole = newClientRole;
-    }
-
-    if (newClientRole === RtcClientRole.Host) {
-      if (!self.isAudioOn) this.muteAudio(true);
-    }
+    // We need to use rtc user join event to manager users
+    // coz there is no server for now and join channel as
+    // a audience will not trigger userJoin event.
+    //
+    // const self = this.getSelfUser();
+    // let newClientRole = RtcClientRole.Audience;
+    // if (self.isAudioOn || self.isCameraOn) newClientRole = RtcClientRole.Host;
+    // if (newClientRole !== this.state.clientRole) {
+    //   this.engine.setClientRole(newClientRole as number);
+    //   this.state.clientRole = newClientRole;
+    // }
+    // if (newClientRole === RtcClientRole.Host) {
+    //   if (!self.isAudioOn) this.muteAudio(true);
+    // }
   };
 }
