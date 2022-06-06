@@ -22,6 +22,7 @@ import {
   useCommonManager,
   useStore,
 } from '../../hooks';
+import { exploreToFile } from '../../utils/resource';
 
 const MainView = () => {
   const style = useStyle();
@@ -37,6 +38,10 @@ const MainView = () => {
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNicknameInvalid, setNicknameInvalid] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    exploreToFile('./');
+  }, []);
 
   useEffect(() => {
     if (state.connection === MeetingConnection.Connecting && loading !== true) {

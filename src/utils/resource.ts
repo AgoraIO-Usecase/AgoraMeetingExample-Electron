@@ -1,4 +1,5 @@
 import path from 'path';
+import { shell } from 'electron';
 
 export const getResourcePath = (filePath = './') => {
   if (process.env.NODE_ENV === 'development') {
@@ -6,5 +7,8 @@ export const getResourcePath = (filePath = './') => {
   }
   return path.resolve(`${process.resourcesPath}/extraResources`, filePath);
 };
+
+export const exploreToFile = (filePath: string) =>
+  shell.showItemInFolder(filePath);
 
 export default {};
