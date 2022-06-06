@@ -30,6 +30,7 @@ import {
   RtcScreenShareStateReason,
   RtcScreenShareSource,
   RtcVideoStreamType,
+  RtcClientRole,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -80,6 +81,7 @@ export class RtcManager extends EventEmitter {
     users: { [key: string]: RtcUser | undefined };
     dataStreamId: number;
     dataStreamTimerId?: NodeJS.Timeout;
+    clientRole: RtcClientRole;
   } = {
     isInitialized: false,
 
@@ -90,6 +92,7 @@ export class RtcManager extends EventEmitter {
     users: {},
     dataStreamId: 0,
     dataStreamTimerId: undefined,
+    clientRole: RtcClientRole.Audience,
   };
 
   constructor() {
@@ -171,7 +174,11 @@ export class RtcManager extends EventEmitter {
     this.engine.enableAudioVolumeIndication(200, 3, false);
     this.engine.enableDualStreamMode(true);
     this.engine.enableLocalVideo(isCameraOn);
-    this.engine.enableLocalAudio(isAudioOn);
+
+    // in case that enable local may hear a pause in the remote audio playback
+    // https://docs.agora.io/cn/Video/API%20Reference/electron/classes/agorartcengine.html#enablelocalaudio
+    this.engine.enableLocalAudio(true);
+    this.engine.muteLocalAudioStream(!isAudioOn);
 
     this.engine.joinChannel('', channelName, '', this.state.uid);
 
@@ -202,12 +209,26 @@ export class RtcManager extends EventEmitter {
 
   enableAudio = (enable: boolean) => {
     log.info('rtc manager enable audio', enable);
-    this.engine.enableLocalAudio(enable);
+    this.engine.muteLocalAudioStream(!enable);
+
+    this.updateUser({
+      ...this.getSelfUser(),
+      isAudioOn: enable,
+    });
+
+    this.autoChangeClientRole();
   };
 
   enableVideo = (enable: boolean) => {
     log.info('rtc manager enable video', enable);
     this.engine.enableLocalVideo(enable);
+
+    this.updateUser({
+      ...this.getSelfUser(),
+      isCameraOn: enable,
+    });
+
+    this.autoChangeClientRole();
   };
 
   muteAudio = (mute: boolean) => {
@@ -455,7 +476,13 @@ export class RtcManager extends EventEmitter {
     });
 
     this.engine.on('userOffline', (uid, reason) => {
-      if (this.state.shareId === uid) return;
+      // do not remove user when uid is self share id or
+      // reason is remote become audience
+      if (
+        this.state.shareId === uid ||
+        reason === 2 /* USER_OFFLINE_BECOME_AUDIENCE */
+      )
+        return;
 
       log.info(`rtc manager on userOffline ---- ${uid}  reason: ${reason}`);
       this.removeUser(uid);
@@ -483,11 +510,12 @@ export class RtcManager extends EventEmitter {
 
         log.info('local video state changed,', localVideoState, err, isOn);
 
-        if (isOn !== this.getSelfUser().isCameraOn)
-          this.updateUser({
-            ...this.getSelfUser(),
-            isCameraOn: isOn,
-          });
+        // if (isOn !== this.getSelfUser().isCameraOn) {
+        //   this.updateUser({
+        //     ...this.getSelfUser(),
+        //     isCameraOn: isOn,
+        //   });
+        // }
       }
     );
 
@@ -500,11 +528,11 @@ export class RtcManager extends EventEmitter {
 
         log.info('local audio state changed,', state, err, isOn);
 
-        if (isOn !== this.getSelfUser().isAudioOn)
-          this.updateUser({
-            ...this.getSelfUser(),
-            isAudioOn: isOn,
-          });
+        // if (isOn !== this.getSelfUser().isAudioOn)
+        //   this.updateUser({
+        //     ...this.getSelfUser(),
+        //     isAudioOn: isOn,
+        //   });
       }
     );
 
@@ -594,6 +622,28 @@ export class RtcManager extends EventEmitter {
     this.engine.on('streamMessage', (uid, streamId, msg, len) => {
       this.onDataStreamMessage(msg);
     });
+
+    this.engine.on('clientRoleChanged', (oldRole, newRole) => {
+      log.info(
+        `rtc manager on client role changed from ${oldRole} to ${newRole}`
+      );
+    });
+
+    this.engine.on('clientRoleChangeFailed', (reason, role) => {
+      log.info(
+        `rtc manager on client role changed failed reason ${reason} current role ${role}`
+      );
+
+      // in case that set role as host failed
+      if (this.state.clientRole === RtcClientRole.Host && role === 2) {
+        this.enableAudio(false);
+        this.enableVideo(false);
+
+        // no need to change client role directly here.
+        // Will change client role after enableAudio and enableVideo
+        // in autoChangeClientRole
+      }
+    });
   };
 
   private generateRtcUid = () => {
@@ -606,7 +656,7 @@ export class RtcManager extends EventEmitter {
 
   private preConfigEngine = () => {
     this.engine.setChannelProfile(1);
-    this.engine.setClientRole(1);
+    this.engine.setClientRole(this.state.clientRole as number);
     this.engine.enableAudio();
     this.engine.enableVideo();
 
@@ -760,5 +810,19 @@ export class RtcManager extends EventEmitter {
       clearInterval(this.state.dataStreamTimerId);
 
     this.state.dataStreamTimerId = undefined;
+  };
+
+  private autoChangeClientRole = () => {
+    const self = this.getSelfUser();
+    let newClientRole = RtcClientRole.Audience;
+    if (self.isAudioOn || self.isCameraOn) newClientRole = RtcClientRole.Host;
+    if (newClientRole !== this.state.clientRole) {
+      this.engine.setClientRole(newClientRole as number);
+      this.state.clientRole = newClientRole;
+    }
+
+    if (newClientRole === RtcClientRole.Host) {
+      if (!self.isAudioOn) this.muteAudio(true);
+    }
   };
 }

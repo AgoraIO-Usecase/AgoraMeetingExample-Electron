@@ -111,12 +111,11 @@ const MainView = () => {
         <div>
           <TextField
             id="channelname"
-            defaultValue={joinParams.channelName}
             placeholder="input your channel name"
             error={isChannelNameInvalid}
             helperText={isChannelNameInvalid ? '*invalid channel name' : ''}
             value={joinParams.channelName}
-            inputProps={{ maxlength: 18 }}
+            inputProps={{ maxLength: 18 }}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChannelNameChanged(e.target.value)
             }
@@ -129,7 +128,7 @@ const MainView = () => {
             placeholder="input your nickname"
             error={isNicknameInvalid}
             helperText={isNicknameInvalid ? '*invalid nickname' : ''}
-            inputProps={{ maxlength: 12 }}
+            inputProps={{ maxLength: 12 }}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onNicknameChanged(e.target.value)
             }

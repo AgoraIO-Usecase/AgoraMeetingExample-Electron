@@ -95,3 +95,8 @@ export enum RtcVideoStreamType {
   Low,
   High,
 }
+
+export enum RtcClientRole {
+  Host = 1,
+  Audience = 2,
+}
