@@ -22,7 +22,6 @@ import {
   useCommonManager,
   useStore,
 } from '../../hooks';
-import { exploreToFile } from '../../utils/resource';
 
 const MainView = () => {
   const style = useStyle();
@@ -38,10 +37,6 @@ const MainView = () => {
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNicknameInvalid, setNicknameInvalid] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    exploreToFile('./');
-  }, []);
 
   useEffect(() => {
     if (state.connection === MeetingConnection.Connecting && loading !== true) {
@@ -60,15 +55,19 @@ const MainView = () => {
   }, [state.connection]);
 
   const onChannelNameChanged = (value: string) => {
-    setJoinParams({ ...joinParams, channelName: value });
+    const tmpValue = value.replace(/[^\da-zA-Z]/g, '').toUpperCase();
 
-    if (value !== '' && isChannelNameInvalid) setChannelNameInvalid(false);
+    setJoinParams({ ...joinParams, channelName: tmpValue });
+
+    if (tmpValue !== '' && isChannelNameInvalid) setChannelNameInvalid(false);
   };
 
   const onNicknameChanged = (value: string) => {
-    setJoinParams({ ...joinParams, nickname: value });
+    const tmpValue = value.replace(/[^\da-zA-Z]/g, '');
 
-    if (value !== '' && isNicknameInvalid) setNicknameInvalid(false);
+    setJoinParams({ ...joinParams, nickname: tmpValue });
+
+    if (tmpValue !== '' && isNicknameInvalid) setNicknameInvalid(false);
   };
 
   const onSubmit = () => {
@@ -116,6 +115,8 @@ const MainView = () => {
             placeholder="input your channel name"
             error={isChannelNameInvalid}
             helperText={isChannelNameInvalid ? '*invalid channel name' : ''}
+            value={joinParams.channelName}
+            inputProps={{ maxlength: 18 }}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onChannelNameChanged(e.target.value)
             }
@@ -128,6 +129,7 @@ const MainView = () => {
             placeholder="input your nickname"
             error={isNicknameInvalid}
             helperText={isNicknameInvalid ? '*invalid nickname' : ''}
+            inputProps={{ maxlength: 12 }}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               onNicknameChanged(e.target.value)
             }
