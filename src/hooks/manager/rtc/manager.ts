@@ -653,7 +653,7 @@ export class RtcManager extends EventEmitter {
   };
 
   private generateRtcScreenShareUid = () => {
-    return Number(`${new Date().getTime()}`.slice(3));
+    return Number(`${new Date().getTime()}`.slice(5));
   };
 
   private preConfigEngine = () => {

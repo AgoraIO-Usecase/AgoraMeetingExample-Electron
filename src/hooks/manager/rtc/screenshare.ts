@@ -89,6 +89,11 @@ export class RtcScreenShareManager extends EventEmitter {
     // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
     // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
     this.engine.videoSourceSetVideoProfile(43, false);
+
+    log.info(
+      `screenshare manager join ${channelName} with uid ${this.props.uid}`
+    );
+
     this.engine.videoSourceJoin('', channelName, '', this.props.uid, {
       autoSubscribeAudio: false,
       autoSubscribeVideo: false,
