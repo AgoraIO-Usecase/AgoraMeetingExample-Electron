@@ -11,9 +11,9 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 
 import HeaderBar from '../components/header';
 import AttendeeView from './attendees';
+import ScreenShareDialog from './screenshare';
 import { ScreenShareState, useCommonManager, useStore } from '../../hooks';
 import useStyle from './style';
-import ScreenShareDialog from './screenshare';
 
 const MeetingView = () => {
   const navigate = useNavigate();

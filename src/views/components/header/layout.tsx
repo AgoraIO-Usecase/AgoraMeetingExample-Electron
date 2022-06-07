@@ -3,6 +3,8 @@ import { Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import Check from '@mui/icons-material/Check';
 import { AttendeeLayoutType, StoreActionType, useStore } from '../../../hooks';
 
+import log from 'electron-log';
+
 export type LayoutMenuProps = {
   id: string;
   anchor: Element | null;
@@ -46,6 +48,8 @@ const LayoutMenu = (props: LayoutMenuProps) => {
   const { state, dispatch } = useStore();
 
   const onLayoutTypeSelected = (type: AttendeeLayoutType) => {
+    log.warn(`ui attendee layout changed to ${type}`);
+
     dispatch({
       type: StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT,
       payload: type,

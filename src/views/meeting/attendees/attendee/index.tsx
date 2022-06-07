@@ -14,12 +14,13 @@ import { generateVideoboxId } from '../utils';
 export declare type VideoBoxProps = {
   uid?: number | undefined;
   isSelf: boolean;
-  isMain?: boolean;
+  isMain: boolean;
+  isFit: boolean;
 };
 
 const VideoBox = (props: VideoBoxProps) => {
   const style = useStyle();
-  const { uid, isSelf, isMain } = props;
+  const { uid, isSelf, isMain, isFit } = props;
   const commonManager = useCommonManager();
   const domId = useMemo(
     () => generateVideoboxId(uid || 0, isMain || false),
@@ -42,14 +43,9 @@ const VideoBox = (props: VideoBoxProps) => {
     }
 
     if (isSelf) {
-      commonManager.setupLocalVideoRenderer(dom!, isMain || false, isAppend);
+      commonManager.setupLocalVideoRenderer(dom!, isFit, isAppend);
     } else {
-      commonManager.setupRemoteVideoRenderer(
-        uid!,
-        dom!,
-        isMain || false,
-        isAppend
-      );
+      commonManager.setupRemoteVideoRenderer(uid!, dom!, isFit, isAppend);
     }
 
     return () => {
@@ -64,12 +60,13 @@ const VideoBox = (props: VideoBoxProps) => {
 
 export type AttendeeItemProps = {
   isMain?: boolean;
+  isFit?: boolean;
   attendee: AttendeeInfo;
 };
 
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
-  const { isMain, attendee } = props;
+  const { isMain, isFit, attendee } = props;
   const { uid, nickname, isSelf, isCameraOn, isAudioOn, parentId } = attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
@@ -123,7 +120,12 @@ const AttendeeItem = (props: AttendeeItemProps) => {
           )}
         </Stack>
         {isCameraOn ? (
-          <VideoBox uid={uid} isSelf={isSelf || false} isMain={isMain} />
+          <VideoBox
+            uid={uid}
+            isSelf={isSelf || false}
+            isMain={isMain || false}
+            isFit={isFit || false}
+          />
         ) : (
           <></>
         )}
