@@ -1,27 +1,41 @@
-import React, { useCallback, useState } from 'react';
-import { Stack } from '@mui/material';
+import React, { useCallback, useState, useMemo } from 'react';
+import { Stack, Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 
+import LayoutMenu from './layout';
 import SettingView from '../../setting';
 
 export declare type HeaderBarProps = {
   fixed: boolean;
   title?: string;
   layouts?: boolean;
-  onLayoutClicked?: () => void;
 };
 
 const HeaderBar = (props: HeaderBarProps) => {
-  const { fixed, title, layouts, onLayoutClicked } = props;
+  const { fixed, title, layouts } = props;
   const [showSetting, setShowSetting] = useState(false);
+  const [layoutMenuAnchor, setLayoutMenuAnchor] = useState<Element | null>(
+    null
+  );
+  const showLayoutMenu = useMemo(
+    () => Boolean(layoutMenuAnchor),
+    [layoutMenuAnchor]
+  );
 
   const onSettingClicked = useCallback(() => {
     setShowSetting(true);
   }, []);
+
+  const onLayoutClicked = useCallback(
+    (evt: React.MouseEvent<HTMLButtonElement>) => {
+      setLayoutMenuAnchor(evt.currentTarget);
+    },
+    []
+  );
 
   return (
     <Stack
@@ -53,15 +67,34 @@ const HeaderBar = (props: HeaderBarProps) => {
       )}
       <div style={{ width: '100%', height: '10px' }} />
       {layouts ? (
-        <IconButton onClick={onLayoutClicked}>
-          <GridViewOutlinedIcon color="primary" />
-        </IconButton>
+        <>
+          <Tooltip arrow title="AttendeeView Layout">
+            <IconButton
+              id="layout-button"
+              aria-controls={showLayoutMenu ? 'layout-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={showLayoutMenu ? 'true' : undefined}
+              onClick={onLayoutClicked}
+            >
+              <GridViewOutlinedIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+          <LayoutMenu
+            id="layout-menu"
+            anchor={layoutMenuAnchor}
+            anchorId="layout-button"
+            open={showLayoutMenu}
+            onClose={() => setLayoutMenuAnchor(null)}
+          />
+        </>
       ) : (
         <></>
       )}
-      <IconButton onClick={onSettingClicked}>
-        <SettingsOutlinedIcon color="primary" />
-      </IconButton>
+      <Tooltip arrow title="Setting">
+        <IconButton onClick={onSettingClicked}>
+          <SettingsOutlinedIcon color="primary" />
+        </IconButton>
+      </Tooltip>
       <SettingView
         open={showSetting}
         onClose={() => {

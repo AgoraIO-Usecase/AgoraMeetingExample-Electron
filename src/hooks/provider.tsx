@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useMemo, useReducer } from 'react';
 import {
+  AttendeeLayoutType,
   StoreActionPayloadDevice,
   StoreActionType,
   StoreContext,
@@ -18,6 +19,7 @@ export const RootProvider: FC = (props) => {
     connection: MeetingConnection.Disconnected,
     attendees: [],
     screenshareState: ScreenShareState.Idle,
+    attendeeLayout: AttendeeLayoutType.Speaker,
   });
   const commonManager = useMemo(() => new CommonManager(), []);
 

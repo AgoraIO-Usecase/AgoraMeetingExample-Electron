@@ -6,12 +6,19 @@ import {
   ScreenShareState,
 } from '../manager';
 
+export enum AttendeeLayoutType {
+  Speaker,
+  Grid9,
+  Grid25,
+}
+
 export enum StoreActionType {
   ACTION_TYPE_CONNECTION,
   ACTION_TYPE_DEVICE,
   ACTION_TYPE_ATTENDEE_NEW,
   ACTION_TYPE_ATTENDEE_UPDATE,
   ACTION_TYPE_ATTENDEE_REMOVE,
+  ACTION_TYPE_ATTENDEE_LAYOUT,
   ACTION_TYPE_SCREENSHARE_STATE,
 }
 
@@ -26,6 +33,7 @@ export type StoreState = {
   speakers?: DeviceInfo[];
   microphones?: DeviceInfo[];
 
+  attendeeLayout: AttendeeLayoutType;
   screenshareState: ScreenShareState;
 };
 
@@ -45,7 +53,8 @@ export type StoreActionPayload =
   | MeetingConnection
   | StoreActionPayloadAttendee
   | StoreActionPayloadDevice
-  | ScreenShareState;
+  | ScreenShareState
+  | AttendeeLayoutType;
 
 export type StoreAction = {
   type: StoreActionType;

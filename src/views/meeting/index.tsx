@@ -57,7 +57,7 @@ const MeetingView = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <HeaderBar title={commonManager.getChannelName()} fixed={false} />
+      <HeaderBar title={commonManager.getChannelName()} fixed={false} layouts />
       <AttendeeView />
       <Stack
         className={style.toolBar}
@@ -67,10 +67,7 @@ const MeetingView = () => {
         alignItems="center"
         spacing={2}
       >
-        <Tooltip
-          title={selfUser.isAudioOn ? 'Close Microphone' : 'Open Microphone'}
-          arrow
-        >
+        <Tooltip title={selfUser.isAudioOn ? 'Mute' : 'Unmute'} arrow>
           <IconButton
             className={style.toolButton}
             onClick={onMicrophoneClicked}

@@ -6,6 +6,7 @@ import {
   StoreState,
   StoreActionPayloadAttendee,
   StoreActionPayloadDevice,
+  AttendeeLayoutType,
 } from './types';
 
 const onMeetingConnection = (
@@ -110,6 +111,12 @@ export const StoreReducer = (
         state,
         action.payload as StoreActionPayloadAttendee
       );
+      break;
+    case StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT:
+      newState = {
+        ...state,
+        attendeeLayout: action.payload as AttendeeLayoutType,
+      };
       break;
     case StoreActionType.ACTION_TYPE_SCREENSHARE_STATE:
       newState = {
