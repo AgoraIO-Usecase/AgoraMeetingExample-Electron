@@ -51,6 +51,10 @@ export interface CommonManager {
   ): this;
   on(evt: 'attendeeRemove', cb: (position: number) => void): this;
   on(
+    evt: 'attendeeReplace',
+    cb: (oldPosition: number, newPosition: number) => void
+  ): this;
+  on(
     evt: 'volumeIndications',
     cb: (indications: VolumeIndication[]) => void
   ): this;
@@ -127,6 +131,9 @@ export class CommonManager extends EventEmitter {
     });
     this.attendeeManager.on('remove', (position) => {
       this.emit('attendeeRemove', position);
+    });
+    this.attendeeManager.on('replace', (oldPosition, newPosition) => {
+      this.emit('attendeeReplace', oldPosition, newPosition);
     });
     this.attendeeManager.initialize();
   };

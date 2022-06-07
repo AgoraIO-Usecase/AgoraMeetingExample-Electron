@@ -71,6 +71,15 @@ export const RootProvider: FC = (props) => {
         },
       });
     });
+    commonManager.on('attendeeReplace', (oldPosition, newPosition) => {
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_ATTENDEE_REPLACE,
+        payload: {
+          oldPosition,
+          newPosition,
+        },
+      });
+    });
     commonManager.on('screenshareState', (screenshareState, reason) => {
       dispatch({
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import log from 'electron-log';
-import { RtcManager, RtcUser } from './rtc';
+import { RtcManager, RtcUser, RtcUserUpdateReason } from './rtc';
 import { AttendeeInfo } from './types';
 
 export interface AttendeeManager {
@@ -10,6 +10,10 @@ export interface AttendeeManager {
     cb: (position: number, attendee: AttendeeInfo) => void
   ): this;
   on(evt: 'remove', cb: (position: number) => void): this;
+  on(
+    evt: 'replace',
+    cb: (oldPosition: number, newPosition: number) => void
+  ): this;
 }
 
 export class AttendeeManager extends EventEmitter {
@@ -75,8 +79,8 @@ export class AttendeeManager extends EventEmitter {
     }
   };
 
-  private onRtcUserUpdate = (user: RtcUser) => {
-    log.info('attendee manager on onRtcUserUpdate', user);
+  private onRtcUserUpdate = (user: RtcUser, reason: RtcUserUpdateReason) => {
+    log.info('attendee manager on onRtcUserUpdate', user, reason);
 
     const index = this.state.attendees.findIndex(
       (item) => item.uid === user.uid
@@ -85,8 +89,36 @@ export class AttendeeManager extends EventEmitter {
     if (index === -1) return;
 
     const attendee = { ...this.state.attendees[index], ...user };
-    this.state.attendees[index] = attendee;
-    this.emit('update', index, attendee);
+    if (reason === RtcUserUpdateReason.Info || index === 0 || index === 1) {
+      this.state.attendees[index] = attendee;
+      this.emit('update', index, attendee);
+    } else {
+      let newIndex = index;
+      for (let i = 1; i < this.state.attendees.length; i += 1) {
+        if (
+          this.getAttendeePriority(attendee) <
+          this.getAttendeePriority(this.state.attendees[i])
+        ) {
+          newIndex = i;
+          break;
+        }
+      }
+
+      if (newIndex === index) {
+        this.state.attendees[index] = attendee;
+        this.emit('update', index, attendee);
+      }
+
+      // eslint-disable-next-line prefer-destructuring
+      this.state.attendees[index] = this.state.attendees.splice(
+        newIndex,
+        1,
+        attendee
+      )[0];
+
+      this.emit('update', index, attendee);
+      this.emit('replace', index, newIndex);
+    }
   };
 
   private onRtcUserRemove = (uid: number) => {
@@ -108,5 +140,16 @@ export class AttendeeManager extends EventEmitter {
     this.rtcManager.on('userNew', this.onRtcUserNew);
     this.rtcManager.on('userUpdate', this.onRtcUserUpdate);
     this.rtcManager.on('userRemove', this.onRtcUserRemove);
+  };
+
+  private getAttendeePriority = (attendee: AttendeeInfo) => {
+    const { isSelf, isAudioOn, isCameraOn } = attendee;
+    if (isSelf) return -9999;
+
+    let priority = 0;
+    if (isAudioOn) priority -= 1;
+    if (isCameraOn) priority -= 2;
+
+    return priority;
   };
 }

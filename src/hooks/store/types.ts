@@ -18,6 +18,7 @@ export enum StoreActionType {
   ACTION_TYPE_ATTENDEE_NEW,
   ACTION_TYPE_ATTENDEE_UPDATE,
   ACTION_TYPE_ATTENDEE_REMOVE,
+  ACTION_TYPE_ATTENDEE_REPLACE,
   ACTION_TYPE_ATTENDEE_LAYOUT,
   ACTION_TYPE_SCREENSHARE_STATE,
 }
@@ -42,6 +43,11 @@ export type StoreActionPayloadAttendee = {
   attendees: AttendeeInfo[];
 };
 
+export type StoreActionPayloadAttendeeReplace = {
+  oldPosition: number;
+  newPosition: number;
+};
+
 export type StoreActionPayloadDevice = {
   type: DeviceType;
   currentDeviceId: string;
@@ -52,6 +58,7 @@ export type StoreActionPayload =
   | string
   | MeetingConnection
   | StoreActionPayloadAttendee
+  | StoreActionPayloadAttendeeReplace
   | StoreActionPayloadDevice
   | ScreenShareState
   | AttendeeLayoutType;

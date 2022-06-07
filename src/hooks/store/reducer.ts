@@ -7,6 +7,7 @@ import {
   StoreActionPayloadAttendee,
   StoreActionPayloadDevice,
   AttendeeLayoutType,
+  StoreActionPayloadAttendeeReplace,
 } from './types';
 
 const onMeetingConnection = (
@@ -80,6 +81,23 @@ const onAttendeeRemove = (
   return { ...oldState, attendees: newAttendees };
 };
 
+const onAttendeeReplace = (
+  oldState: StoreState,
+  payload: StoreActionPayloadAttendeeReplace
+) => {
+  const newAttendees = oldState.attendees || [];
+  const { oldPosition, newPosition } = payload;
+
+  // eslint-disable-next-line prefer-destructuring
+  newAttendees[oldPosition] = newAttendees.splice(
+    newPosition,
+    1,
+    newAttendees[oldPosition]
+  )[0];
+
+  return { ...oldState, attendees: newAttendees };
+};
+
 export const StoreReducer = (
   state: StoreState,
   action: StoreAction
@@ -110,6 +128,12 @@ export const StoreReducer = (
       newState = onAttendeeRemove(
         state,
         action.payload as StoreActionPayloadAttendee
+      );
+      break;
+    case StoreActionType.ACTION_TYPE_ATTENDEE_REPLACE:
+      newState = onAttendeeReplace(
+        state,
+        action.payload as StoreActionPayloadAttendeeReplace
       );
       break;
     case StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT:

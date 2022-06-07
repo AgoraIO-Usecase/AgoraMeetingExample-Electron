@@ -21,6 +21,7 @@ const renderRow = (
 
   return (
     <ListItem
+      id={`speaker-attendee-item-${state.attendees[index].uid}`}
       style={style}
       key={index}
       component="div"

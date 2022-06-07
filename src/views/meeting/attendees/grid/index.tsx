@@ -48,7 +48,7 @@ const GridAttendeeView = (props: GridAttendeeViewProps) => {
   return (
     <div className={style.wrapper} style={gridStyle}>
       {state.attendees.map((item, index) => (
-        <Grid item key={index}>
+        <Grid item key={index} id={`grid-attendee-item-${item.uid}`}>
           <AttendeeItem attendee={item} isFit />
         </Grid>
       ))}

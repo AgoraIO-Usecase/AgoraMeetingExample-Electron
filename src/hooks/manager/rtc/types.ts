@@ -42,6 +42,11 @@ export interface RtcUser {
   isAudioMuted?: boolean;
 }
 
+export enum RtcUserUpdateReason {
+  Info,
+  Media,
+}
+
 export interface RtcJoinParams {
   channelName: string;
   nickname: string;

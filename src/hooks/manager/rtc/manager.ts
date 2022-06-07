@@ -31,6 +31,7 @@ import {
   RtcScreenShareSource,
   RtcVideoStreamType,
   RtcClientRole,
+  RtcUserUpdateReason,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
@@ -42,7 +43,10 @@ export declare interface RtcManager {
     cb: (connection: RtcConnection, reason: RtcConnectionReason) => void
   ): this;
   on(evt: 'userNew', cb: (user: RtcUser) => void): this;
-  on(evt: 'userUpdate', cb: (user: RtcUser) => void): this;
+  on(
+    evt: 'userUpdate',
+    cb: (user: RtcUser, reason: RtcUserUpdateReason) => void
+  ): this;
   on(evt: 'userRemove', cb: (uid: number) => void): this;
   on(
     evt: 'deviceList',
@@ -213,10 +217,13 @@ export class RtcManager extends EventEmitter {
     log.info('rtc manager enable audio', enable);
     this.engine.muteLocalAudioStream(!enable);
 
-    this.updateUser({
-      ...this.getSelfUser(),
-      isAudioOn: enable,
-    });
+    this.updateUser(
+      {
+        ...this.getSelfUser(),
+        isAudioOn: enable,
+      },
+      RtcUserUpdateReason.Media
+    );
 
     this.autoChangeClientRole();
   };
@@ -225,10 +232,13 @@ export class RtcManager extends EventEmitter {
     log.info('rtc manager enable video', enable);
     this.engine.enableLocalVideo(enable);
 
-    this.updateUser({
-      ...this.getSelfUser(),
-      isCameraOn: enable,
-    });
+    this.updateUser(
+      {
+        ...this.getSelfUser(),
+        isCameraOn: enable,
+      },
+      RtcUserUpdateReason.Media
+    );
 
     this.autoChangeClientRole();
   };
@@ -513,10 +523,13 @@ export class RtcManager extends EventEmitter {
         log.info('local video state changed,', localVideoState, err, isOn);
 
         if (isOn !== this.getSelfUser().isCameraOn) {
-          this.updateUser({
-            ...this.getSelfUser(),
-            isCameraOn: isOn,
-          });
+          this.updateUser(
+            {
+              ...this.getSelfUser(),
+              isCameraOn: isOn,
+            },
+            RtcUserUpdateReason.Media
+          );
         }
       }
     );
@@ -534,7 +547,7 @@ export class RtcManager extends EventEmitter {
         //   this.updateUser({
         //     ...this.getSelfUser(),
         //     isAudioOn: isOn,
-        //   });
+        //   }, RtcUserUpdateReason.Media);
       }
     );
 
@@ -554,10 +567,13 @@ export class RtcManager extends EventEmitter {
         if (oldUsaer && oldUsaer.isCameraOn !== isOn) {
           log.info('remote video state changed,', uid, state, reason, isOn);
 
-          this.updateUser({
-            uid,
-            isCameraOn: isOn,
-          });
+          this.updateUser(
+            {
+              uid,
+              isCameraOn: isOn,
+            },
+            RtcUserUpdateReason.Media
+          );
         }
       }
     );
@@ -578,10 +594,13 @@ export class RtcManager extends EventEmitter {
         if (oldUsaer && oldUsaer.isAudioOn !== isOn) {
           log.info('remote audio state changed,', uid, state, reason, isOn);
 
-          this.updateUser({
-            uid,
-            isAudioOn: isOn,
-          });
+          this.updateUser(
+            {
+              uid,
+              isAudioOn: isOn,
+            },
+            RtcUserUpdateReason.Media
+          );
         }
       }
     );
@@ -672,9 +691,15 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.initialize(appId, logPath, this.state.shareId);
     this.screenshareManager.on('state', (state, reason) => {
       if (state === RtcScreenShareState.Running) {
-        this.updateUser({ uid: this.state.uid, shareId: this.state.shareId });
+        this.updateUser(
+          { uid: this.state.uid, shareId: this.state.shareId },
+          RtcUserUpdateReason.Info
+        );
       } else if (state === RtcScreenShareState.Idle) {
-        this.updateUser({ uid: this.state.uid, shareId: 0 });
+        this.updateUser(
+          { uid: this.state.uid, shareId: 0 },
+          RtcUserUpdateReason.Info
+        );
       }
       this.emit('screenshareState', state, reason);
     });
@@ -730,10 +755,10 @@ export class RtcManager extends EventEmitter {
     this.emit('userNew', this.state.users[user.uid]);
   };
 
-  private updateUser = (user: RtcUser) => {
+  private updateUser = (user: RtcUser, reason: RtcUserUpdateReason) => {
     this.state.users[user.uid] = { ...this.state.users[user.uid], ...user };
 
-    this.emit('userUpdate', this.state.users[user.uid]);
+    this.emit('userUpdate', this.state.users[user.uid], reason);
   };
 
   private removeUser = (uid: number) => {
@@ -758,12 +783,15 @@ export class RtcManager extends EventEmitter {
         oldUser.parentId !== info.parentId ||
         oldUser.shareId !== info.shareId
       )
-        this.updateUser({
-          uid: info.uid,
-          nickname: info.nickname,
-          parentId: info.parentId,
-          shareId: info.shareId,
-        });
+        this.updateUser(
+          {
+            uid: info.uid,
+            nickname: info.nickname,
+            parentId: info.parentId,
+            shareId: info.shareId,
+          },
+          RtcUserUpdateReason.Info
+        );
 
       // update share user
       if (info.shareId === undefined || info.shareId === 0) return;
@@ -774,11 +802,14 @@ export class RtcManager extends EventEmitter {
         (shareUser.nickname !== info.nickname ||
           shareUser.parentId !== info.uid)
       )
-        this.updateUser({
-          uid: info.shareId,
-          nickname: info.nickname,
-          parentId: info.uid,
-        });
+        this.updateUser(
+          {
+            uid: info.shareId,
+            nickname: info.nickname,
+            parentId: info.uid,
+          },
+          RtcUserUpdateReason.Info
+        );
     } catch (e) {
       log.error('rtc manager unpack data stream message failed', e, msg);
     }

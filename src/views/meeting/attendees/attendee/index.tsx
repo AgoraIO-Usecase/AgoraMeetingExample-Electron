@@ -49,6 +49,9 @@ const VideoBox = (props: VideoBoxProps) => {
     }
 
     return () => {
+      // there has a known issue here
+      // can not switch renderer mode from fit to stretch after
+      // main attendee destroyed
       if (isMain && !isSelf && uid !== undefined) {
         commonManager.setRemoteVideoStreamType(uid, false);
       }
