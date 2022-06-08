@@ -48,6 +48,8 @@ const VideoBox = (props: VideoBoxProps) => {
       commonManager.setupRemoteVideoRenderer(uid!, dom!, isFit, isAppend);
     }
 
+    console.warn('attendee videobox initialize for ', uid);
+
     return () => {
       // there has a known issue here
       // can not switch renderer mode from fit to stretch after
@@ -55,6 +57,8 @@ const VideoBox = (props: VideoBoxProps) => {
       if (isMain && !isSelf && uid !== undefined) {
         commonManager.setRemoteVideoStreamType(uid, false);
       }
+
+      console.warn('attendee videobox uninitialize for ', uid);
     };
   }, [uid]);
 
