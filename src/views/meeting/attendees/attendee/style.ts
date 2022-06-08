@@ -29,6 +29,7 @@ const useStyle = makeStyles(() => {
       boxSizing: 'border-box',
       width: '100%',
       height: '32px',
+      minHeight: '32px',
       background: '#1F2B2B2B',
       borderBottomLeftRadius: '4.75px',
       borderBottomRightRadius: '4.75px',
