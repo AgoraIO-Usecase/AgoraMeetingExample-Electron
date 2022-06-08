@@ -8,6 +8,7 @@ import {
 
 export enum AttendeeLayoutType {
   Speaker,
+  Grid4,
   Grid9,
   Grid25,
 }

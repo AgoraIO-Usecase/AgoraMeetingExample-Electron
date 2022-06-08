@@ -1,9 +1,9 @@
 import React from 'react';
 import { Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import Check from '@mui/icons-material/Check';
-import { AttendeeLayoutType, StoreActionType, useStore } from '../../../hooks';
-
 import log from 'electron-log';
+
+import { AttendeeLayoutType, StoreActionType, useStore } from '../../../hooks';
 
 export type LayoutMenuProps = {
   id: string;
@@ -15,6 +15,7 @@ export type LayoutMenuProps = {
 
 const LayoutTypeArray: { type: AttendeeLayoutType; name: string }[] = [
   { type: AttendeeLayoutType.Speaker, name: 'Speaker Layout' },
+  { type: AttendeeLayoutType.Grid4, name: '2x2 Grid Layout' },
   { type: AttendeeLayoutType.Grid9, name: '3x3 Grid Layout' },
   { type: AttendeeLayoutType.Grid25, name: '5x5 Grid Layout' },
 ];

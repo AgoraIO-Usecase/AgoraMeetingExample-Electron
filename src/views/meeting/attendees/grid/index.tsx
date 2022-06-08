@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { Grid } from '@mui/material';
+import React, { useEffect, useMemo } from 'react';
+import { Grid, Stack, Pagination } from '@mui/material';
 
 import AttendeeItem from '../attendee';
-import { useStore, AttendeeLayoutType } from '../../../../hooks';
+import { useStore, AttendeeLayoutType, AttendeeInfo } from '../../../../hooks';
 import useStyle from './style';
 
 export type GridAttendeeViewProps = {
@@ -15,8 +15,22 @@ const GridAttendeeView = (props: GridAttendeeViewProps) => {
   const { state } = useStore();
 
   const maxAttendeeCountPerPage = useMemo(() => {
-    if (type === AttendeeLayoutType.Grid25) return 25;
-    return 9;
+    let count = 4;
+    switch (type) {
+      case AttendeeLayoutType.Grid4:
+        count = 4;
+        break;
+      case AttendeeLayoutType.Grid9:
+        count = 9;
+        break;
+      case AttendeeLayoutType.Grid25:
+        count = 25;
+        break;
+      default:
+        break;
+    }
+
+    return count;
   }, [type]);
 
   const gridColumnRow = useMemo(() => {
@@ -45,14 +59,42 @@ const GridAttendeeView = (props: GridAttendeeViewProps) => {
     };
   }, [gridColumnRow]);
 
+  const totalPage = useMemo(() => {
+    return Math.ceil(state.attendees.length / maxAttendeeCountPerPage);
+  }, [state, maxAttendeeCountPerPage]);
+
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const onPageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
+  };
+
+  useEffect(() => {
+    if (currentPage > totalPage) setCurrentPage(totalPage);
+  }, [totalPage]);
+
   return (
-    <div className={style.wrapper} style={gridStyle}>
-      {state.attendees.map((item, index) => (
-        <Grid item key={index} id={`grid-attendee-item-${item.uid}`}>
-          <AttendeeItem attendee={item} isFit />
-        </Grid>
-      ))}
-    </div>
+    <Stack className={style.wrapper} spacing={1}>
+      <div className={style.grid} style={gridStyle}>
+        {state.attendees
+          .slice(
+            (currentPage - 1) * maxAttendeeCountPerPage,
+            Math.min(
+              state.attendees.length,
+              currentPage * maxAttendeeCountPerPage
+            )
+          )
+          .map((item, index) => (
+            <Grid item key={index} id={`grid-attendee-item-${item.uid}`}>
+              <AttendeeItem attendee={item} isFit />
+            </Grid>
+          ))}
+      </div>
+      <Pagination
+        count={totalPage}
+        page={currentPage}
+        onChange={onPageChange}
+      />
+    </Stack>
   );
 };
 
