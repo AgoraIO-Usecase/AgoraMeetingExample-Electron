@@ -685,6 +685,10 @@ export class RtcManager extends EventEmitter {
     this.engine.setParameters(
       '{"che.video.lowBitRateStreamParameter":{"width":480,"height":360,"frameRate":10,"bitRate":200}}'
     );
+
+    // disable fec for boradcast
+    this.engine.setParameters('{"che.video.fec_outside_bw_ratio": 0}');
+    this.engine.setParameters('{"che.video.harqScene": 0}');
   };
 
   private initializeScreenShareManager = (appId: string, logPath: string) => {
