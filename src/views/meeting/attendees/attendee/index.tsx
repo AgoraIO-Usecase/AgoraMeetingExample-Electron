@@ -58,7 +58,13 @@ const VideoBox = (props: VideoBoxProps) => {
         commonManager.setRemoteVideoStreamType(uid, false);
       }
 
-      console.warn('attendee videobox uninitialize for ', uid);
+      if (isSelf) {
+        commonManager.destroyLocalVideoRenderer(dom!);
+      } else {
+        commonManager.destroyRemoteVideoRenderer(uid!, dom!);
+      }
+
+      console.warn('attendee videobox uninitialize for ', uid, dom!.id);
     };
   }, [uid]);
 

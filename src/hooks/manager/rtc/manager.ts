@@ -183,7 +183,13 @@ export class RtcManager extends EventEmitter {
     // https://docs.agora.io/cn/Video/API%20Reference/electron/classes/agorartcengine.html#enablelocalaudio
     this.engine.enableLocalAudio(true);
 
-    this.engine.joinChannel('', channelName, '', this.state.uid);
+    // coz we do not have any backend service for now, we should auto subscribe remote audio and video
+    this.engine.joinChannel('', channelName, '', this.state.uid, {
+      autoSubscribeAudio: true,
+      autoSubscribeVideo: true,
+      publishLocalAudio: isAudioOn,
+      publishLocalVideo: isCameraOn,
+    });
 
     // coz host will auto publish audio stream
     this.engine.muteLocalAudioStream(!isAudioOn);
@@ -264,14 +270,21 @@ export class RtcManager extends EventEmitter {
     isFit: boolean,
     isAppend: boolean
   ) => {
-    log.info('rtc manager setup local video renderer');
+    log.info('rtc manager setup local video renderer', view.id);
     this.engine.setupLocalVideo(view, { append: isAppend });
-    this.engine.setupViewContentMode('local', isFit ? 1 : 0, undefined);
+
+    // coz sdk can not set view mode by view
+    // force to use fit for now
+    this.engine.setupViewContentMode('local', isFit ? 1 : 1, undefined);
   };
 
   destroyLocalVideoRenderer = (view: Element) => {
-    log.info('rtc manager destroy local video renderer');
+    log.info('rtc manager destroy local video renderer', view.id);
     this.engine.destroyRenderView('local', undefined, view);
+
+    // there is no workaround solution for stop trans frame from
+    // c++ to js when there is no local renderer for now
+    // so will get warn info like 'Can't find renderer for uid: 0'
   };
 
   setupRemoteVideoRenderer = (
@@ -280,14 +293,26 @@ export class RtcManager extends EventEmitter {
     isFit: boolean,
     isAppend: boolean
   ) => {
-    log.info(`rtc manager setup remote video renderer for ${uid}`);
+    log.info(`rtc manager setup remote video renderer for ${uid} ${view.id}`);
     this.engine.setupRemoteVideo(uid, view, undefined, { append: isAppend });
-    this.engine.setupViewContentMode(uid, isFit ? 1 : 0, undefined);
+
+    // coz sdk can not set view mode by view
+    // force to use fit for now
+    this.engine.setupViewContentMode(uid, isFit ? 1 : 1, undefined);
   };
 
   destroyRemoteVideoRenderer = (uid: number, view: Element) => {
-    log.info('rtc manager destroy remote video renderer');
+    log.info(`rtc manager destroy remote video renderer ${uid} ${view.id}`);
     this.engine.destroyRenderView(uid, undefined, view);
+
+    // this is a workaround solution
+    // coz sdk can not auto stop trans frame from c++ to js when there is
+    // no renderer for now
+    // eslint-disable-next-line no-underscore-dangle
+    const renderers = this.engine._getRenderers(1, uid, undefined);
+    if (!renderers || renderers.length === 0) {
+      this.engine.setupRemoteVideo(uid);
+    }
   };
 
   setCurrentCamera = (deviceId: string) => this.engine.setVideoDevice(deviceId);

@@ -210,12 +210,10 @@ export class CommonManager extends EventEmitter {
     isFit: boolean,
     isAppend: boolean
   ) => {
-    log.info('common manager setup local video renderer', isFit, isAppend);
     this.rtcManager.setupLocalVideoRenderer(view, isFit, isAppend);
   };
 
   destroyLocalVideoRenderer = (view: Element) => {
-    log.info('rtc manager destroy local video renderer');
     this.rtcManager.destroyLocalVideoRenderer(view);
   };
 
@@ -225,16 +223,10 @@ export class CommonManager extends EventEmitter {
     isFit: boolean,
     isAppend: boolean
   ) => {
-    log.info(
-      `common manager setup remote video renderer for ${uid}`,
-      isFit,
-      isAppend
-    );
     this.rtcManager.setupRemoteVideoRenderer(uid, view, isFit, isAppend);
   };
 
   destroyRemoteVideoRenderer = (uid: number, view: Element) => {
-    log.info('rtc manager destroy remote video renderer');
     this.rtcManager.destroyRemoteVideoRenderer(uid, view);
   };
 
