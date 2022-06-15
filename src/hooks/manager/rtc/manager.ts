@@ -36,6 +36,7 @@ import {
 import { PresetEncoderConfigurations } from './recommend';
 import { readImage } from './utils';
 import { RtcScreenShareManager } from './screenshare';
+import { generateRtcToken } from './cert';
 
 export declare interface RtcManager {
   on(
@@ -183,8 +184,9 @@ export class RtcManager extends EventEmitter {
     // https://docs.agora.io/cn/Video/API%20Reference/electron/classes/agorartcengine.html#enablelocalaudio
     this.engine.enableLocalAudio(true);
 
+    const token = generateRtcToken(channelName, this.state.uid);
     // coz we do not have any backend service for now, we should auto subscribe remote audio and video
-    this.engine.joinChannel('', channelName, '', this.state.uid, {
+    this.engine.joinChannel(token, channelName, '', this.state.uid, {
       autoSubscribeAudio: true,
       autoSubscribeVideo: true,
       publishLocalAudio: isAudioOn,
@@ -675,21 +677,21 @@ export class RtcManager extends EventEmitter {
       );
     });
 
-    this.engine.on('clientRoleChangeFailed', (reason, role) => {
-      log.info(
-        `rtc manager on client role changed failed reason ${reason} current role ${role}`
-      );
+    // this.engine.on('clientRoleChangeFailed', (reason, role) => {
+    //   log.info(
+    //     `rtc manager on client role changed failed reason ${reason} current role ${role}`
+    //   );
 
-      // in case that set role as host failed
-      if (this.state.clientRole === RtcClientRole.Host && role === 2) {
-        this.enableAudio(false);
-        this.enableVideo(false);
+    //   // in case that set role as host failed
+    //   if (this.state.clientRole === RtcClientRole.Host && role === 2) {
+    //     this.enableAudio(false);
+    //     this.enableVideo(false);
 
-        // no need to change client role directly here.
-        // Will change client role after enableAudio and enableVideo
-        // in autoChangeClientRole
-      }
-    });
+    //     // no need to change client role directly here.
+    //     // Will change client role after enableAudio and enableVideo
+    //     // in autoChangeClientRole
+    //   }
+    // });
   };
 
   private generateRtcUid = () => {
