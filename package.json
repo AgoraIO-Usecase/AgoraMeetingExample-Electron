@@ -1,7 +1,7 @@
 {
-  "name": "agroa-meeting",
-  "productName": "AgoraMeeting",
-  "description": "AgoraMeeting",
+  "name": "agora-meeting",
+  "productName": "AgoraMeeting-Electron",
+  "description": "AgoraMeeting-Electron",
   "scripts": {
     "build": "concurrently \"yarn build:main\" \"yarn build:renderer\"",
     "build:main": "cross-env NODE_ENV=production webpack --config ./.erb/configs/webpack.config.main.prod.babel.js",
@@ -38,7 +38,7 @@
   },
   "build": {
     "asar": false,
-    "productName": "AgoraMeeting",
+    "productName": "AgoraMeeting-Electron",
     "appId": "io.agora.agorameeting",
     "files": [
       "dist/",
