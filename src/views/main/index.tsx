@@ -111,7 +111,7 @@ const MainView = () => {
         <div>
           <TextField
             id="channelname"
-            placeholder="input your channel name"
+            placeholder="Enter your channel name"
             error={isChannelNameInvalid}
             helperText={isChannelNameInvalid ? '*invalid channel name' : ''}
             value={joinParams.channelName}
@@ -125,7 +125,7 @@ const MainView = () => {
           <TextField
             id="nickname"
             defaultValue={joinParams.nickname}
-            placeholder="input your nickname"
+            placeholder="Enter your nickname"
             error={isNicknameInvalid}
             helperText={isNicknameInvalid ? '*invalid nickname' : ''}
             inputProps={{ maxLength: 12 }}
