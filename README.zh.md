@@ -12,7 +12,7 @@ _Read this in other languages: [English](README.md)_
 #### 运行环境
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) = 14.x
+- [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.21.3
 
 #### 运行步骤

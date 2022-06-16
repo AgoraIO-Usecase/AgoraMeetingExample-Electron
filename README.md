@@ -11,7 +11,7 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 #### Developer Environment Requirements
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) = 14.x
+- [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.21.3
 
 #### Steps to run
