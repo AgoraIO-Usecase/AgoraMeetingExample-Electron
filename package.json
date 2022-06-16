@@ -252,8 +252,8 @@
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19"
   },
-  "devEngines": {
-    "node": ">=10.x",
+  "engines": {
+    "node": ">=14.0.0 < 15",
     "npm": ">=6.x",
     "yarn": ">=1.21.3"
   },
