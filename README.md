@@ -1,18 +1,18 @@
-# AgoraMeeting-Electron
+# AgoraMeetingExample-Electron
 
 _**其他语言版本：** [**简体中文**](README.zh.md)_
 
 ## Overview
 
-The AgoraMeeting-Electron project is an open-source demo that will show you meeting sence on how to integrate Agora SDK APIs into your project.
+The AgoraMeetingExample-Electron project is an open-source demo that will show you meeting sence on how to integrate Agora SDK APIs into your project.
 
 ## How to run the sample project
 
 #### Developer Environment Requirements
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Yarn](https://yarnpkg.com/)  package manager
+- [Node.js](https://nodejs.org/en/download/) = 14.x
+- [Yarn](https://yarnpkg.com/) package manager >= 1.21.3
 
 #### Steps to run
 
@@ -21,8 +21,8 @@ First, create a developer account at [Agora.io](https://dashboard.agora.io/signi
 Then do the following:
 
 ```shell 
-$ git clone https://github.com/AgoraIO-Usecase/AgoraMeeting-Electron.git
-$ cd AgoraMeeting-Electron
+$ git clone https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron.git
+$ cd AgoraMeetingExample-Electron
 $ yarn
 $ yarn start
 

@@ -1,4 +1,4 @@
-# AgoraMeeting-Electron
+# AgoraMeetingExample-Electron
 
 _Read this in other languages: [English](README.md)_
 
@@ -12,8 +12,8 @@ _Read this in other languages: [English](README.md)_
 #### 运行环境
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/)
-- [Yarn](https://yarnpkg.com/) package manager
+- [Node.js](https://nodejs.org/en/download/) = 14.x
+- [Yarn](https://yarnpkg.com/) package manager >= 1.21.3
 
 #### 运行步骤
 
@@ -22,8 +22,8 @@ _Read this in other languages: [English](README.md)_
 然后进行以下操作:
 
 ```shell
-$ git clone https://github.com/AgoraIO-Usecase/AgoraMeeting-Electron.git
-$ cd AgoraMeeting-Electron
+$ git clone https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron.git
+$ cd AgoraMeetingExample-Electron
 $ yarn
 $ yarn start
 

@@ -1,7 +1,7 @@
 {
-  "name": "agora-meeting",
-  "productName": "AgoraMeeting-Electron",
-  "description": "AgoraMeeting-Electron",
+  "name": "agora-meeting-example-electron",
+  "productName": "AgoraMeetingExample-Electron",
+  "description": "AgoraMeetingExample-Electron",
   "version": "1.1.0",
   "main": "./main.prod.js",
   "scripts": {
