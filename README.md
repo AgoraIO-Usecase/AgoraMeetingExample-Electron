@@ -6,6 +6,11 @@ _**其他语言版本：** [**简体中文**](README.zh.md)_
 
 The AgoraMeetingExample-Electron project is an open-source demo that will show you meeting sence on how to integrate Agora SDK APIs into your project.
 
+## Todo
+- Real-time Messaging
+- Interactive Whiteboard
+- Conference Control
+
 ## How to run the sample project
 
 #### Developer Environment Requirements
@@ -16,7 +21,8 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 
 #### Steps to run
 
-First, create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an App ID.
+- Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an AppID.
+- Reanme file [.env.template](.env.template) to .env, and replace 'XXXXXX' with your AppID and AppCert.
 
 Then do the following:
 

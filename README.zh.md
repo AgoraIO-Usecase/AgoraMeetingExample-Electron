@@ -6,6 +6,12 @@ _Read this in other languages: [English](README.md)_
 
 这个开源示例项目演示了针对会议场景下，Agora SDK 的基本集成逻辑。
 
+## 待完成
+- 实时消息
+- 白板共享
+- 会议控制
+- 会议邀请
+
 
 ## 如何运行示例程序
 
@@ -18,6 +24,7 @@ _Read this in other languages: [English](README.md)_
 #### 运行步骤
 
 - 首先在 [Agora.io 注册](https://dashboard.agora.io/cn/signup/) 注册账号，并创建自己的测试项目，获取到 AppID。
+- 重命名文件[.env.template](.env.template) 为'.env'，并将获取到的AppId和AppCert填入该文件。
 
 然后进行以下操作:
 
