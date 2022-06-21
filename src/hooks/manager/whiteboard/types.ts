@@ -8,6 +8,8 @@ export enum WhiteBoardError {
   None,
   Exception,
   CreateRoom,
+  Error,
+  Kicked,
 }
 
 export default {};

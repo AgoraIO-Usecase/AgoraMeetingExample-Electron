@@ -1,5 +1,10 @@
 import { EventEmitter } from 'events';
-import { createFastboard, FastboardApp, mount } from '@netless/fastboard';
+import {
+  createFastboard,
+  FastboardApp,
+  mount,
+  RoomPhase,
+} from '@netless/fastboard';
 import log from 'electron-log';
 
 import { WhiteBoardError, WhiteBoardConnection } from './types';
@@ -106,6 +111,11 @@ export class WhiteBoardManager extends EventEmitter {
           uid: '',
           uuid,
           roomToken: generateRoomToken(uuid),
+          callbacks: {
+            onPhaseChanged: this.onWhiteBoardPhaseChanged,
+            onDisconnectWithError: this.onWhiteBoardDisconnectWithError,
+            onKickedWithReason: this.onWhiteBoardKickedWithReason,
+          },
         },
         managerConfig: {
           cursor: true,
@@ -115,8 +125,6 @@ export class WhiteBoardManager extends EventEmitter {
       this.props.board.app = app;
 
       this.props.board.element = mount(app, container);
-
-      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
     } catch (error) {
       log.error('whiteboard start whiteboard throw an exception', error);
       this.setConnection(
@@ -131,14 +139,44 @@ export class WhiteBoardManager extends EventEmitter {
 
     this.props.board.element?.destroy();
     await this.props.board.app?.destroy();
+  };
 
-    this.setConnection(WhiteBoardConnection.Disconnected, WhiteBoardError.None);
+  private onWhiteBoardPhaseChanged = (phase: RoomPhase) => {
+    if (phase === 'disconnected') {
+      this.setConnection(
+        WhiteBoardConnection.Disconnected,
+        WhiteBoardError.None
+      );
+    } else if (phase === 'connected') {
+      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
+    }
+  };
+
+  private onWhiteBoardDisconnectWithError = (error: any) => {
+    log.error('whiteboard manager on disconnect with error', error);
+    this.setConnection(
+      WhiteBoardConnection.Disconnected,
+      WhiteBoardError.Error
+    );
+    this.stop();
+  };
+
+  private onWhiteBoardKickedWithReason = (reason: string) => {
+    log.error('whiteboard manager on kicked with reason', reason);
+    this.setConnection(
+      WhiteBoardConnection.Disconnected,
+      WhiteBoardError.Kicked
+    );
+    this.stop();
   };
 
   private setConnection = (
     connection: WhiteBoardConnection,
     error: WhiteBoardError
   ) => {
+    if (this.props.connection === connection && error === WhiteBoardError.None)
+      return;
+
     this.props.connection = connection;
 
     this.emit('connection', connection, this.props.params?.uuid, error);
