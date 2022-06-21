@@ -13,11 +13,6 @@ const useStyle = makeStyles(() => {
       padding: 6,
       height: 52,
     },
-    toolBar: { padding: 6, boxSizing: 'border-box' },
-    toolButton: {
-      // border: '1px solid #E0E3E7 !important',
-      // borderRadius: '10px !important',
-    },
   });
 });
 

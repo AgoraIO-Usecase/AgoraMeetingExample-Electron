@@ -1,18 +1,25 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack, Tooltip } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
+import LoadingButton from '@mui/lab/LoadingButton';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import MicOffOutlinedIcon from '@mui/icons-material/MicOffOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
 import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
+import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 
 import HeaderBar from '../components/header';
 import AttendeeView from './attendees';
+import ToolBar from './toolbar';
 import ScreenShareDialog from './screenshare';
-import { ScreenShareState, useCommonManager, useStore } from '../../hooks';
+import {
+  ScreenShareState,
+  useCommonManager,
+  useStore,
+  WhiteBoardState,
+} from '../../hooks';
 import useStyle from './style';
 
 const MeetingView = () => {
@@ -42,6 +49,15 @@ const MeetingView = () => {
       commonManager.stopScreenShare();
   };
 
+  const onWhiteBoardClicked = () => {
+    if (state.whiteboardState === WhiteBoardState.Idle)
+      commonManager.whiteboardStart(
+        document.getElementById('root')! as HTMLDivElement
+      );
+    else if (state.whiteboardState === WhiteBoardState.Running)
+      commonManager.whiteboardStop();
+  };
+
   const onLeaveMeetingClicked = () => {
     commonManager.leaveMeeting();
 
@@ -59,64 +75,17 @@ const MeetingView = () => {
     >
       <HeaderBar title={commonManager.getChannelName()} fixed={false} layouts />
       <AttendeeView />
-      <Stack
-        className={style.toolBar}
-        width="100%"
-        direction="row"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
-      >
-        <Tooltip title={selfUser.isAudioOn ? 'Mute' : 'Unmute'} arrow>
-          <IconButton
-            className={style.toolButton}
-            onClick={onMicrophoneClicked}
-          >
-            {selfUser.isAudioOn ? (
-              <MicNoneOutlinedIcon color="primary" />
-            ) : (
-              <MicOffOutlinedIcon color="error" />
-            )}
-          </IconButton>
-        </Tooltip>
-        <Tooltip
-          title={selfUser.isCameraOn ? 'TurnOff Camera' : 'TurnOn Camera'}
-          arrow
-        >
-          <IconButton className={style.toolButton} onClick={onCameraClicked}>
-            {selfUser.isCameraOn ? (
-              <VideocamOutlinedIcon color="primary" />
-            ) : (
-              <VideocamOffOutlinedIcon color="error" />
-            )}
-          </IconButton>
-        </Tooltip>
-        <Tooltip
-          title={
-            state.screenshareState ? 'Stop ScreenShare' : 'Start ScreenShare'
-          }
-          arrow
-        >
-          <IconButton
-            className={style.toolButton}
-            onClick={onScreenShareClicked}
-          >
-            {state.screenshareState === ScreenShareState.Running ? (
-              <ScreenShareOutlinedIcon color="success" />
-            ) : (
-              <ScreenShareOutlinedIcon color="primary" />
-            )}
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Leave" arrow>
-          <IconButton
-            className={style.toolButton}
-            onClick={onLeaveMeetingClicked}
-          >
-            <LocalPhoneOutlinedIcon color="error" />
-          </IconButton>
-        </Tooltip>
-      </Stack>
+      <ToolBar
+        isAudioOn={selfUser.isAudioOn || false}
+        isCamerOn={selfUser.isCameraOn || false}
+        screenshareState={state.screenshareState}
+        whiteboardState={state.whiteboardState}
+        onMicrophoneClicked={onMicrophoneClicked}
+        onCameraClicked={onCameraClicked}
+        onScreenShareClicked={onScreenShareClicked}
+        onWhiteBoardClicked={onWhiteBoardClicked}
+        onLeaveMeetingClicked={onLeaveMeetingClicked}
+      />
       <ScreenShareDialog
         open={openScreenShareDialog}
         onClose={() => setOpenScreenShareDialog(false)}
