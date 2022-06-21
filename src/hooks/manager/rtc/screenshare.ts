@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import log from 'electron-log';
 
 import { RtcScreenShareState, RtcScreenShareStateReason } from './types';
+import { generateRtcToken } from './cert';
 
 export interface RtcScreenShareManager {
   on(
@@ -94,7 +95,8 @@ export class RtcScreenShareManager extends EventEmitter {
       `screenshare manager join ${channelName} with uid ${this.props.uid}`
     );
 
-    this.engine.videoSourceJoin('', channelName, '', this.props.uid, {
+    const token = generateRtcToken(channelName, this.props.uid);
+    this.engine.videoSourceJoin(token, channelName, '', this.props.uid, {
       autoSubscribeAudio: false,
       autoSubscribeVideo: false,
       publishLocalAudio: false,

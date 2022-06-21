@@ -216,6 +216,8 @@ export class RtcManager extends EventEmitter {
       return;
     }
 
+    if (this.screenshareManager.isRunning()) this.screenshareManager.stop();
+
     log.info('rtc manager leave channel');
     this.engine.leaveChannel();
     this.setConnection(RtcConnection.Disconnecting);
