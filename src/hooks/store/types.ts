@@ -4,6 +4,7 @@ import {
   DeviceType,
   MeetingConnection,
   ScreenShareState,
+  WhiteBoardState,
 } from '../manager';
 
 export enum AttendeeLayoutType {
@@ -22,6 +23,7 @@ export enum StoreActionType {
   ACTION_TYPE_ATTENDEE_REPLACE,
   ACTION_TYPE_ATTENDEE_LAYOUT,
   ACTION_TYPE_SCREENSHARE_STATE,
+  ACTION_TYPE_WHITEBOARD_STATE,
 }
 
 export type StoreState = {
@@ -37,6 +39,8 @@ export type StoreState = {
 
   attendeeLayout: AttendeeLayoutType;
   screenshareState: ScreenShareState;
+
+  whiteboardState: WhiteBoardState;
 };
 
 export type StoreActionPayloadAttendee = {
@@ -62,7 +66,8 @@ export type StoreActionPayload =
   | StoreActionPayloadAttendeeReplace
   | StoreActionPayloadDevice
   | ScreenShareState
-  | AttendeeLayoutType;
+  | AttendeeLayoutType
+  | WhiteBoardState;
 
 export type StoreAction = {
   type: StoreActionType;

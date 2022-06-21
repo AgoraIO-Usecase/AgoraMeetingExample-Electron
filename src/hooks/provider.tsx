@@ -11,6 +11,7 @@ import {
   CommonManagerContext,
   MeetingConnection,
   ScreenShareState,
+  WhiteBoardState,
 } from './manager';
 
 export const RootProvider: FC = (props) => {
@@ -20,6 +21,7 @@ export const RootProvider: FC = (props) => {
     attendees: [],
     screenshareState: ScreenShareState.Idle,
     attendeeLayout: AttendeeLayoutType.Speaker,
+    whiteboardState: WhiteBoardState.Idle,
   });
   const commonManager = useMemo(() => new CommonManager(), []);
 
@@ -84,6 +86,12 @@ export const RootProvider: FC = (props) => {
       dispatch({
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
         payload: screenshareState,
+      });
+    });
+    commonManager.on('whiteboardState', (whiteboardState) => {
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,
+        payload: whiteboardState,
       });
     });
 

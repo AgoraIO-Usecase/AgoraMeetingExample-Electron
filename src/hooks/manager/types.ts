@@ -90,3 +90,9 @@ export type ScreenShareSource = {
   thumbWidth: number;
   thumbHeight: number;
 };
+
+export enum WhiteBoardState {
+  Idle,
+  Waitting,
+  Running,
+}

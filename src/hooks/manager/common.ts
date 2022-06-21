@@ -24,11 +24,14 @@ import {
   Version,
   VideoEncoderConfigurationType,
   VolumeIndication,
+  WhiteBoardState,
 } from './types';
 import storage from './localstorage';
 import { getResourcePath } from '../../utils/resource';
+import { WhiteBoardConnection, WhiteBoardManager } from './whiteboard';
 
 export interface CommonManager {
+  // common events
   on(
     evt: 'connection',
     cb: (connection: MeetingConnection, reason: MeetingConnectionReason) => void
@@ -42,6 +45,12 @@ export interface CommonManager {
     ) => void
   ): this;
   on(
+    evt: 'volumeIndications',
+    cb: (indications: VolumeIndication[]) => void
+  ): this;
+
+  // attendee events
+  on(
     evt: 'attendeeNew',
     cb: (position: number, attendee: AttendeeInfo) => void
   ): this;
@@ -54,10 +63,8 @@ export interface CommonManager {
     evt: 'attendeeReplace',
     cb: (oldPosition: number, newPosition: number) => void
   ): this;
-  on(
-    evt: 'volumeIndications',
-    cb: (indications: VolumeIndication[]) => void
-  ): this;
+
+  // screenshare events
   on(
     evt: 'screenshareState',
     cb: (state: ScreenShareState, reason: ScreenShareStateReason) => void
@@ -66,12 +73,16 @@ export interface CommonManager {
     evt: 'screenshareError',
     cb: (reason: ScreenShareStateReason) => void
   ): this;
+
+  // whiteboard events
+  on(evt: 'whiteboardState', cb: (state: WhiteBoardState) => void): this;
 }
 
 export class CommonManager extends EventEmitter {
   private rtcManager!: RtcManager;
   private meetingManager!: MeetingManager;
   private attendeeManager!: AttendeeManager;
+  private whiteboardManager!: WhiteBoardManager;
 
   private state: {
     isInitialized: boolean;
@@ -85,6 +96,7 @@ export class CommonManager extends EventEmitter {
     this.rtcManager = new RtcManager();
     this.meetingManager = new MeetingManager(this.rtcManager);
     this.attendeeManager = new AttendeeManager(this.rtcManager);
+    this.whiteboardManager = new WhiteBoardManager();
   }
 
   private initializeRtcManager = () => {
@@ -116,9 +128,16 @@ export class CommonManager extends EventEmitter {
 
   private initializeMeetingManager = () => {
     this.meetingManager.on('connection', (connection, reason) => {
-      // should adjust connection with other situations in future
       this.emit('connection', connection, reason);
+
+      if (connection === MeetingConnection.Disconnected) {
+        this.whiteboardManager.reset();
+        this.meetingManager.reset();
+        this.attendeeManager.reset();
+        this.rtcManager.reset();
+      }
     });
+
     this.meetingManager.initialize();
   };
 
@@ -138,6 +157,36 @@ export class CommonManager extends EventEmitter {
     this.attendeeManager.initialize();
   };
 
+  private initializeWhiteBoardManager = () => {
+    this.whiteboardManager.on('connection', (connection, room, error) => {
+      console.warn(
+        'common manager on whiteboard connection',
+        connection,
+        error,
+        room
+      );
+
+      let state = WhiteBoardState.Idle;
+      switch (connection) {
+        case WhiteBoardConnection.Disconnected:
+          state = WhiteBoardState.Idle;
+          break;
+        case WhiteBoardConnection.Connecting:
+          state = WhiteBoardState.Waitting;
+          break;
+        case WhiteBoardConnection.Connected:
+          state = WhiteBoardState.Running;
+          break;
+        default:
+          break;
+      }
+
+      this.emit('whiteboardState', state);
+    });
+
+    this.whiteboardManager.initialize();
+  };
+
   initialize = () => {
     if (this.state.isInitialized) return;
 
@@ -146,12 +195,15 @@ export class CommonManager extends EventEmitter {
     this.initializeRtcManager();
     this.initializeMeetingManager();
     this.initializeAttendeeManager();
+    this.initializeWhiteBoardManager();
 
     this.state.isInitialized = true;
   };
 
   release = () => {
     if (!this.state.isInitialized) return;
+
+    this.whiteboardManager.release();
 
     this.attendeeManager.release();
 
@@ -171,10 +223,6 @@ export class CommonManager extends EventEmitter {
   };
 
   joinMeeting = (params: MeetingParams) => {
-    this.rtcManager.reset();
-    this.meetingManager.reset();
-    this.attendeeManager.reset();
-
     log.info('common manager join meeting with params:', params);
 
     this.meetingManager.joinMeeting(params);
@@ -322,5 +370,13 @@ export class CommonManager extends EventEmitter {
       uid,
       isHigh ? RtcVideoStreamType.High : RtcVideoStreamType.Low
     );
+  };
+
+  whiteboardStart = async (container: HTMLDivElement) => {
+    await this.whiteboardManager.start(container);
+  };
+
+  whiteboardStop = async () => {
+    await this.whiteboardManager.stop();
   };
 }

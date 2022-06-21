@@ -1,5 +1,10 @@
 import log from 'electron-log';
-import { DeviceType, MeetingConnection, ScreenShareState } from '../manager';
+import {
+  DeviceType,
+  MeetingConnection,
+  ScreenShareState,
+  WhiteBoardState,
+} from '../manager';
 import {
   StoreActionType,
   StoreAction,
@@ -146,6 +151,12 @@ export const StoreReducer = (
       newState = {
         ...state,
         screenshareState: action.payload as ScreenShareState,
+      };
+      break;
+    case StoreActionType.ACTION_TYPE_WHITEBOARD_STATE:
+      newState = {
+        ...state,
+        whiteboardState: action.payload as WhiteBoardState,
       };
       break;
     default:
