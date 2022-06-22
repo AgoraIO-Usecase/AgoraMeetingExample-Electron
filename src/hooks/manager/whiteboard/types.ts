@@ -12,4 +12,9 @@ export enum WhiteBoardError {
   Kicked,
 }
 
+export type WhiteBoardRoomInfo = {
+  uuid: string;
+  timespan: string;
+};
+
 export default {};

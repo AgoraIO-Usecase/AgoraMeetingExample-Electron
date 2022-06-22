@@ -40,11 +40,15 @@ export interface RtcUser {
 
   isCameraMuted?: boolean;
   isAudioMuted?: boolean;
+
+  whiteboardUUID?: string;
+  whiteboardTimeSpan?: string;
 }
 
 export enum RtcUserUpdateReason {
   Info,
   Media,
+  WhiteBoard,
 }
 
 export interface RtcJoinParams {
@@ -68,7 +72,6 @@ export interface RtcAudioVolumeIndication {
 
 export type RtcDataStreamMessage = {
   info: RtcUser;
-  control: any;
 };
 
 export enum RtcScreenShareState {

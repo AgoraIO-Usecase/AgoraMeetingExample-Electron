@@ -46,7 +46,11 @@ export declare interface RtcManager {
   on(evt: 'userNew', cb: (user: RtcUser) => void): this;
   on(
     evt: 'userUpdate',
-    cb: (user: RtcUser, reason: RtcUserUpdateReason) => void
+    cb: (
+      oldUser: RtcUser,
+      newUser: RtcUser,
+      reason: RtcUserUpdateReason
+    ) => void
   ): this;
   on(evt: 'userRemove', cb: (uid: number) => void): this;
   on(
@@ -462,6 +466,26 @@ export class RtcManager extends EventEmitter {
     );
   };
 
+  setLocalWhiteBoardInfo = (
+    uuid: string | undefined,
+    timespan: string | undefined
+  ) => {
+    const selfUser = this.getSelfUser();
+
+    if (
+      selfUser.whiteboardUUID !== uuid ||
+      selfUser.whiteboardTimeSpan !== timespan
+    )
+      this.updateUser(
+        {
+          ...selfUser,
+          whiteboardUUID: uuid,
+          whiteboardTimeSpan: timespan,
+        },
+        RtcUserUpdateReason.Media
+      );
+  };
+
   private registerEngineEvents = () => {
     this.engine.on('joinedChannel', (channel, uid, elapsed) => {
       log.info(
@@ -470,6 +494,8 @@ export class RtcManager extends EventEmitter {
         )} elapsed: ${elapsed}`
       );
 
+      // We recommend you do not use dataStream to sync meeting infos
+      // coz too many users send message through dataStream will bring broadcasting storms
       this.startDataStreamSender();
       this.setConnection(RtcConnection.Connected);
     });
@@ -784,9 +810,10 @@ export class RtcManager extends EventEmitter {
   };
 
   private updateUser = (user: RtcUser, reason: RtcUserUpdateReason) => {
+    const oldUser = this.state.users[user.uid];
     this.state.users[user.uid] = { ...this.state.users[user.uid], ...user };
 
-    this.emit('userUpdate', this.state.users[user.uid], reason);
+    this.emit('userUpdate', oldUser, this.state.users[user.uid], reason);
   };
 
   private removeUser = (uid: number) => {
@@ -801,7 +828,7 @@ export class RtcManager extends EventEmitter {
   private onDataStreamMessage = (msg: string) => {
     try {
       const data = JSON.parse(msg) as RtcDataStreamMessage;
-      const { info, control } = data;
+      const { info } = data;
 
       const oldUser = this.getUser(info.uid);
       if (oldUser === undefined) return;
@@ -819,6 +846,19 @@ export class RtcManager extends EventEmitter {
             shareId: info.shareId,
           },
           RtcUserUpdateReason.Info
+        );
+
+      if (
+        oldUser.whiteboardUUID !== info.whiteboardUUID ||
+        oldUser.whiteboardTimeSpan !== info.whiteboardTimeSpan
+      )
+        this.updateUser(
+          {
+            uid: info.uid,
+            whiteboardUUID: info.whiteboardUUID,
+            whiteboardTimeSpan: info.whiteboardTimeSpan,
+          },
+          RtcUserUpdateReason.WhiteBoard
         );
 
       // update share user
@@ -844,12 +884,7 @@ export class RtcManager extends EventEmitter {
   };
 
   private sendDataStreamMessage = () => {
-    const data: RtcDataStreamMessage = {
-      info: this.getSelfUser(),
-      control: {},
-    };
-
-    const msg = JSON.stringify(data);
+    const msg = JSON.stringify({ info: this.getSelfUser() });
 
     if (this.isInChannel())
       this.engine.sendStreamMessage(this.state.dataStreamId, msg);

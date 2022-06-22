@@ -7,18 +7,14 @@ import {
 } from '@netless/fastboard';
 import log from 'electron-log';
 
-import { WhiteBoardError, WhiteBoardConnection } from './types';
+import { WhiteBoardError, WhiteBoardConnection, WhiteBoardRoomInfo } from './types';
 import { generateRoomToken, generateSdkToken } from './cert';
-import { createRoom, WhiteBoardRoomParams } from './api';
+import { banRoom, createRoom } from './api';
 
 export declare interface WhiteBoardManager {
   on(
     evt: 'connection',
-    cb: (
-      connection: WhiteBoardConnection,
-      room: string,
-      error: WhiteBoardError
-    ) => void
+    cb: (connection: WhiteBoardConnection, error: WhiteBoardError) => void
   ): this;
 }
 
@@ -28,7 +24,9 @@ export class WhiteBoardManager extends EventEmitter {
     connection: WhiteBoardConnection;
 
     token: string;
-    params?: WhiteBoardRoomParams | undefined;
+    isCreator: boolean;
+    uuid: string;
+    timespan: string;
     board: {
       app?: FastboardApp | undefined;
       mounted?:
@@ -47,7 +45,9 @@ export class WhiteBoardManager extends EventEmitter {
       connection: WhiteBoardConnection.Disconnected,
 
       token: generateSdkToken(),
-      params: undefined,
+      isCreator: false,
+      uuid: '',
+      timespan: '',
       board: {},
     };
   }
@@ -83,13 +83,28 @@ export class WhiteBoardManager extends EventEmitter {
 
     this.props.connection = WhiteBoardConnection.Disconnected;
     this.props.token = generateSdkToken();
-    this.props.params = undefined;
+    this.props.board = {};
+    this.props.isCreator = false;
+    this.props.uuid = '';
+    this.props.timespan = '';
   };
 
-  isRunning = () => this.props.connection === WhiteBoardConnection.Connected;
+  isConnected = () => this.props.connection === WhiteBoardConnection.Connected;
+
+  isDisconnected = () =>
+    this.props.connection === WhiteBoardConnection.Disconnected;
+
+  isCreator = () => this.props.isCreator;
+
+  getRoomInfo = (): WhiteBoardRoomInfo => {
+    return {
+      uuid: this.props.uuid,
+      timespan: this.props.timespan,
+    };
+  };
 
   start = async () => {
-    if (this.isRunning()) return;
+    if (!this.isDisconnected()) return;
 
     log.info('whiteboard manager start');
 
@@ -107,15 +122,14 @@ export class WhiteBoardManager extends EventEmitter {
       }
 
       // join room
-      this.props.params = response.data;
-      const { uuid, teamUUID, appUUID } = this.props.params;
+      const { uuid, createdAt } = response.data;
       const app = await createFastboard({
         sdkConfig: {
           appIdentifier: process.env.AGORA_WHITEBOARD_APPID!,
           region: process.env.AGORA_WHITEBOARD_REGION || 'cn-hz',
         },
         joinRoom: {
-          uid: '',
+          uid: String(Number(`${new Date().getTime()}`.slice(4))),
           uuid,
           roomToken: generateRoomToken(uuid),
           callbacks: {
@@ -130,6 +144,53 @@ export class WhiteBoardManager extends EventEmitter {
       });
 
       this.props.board.app = app;
+      this.props.isCreator = true;
+      this.props.uuid = uuid;
+      this.props.timespan = createdAt;
+
+      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
+    } catch (error) {
+      log.error('whiteboard start whiteboard throw an exception', error);
+      this.setConnection(
+        WhiteBoardConnection.Disconnected,
+        WhiteBoardError.Exception
+      );
+    }
+  };
+
+  private join = async (uuid: string, timespan: string) => {
+    if (!this.isDisconnected()) return;
+
+    log.info('whiteboard manager join');
+
+    this.setConnection(WhiteBoardConnection.Connecting, WhiteBoardError.None);
+
+    try {
+      // join room
+      const app = await createFastboard({
+        sdkConfig: {
+          appIdentifier: process.env.AGORA_WHITEBOARD_APPID!,
+          region: process.env.AGORA_WHITEBOARD_REGION || 'cn-hz',
+        },
+        joinRoom: {
+          uid: String(Number(`${new Date().getTime()}`.slice(4))),
+          uuid,
+          roomToken: generateRoomToken(uuid),
+          callbacks: {
+            onPhaseChanged: this.onWhiteBoardPhaseChanged,
+            onDisconnectWithError: this.onWhiteBoardDisconnectWithError,
+            onKickedWithReason: this.onWhiteBoardKickedWithReason,
+          },
+        },
+        managerConfig: {
+          cursor: true,
+        },
+      });
+
+      this.props.board.app = app;
+      this.props.isCreator = false;
+      this.props.uuid = uuid;
+      this.props.timespan = timespan;
 
       this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
     } catch (error) {
@@ -149,15 +210,21 @@ export class WhiteBoardManager extends EventEmitter {
     try {
       await this.props.board.app?.destroy();
       this.props.board.mounted?.destroy();
+
+      if (this.props.isCreator)
+        await banRoom(this.props.token, this.props.uuid);
     } catch (e) {
       console.warn('whiteboard stop ecxeption', e);
     } finally {
       this.props.board = {};
+      this.props.isCreator = false;
+      this.props.uuid = '';
+      this.props.timespan = '';
     }
   };
 
   setElement = (element: HTMLDivElement | null) => {
-    if (!this.isRunning()) return;
+    if (!this.isConnected()) return;
 
     try {
       const { mounted, app } = this.props.board;
@@ -171,6 +238,49 @@ export class WhiteBoardManager extends EventEmitter {
       }
     } catch (error) {
       log.error('whiteboard manager set element throw an exception', error);
+    }
+  };
+
+  autoJoinOrStop = async (
+    oldRoomInfo: WhiteBoardRoomInfo,
+    newRoomInfo: WhiteBoardRoomInfo
+  ) => {
+    console.warn('whiteboard manager autoJoinOrStop', oldRoomInfo, newRoomInfo);
+    if (
+      this.isDisconnected() &&
+      newRoomInfo.uuid.length &&
+      newRoomInfo.timespan.length
+    ) {
+      // should auto join
+      log.info('whiteboard manager should auto join room', newRoomInfo);
+      await this.join(newRoomInfo.uuid, newRoomInfo.timespan);
+    } else if (
+      this.isConnected() &&
+      !newRoomInfo.uuid.length &&
+      oldRoomInfo.uuid === this.props.uuid
+    ) {
+      // should auto stop, but the server will kick me out when
+      // remote user baned room, so we do nothing here
+      log.info('whiteboard manager should auto stop', oldRoomInfo);
+    } else if (
+      this.isConnected() &&
+      newRoomInfo.uuid.length &&
+      newRoomInfo.uuid !== this.props.uuid
+    ) {
+      const newRoomDate = new Date(newRoomInfo.timespan).getTime();
+      const nowRoomDate = new Date(this.props.timespan).getTime();
+
+      // only when new room info is created before old room we should stop and auto rejoin room
+      if (newRoomDate > nowRoomDate) {
+        log.warn(
+          'whiteboard manager abandoned new room info',
+          nowRoomDate,
+          newRoomDate
+        );
+        return;
+      }
+
+      log.info('whiteboard manager should auto stop and rejoin a new room');
     }
   };
 
@@ -207,11 +317,10 @@ export class WhiteBoardManager extends EventEmitter {
     connection: WhiteBoardConnection,
     error: WhiteBoardError
   ) => {
-    if (this.props.connection === connection && error === WhiteBoardError.None)
-      return;
+    if (this.props.connection === connection) return;
 
     this.props.connection = connection;
 
-    this.emit('connection', connection, this.props.params?.uuid, error);
+    this.emit('connection', connection, error);
   };
 }

@@ -6,6 +6,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.headers.post.region =
   process.env.AGORA_WHITEBOARD_REGION || 'cn-hz';
 
+axios.defaults.headers.patch['Content-Type'] = 'application/json';
+axios.defaults.headers.patch.region =
+  process.env.AGORA_WHITEBOARD_REGION || 'cn-hz';
+
 export interface WhiteBoardRoomParams {
   uuid: string;
   teamUUID: string;
@@ -24,6 +28,15 @@ export const createRoom = (token: string) =>
       headers: {
         token,
       },
+    }
+  );
+
+export const banRoom = (token: string, uuid: string) =>
+  axios.patch<any, AxiosResponse<WhiteBoardRoomParams>>(
+    `${API_HOST}/rooms/${uuid}`,
+    { isBan: true },
+    {
+      headers: { token },
     }
   );
 

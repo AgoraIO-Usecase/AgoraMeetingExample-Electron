@@ -79,16 +79,25 @@ export class AttendeeManager extends EventEmitter {
     }
   };
 
-  private onRtcUserUpdate = (user: RtcUser, reason: RtcUserUpdateReason) => {
-    log.info('attendee manager on onRtcUserUpdate', user, reason);
+  private onRtcUserUpdate = (
+    oldUser: RtcUser,
+    newUser: RtcUser,
+    reason: RtcUserUpdateReason
+  ) => {
+    log.info(
+      'attendee manager on onRtcUserUpdate',
+      JSON.stringify(oldUser),
+      JSON.stringify(newUser),
+      reason
+    );
 
     const index = this.state.attendees.findIndex(
-      (item) => item.uid === user.uid
+      (item) => item.uid === newUser.uid
     );
 
     if (index === -1) return;
 
-    const attendee = { ...this.state.attendees[index], ...user };
+    const attendee = { ...this.state.attendees[index], ...newUser };
     if (reason === RtcUserUpdateReason.Info || index === 0 || index === 1) {
       this.state.attendees[index] = attendee;
       this.emit('update', index, attendee);

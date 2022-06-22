@@ -5,6 +5,7 @@ import log from 'electron-log';
 import { remote } from 'electron';
 import {
   RtcManager,
+  RtcUserUpdateReason,
   RtcVideoEncoderConfigurationType,
   RtcVideoStreamType,
 } from './rtc';
@@ -114,6 +115,20 @@ export class CommonManager extends EventEmitter {
       log.error('common manager on screenshareError', reason);
       this.emit('screenshareError', reason);
     });
+    this.rtcManager.on('userUpdate', (oldUser, newUser, reason) => {
+      if (reason !== RtcUserUpdateReason.WhiteBoard) return;
+
+      this.whiteboardManager.autoJoinOrStop(
+        {
+          uuid: oldUser.whiteboardUUID || '',
+          timespan: oldUser.whiteboardTimeSpan || '',
+        },
+        {
+          uuid: newUser.whiteboardUUID || '',
+          timespan: newUser.whiteboardTimeSpan || '',
+        }
+      );
+    });
 
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
@@ -158,7 +173,7 @@ export class CommonManager extends EventEmitter {
   };
 
   private initializeWhiteBoardManager = () => {
-    this.whiteboardManager.on('connection', (connection, room, error) => {
+    this.whiteboardManager.on('connection', (connection, error) => {
       let state = WhiteBoardState.Idle;
       switch (connection) {
         case WhiteBoardConnection.Disconnected:
@@ -174,6 +189,14 @@ export class CommonManager extends EventEmitter {
           break;
       }
 
+      if (
+        state === WhiteBoardState.Running &&
+        this.whiteboardManager.isCreator()
+      ) {
+        const { uuid, timespan } = this.whiteboardManager.getRoomInfo();
+        this.rtcManager.setLocalWhiteBoardInfo(uuid, timespan);
+      } else this.rtcManager.setLocalWhiteBoardInfo(undefined, undefined);
+
       this.emit('whiteboardState', state);
     });
 
@@ -185,10 +208,10 @@ export class CommonManager extends EventEmitter {
 
     log.info('common manager initialize');
 
+    this.initializeWhiteBoardManager();
     this.initializeRtcManager();
     this.initializeMeetingManager();
     this.initializeAttendeeManager();
-    this.initializeWhiteBoardManager();
 
     this.state.isInitialized = true;
   };
@@ -222,7 +245,7 @@ export class CommonManager extends EventEmitter {
   };
 
   leaveMeeting = () => {
-    if (this.whiteboardManager.isRunning()) this.whiteboardManager.stop();
+    if (this.whiteboardManager.isConnected()) this.whiteboardManager.stop();
 
     this.meetingManager.leaveMeeting();
   };
@@ -382,4 +405,6 @@ export class CommonManager extends EventEmitter {
   whiteboardSetView = (element: HTMLDivElement | null) => {
     this.whiteboardManager.setElement(element);
   };
+
+  whiteboardIsSelfCreator = () => this.whiteboardManager.isCreator();
 }
