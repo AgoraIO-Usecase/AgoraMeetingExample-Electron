@@ -43,9 +43,7 @@ const MeetingView = () => {
 
   const onWhiteBoardClicked = () => {
     if (state.whiteboardState === WhiteBoardState.Idle)
-      commonManager.whiteboardStart(
-        document.getElementById('root')! as HTMLDivElement
-      );
+      commonManager.whiteboardStart();
     else if (state.whiteboardState === WhiteBoardState.Running)
       commonManager.whiteboardStop();
   };
@@ -65,7 +63,11 @@ const MeetingView = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <HeaderBar title={commonManager.getChannelName()} fixed={false} layouts />
+      <HeaderBar
+        title={commonManager.getChannelName()}
+        fixed={false}
+        layouts={state.whiteboardState === WhiteBoardState.Idle}
+      />
       <AttendeeView />
       <ToolBar
         isAudioOn={selfUser.isAudioOn || false}

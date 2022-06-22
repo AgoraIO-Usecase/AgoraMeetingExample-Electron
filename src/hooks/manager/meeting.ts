@@ -70,6 +70,10 @@ export class MeetingManager extends EventEmitter {
     return this.state.connection !== MeetingConnection.Disconnected;
   };
 
+  isDisconnecting = () => {
+    return this.state.connection === MeetingConnection.Disconnecting;
+  };
+
   joinMeeting = (params: MeetingParams) => {
     if (this.isInMeeting()) {
       log.warn('meeting manager join meeting failed, already joined');

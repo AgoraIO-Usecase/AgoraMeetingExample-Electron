@@ -25,6 +25,8 @@ const onMeetingConnection = (
       ...state,
       connection,
       attendees: [],
+      screenshareState: ScreenShareState.Idle,
+      whiteboardState: WhiteBoardState.Idle,
     };
 
   return { ...state, connection };

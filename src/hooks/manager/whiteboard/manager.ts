@@ -31,7 +31,7 @@ export class WhiteBoardManager extends EventEmitter {
     params?: WhiteBoardRoomParams | undefined;
     board: {
       app?: FastboardApp | undefined;
-      element?:
+      mounted?:
         | {
             destroy: () => void;
           }
@@ -71,10 +71,10 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.isInitialized = false;
   };
 
-  reset = () => {
+  reset = async () => {
     try {
-      this.props.board.app?.destroy();
-      this.props.board.element?.destroy();
+      await this.props.board.app?.destroy();
+      this.props.board.mounted?.destroy();
     } catch (e) {
       console.warn('whiteboard reset ecxeption', e);
     } finally {
@@ -86,10 +86,12 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.params = undefined;
   };
 
-  isRunning = () => this.props.connection !== WhiteBoardConnection.Disconnected;
+  isRunning = () => this.props.connection === WhiteBoardConnection.Connected;
 
-  start = async (container: HTMLDivElement) => {
+  start = async () => {
     if (this.isRunning()) return;
+
+    log.info('whiteboard manager start');
 
     this.setConnection(WhiteBoardConnection.Connecting, WhiteBoardError.None);
 
@@ -97,7 +99,7 @@ export class WhiteBoardManager extends EventEmitter {
       // create room
       const response = await createRoom(this.props.token);
       if (!response.status || response.status !== 201) {
-        log.error('whiteboard create room failed', response);
+        log.error('whiteboard manager create room failed', response);
         this.setConnection(
           WhiteBoardConnection.Disconnected,
           WhiteBoardError.CreateRoom
@@ -129,7 +131,7 @@ export class WhiteBoardManager extends EventEmitter {
 
       this.props.board.app = app;
 
-      // this.props.board.element = mount(app, container);
+      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
     } catch (error) {
       log.error('whiteboard start whiteboard throw an exception', error);
       this.setConnection(
@@ -142,9 +144,11 @@ export class WhiteBoardManager extends EventEmitter {
   stop = async () => {
     if (!this.props.board) return;
 
+    log.info('whiteboard manager stop');
+
     try {
       await this.props.board.app?.destroy();
-      this.props.board.element?.destroy();
+      this.props.board.mounted?.destroy();
     } catch (e) {
       console.warn('whiteboard stop ecxeption', e);
     } finally {
@@ -153,14 +157,20 @@ export class WhiteBoardManager extends EventEmitter {
   };
 
   setElement = (element: HTMLDivElement | null) => {
-    try {
-      this.props.board.element?.destroy();
+    if (!this.isRunning()) return;
 
-      if (element) {
-        this.props.board.element = mount(this.props.board.app!, element);
+    try {
+      const { mounted, app } = this.props.board;
+
+      // unmount old element
+      if (mounted) mounted.destroy();
+
+      if (element && app) {
+        this.props.board.mounted = mount(app, element);
+        log.info('whiteboard manager mounted with element ', element.id);
       }
     } catch (error) {
-      log.error('whiteboard set element throw an exception', error);
+      log.error('whiteboard manager set element throw an exception', error);
     }
   };
 
@@ -170,9 +180,9 @@ export class WhiteBoardManager extends EventEmitter {
         WhiteBoardConnection.Disconnected,
         WhiteBoardError.None
       );
-    } else if (phase === 'connected') {
-      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
     }
+
+    log.info(`whiteboard manager on phase ${phase}`);
   };
 
   private onWhiteBoardDisconnectWithError = (error: any) => {

@@ -159,13 +159,6 @@ export class CommonManager extends EventEmitter {
 
   private initializeWhiteBoardManager = () => {
     this.whiteboardManager.on('connection', (connection, room, error) => {
-      console.warn(
-        'common manager on whiteboard connection',
-        connection,
-        error,
-        room
-      );
-
       let state = WhiteBoardState.Idle;
       switch (connection) {
         case WhiteBoardConnection.Disconnected:
@@ -236,6 +229,10 @@ export class CommonManager extends EventEmitter {
 
   isInMeeting = () => {
     return this.meetingManager.isInMeeting();
+  };
+
+  isDisconnecting = () => {
+    return this.meetingManager.isDisconnecting();
   };
 
   getChannelName = () => this.meetingManager.getChannelName();
@@ -374,11 +371,15 @@ export class CommonManager extends EventEmitter {
     );
   };
 
-  whiteboardStart = async (container: HTMLDivElement) => {
-    await this.whiteboardManager.start(container);
+  whiteboardStart = async () => {
+    await this.whiteboardManager.start();
   };
 
   whiteboardStop = async () => {
     await this.whiteboardManager.stop();
+  };
+
+  whiteboardSetView = (element: HTMLDivElement | null) => {
+    this.whiteboardManager.setElement(element);
   };
 }

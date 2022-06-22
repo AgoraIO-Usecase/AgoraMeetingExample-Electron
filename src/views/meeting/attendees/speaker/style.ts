@@ -25,6 +25,11 @@ const useStyle = makeStyles(() => {
       right: '0px',
       height: '100%',
       padding: '4px 4px',
+      pointerEvents: 'none',
+      zIndex: '9999999',
+    },
+    videoBoxListSwitch: {
+      pointerEvents: 'auto',
     },
   });
 });

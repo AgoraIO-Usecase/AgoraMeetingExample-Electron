@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useMemo, useState } from 'react';
 import { ListItem, Stack, Slide, IconButton } from '@mui/material';
 import NavigateBeforeOutlinedIcon from '@mui/icons-material/NavigateBeforeOutlined';
@@ -6,7 +7,13 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import AttendeeItem from '../attendee';
-import { useStore, StoreState, useCommonManager } from '../../../../hooks';
+import WhiteBoardView from '../../../components/whiteboard';
+import {
+  useStore,
+  StoreState,
+  useCommonManager,
+  WhiteBoardState,
+} from '../../../../hooks';
 import useStyle from './style';
 import { generateVideoboxId } from '../utils';
 
@@ -75,7 +82,9 @@ const AttendeeView = () => {
   return (
     <Stack direction="row" className={style.wrapper}>
       <Stack className={style.videoBoxMainContainer}>
-        {mainViewIndex < state.attendees.length ? (
+        {state.whiteboardState === WhiteBoardState.Running ? (
+          <WhiteBoardView />
+        ) : mainViewIndex < state.attendees.length ? (
           <AttendeeItem
             isMain
             isFit
@@ -90,7 +99,10 @@ const AttendeeView = () => {
           justifyContent="center"
         >
           {needShowAttendeeList ? (
-            <IconButton onClick={onSlideButtonClicked}>
+            <IconButton
+              className={style.videoBoxListSwitch}
+              onClick={onSlideButtonClicked}
+            >
               {showAttendeeList ? (
                 <NavigateBeforeOutlinedIcon color="primary" fontSize="large" />
               ) : (

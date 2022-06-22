@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo, useReducer } from 'react';
-import { useSnackbar } from 'notistack';
+import { useSnackbar, VariantType } from 'notistack';
 import {
   AttendeeLayoutType,
   StoreActionPayloadDevice,
@@ -26,6 +26,20 @@ export const RootProvider: FC = (props) => {
   });
   const commonManager = useMemo(() => new CommonManager(), []);
   const { enqueueSnackbar } = useSnackbar();
+
+  const showNotification = (
+    message: string,
+    variant: VariantType = 'info',
+    isInMeeting = true
+  ) => {
+    if (
+      isInMeeting &&
+      (!commonManager.isInMeeting() || commonManager.isDisconnecting())
+    )
+      return;
+
+    enqueueSnackbar(message, { variant });
+  };
 
   useEffect(() => {
     commonManager.on('connection', (connection, reason) => {
@@ -86,9 +100,9 @@ export const RootProvider: FC = (props) => {
     });
     commonManager.on('screenshareState', (screenshareState, reason) => {
       if (screenshareState === ScreenShareState.Running)
-        enqueueSnackbar('screenshare begin', { variant: 'success' });
+        showNotification('screenshare begin', 'success');
       else if (screenshareState === ScreenShareState.Idle)
-        enqueueSnackbar('screenshare finished', { variant: 'info' });
+        showNotification('screenshare finished', 'info');
 
       dispatch({
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
@@ -97,9 +111,18 @@ export const RootProvider: FC = (props) => {
     });
     commonManager.on('whiteboardState', (whiteboardState) => {
       if (whiteboardState === WhiteBoardState.Running)
-        enqueueSnackbar('whiteboard begin', { variant: 'success' });
+        showNotification(
+          'whiteboard begin, layout will change to speaker',
+          'success'
+        );
       else if (whiteboardState === WhiteBoardState.Idle)
-        enqueueSnackbar('whiteboard finished', { variant: 'info' });
+        showNotification('whiteboard finished', 'info');
+
+      if (whiteboardState === WhiteBoardState.Running)
+        dispatch({
+          type: StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT,
+          payload: AttendeeLayoutType.Speaker,
+        });
 
       dispatch({
         type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,
