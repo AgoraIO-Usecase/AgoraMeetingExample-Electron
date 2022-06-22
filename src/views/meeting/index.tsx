@@ -1,14 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stack, Tooltip } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
-import MicOffOutlinedIcon from '@mui/icons-material/MicOffOutlined';
-import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
-import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
-import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
-import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
-import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
+import { Stack } from '@mui/material';
 
 import HeaderBar from '../components/header';
 import AttendeeView from './attendees';

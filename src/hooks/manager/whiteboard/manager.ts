@@ -129,7 +129,7 @@ export class WhiteBoardManager extends EventEmitter {
 
       this.props.board.app = app;
 
-      this.props.board.element = mount(app, container);
+      // this.props.board.element = mount(app, container);
     } catch (error) {
       log.error('whiteboard start whiteboard throw an exception', error);
       this.setConnection(
@@ -149,6 +149,18 @@ export class WhiteBoardManager extends EventEmitter {
       console.warn('whiteboard stop ecxeption', e);
     } finally {
       this.props.board = {};
+    }
+  };
+
+  setElement = (element: HTMLDivElement | null) => {
+    try {
+      this.props.board.element?.destroy();
+
+      if (element) {
+        this.props.board.element = mount(this.props.board.app!, element);
+      }
+    } catch (error) {
+      log.error('whiteboard set element throw an exception', error);
     }
   };
 

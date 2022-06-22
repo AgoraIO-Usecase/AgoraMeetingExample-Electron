@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useMemo, useReducer } from 'react';
+import { useSnackbar } from 'notistack';
 import {
   AttendeeLayoutType,
   StoreActionPayloadDevice,
@@ -24,6 +25,7 @@ export const RootProvider: FC = (props) => {
     whiteboardState: WhiteBoardState.Idle,
   });
   const commonManager = useMemo(() => new CommonManager(), []);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     commonManager.on('connection', (connection, reason) => {
@@ -83,12 +85,22 @@ export const RootProvider: FC = (props) => {
       });
     });
     commonManager.on('screenshareState', (screenshareState, reason) => {
+      if (screenshareState === ScreenShareState.Running)
+        enqueueSnackbar('screenshare begin', { variant: 'success' });
+      else if (screenshareState === ScreenShareState.Idle)
+        enqueueSnackbar('screenshare finished', { variant: 'info' });
+
       dispatch({
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
         payload: screenshareState,
       });
     });
     commonManager.on('whiteboardState', (whiteboardState) => {
+      if (whiteboardState === WhiteBoardState.Running)
+        enqueueSnackbar('whiteboard begin', { variant: 'success' });
+      else if (whiteboardState === WhiteBoardState.Idle)
+        enqueueSnackbar('whiteboard finished', { variant: 'info' });
+
       dispatch({
         type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,
         payload: whiteboardState,

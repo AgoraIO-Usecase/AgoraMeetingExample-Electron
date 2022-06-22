@@ -247,6 +247,7 @@
     "electron-log": "^4.4.7",
     "history": "^5.0.0",
     "image-js": "^0.34.1",
+    "notistack": "^2.0.5",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-draggable": "^4.4.5",

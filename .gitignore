@@ -39,6 +39,7 @@ src/renderer.prod.js
 src/renderer.prod.js.map
 src/style.css
 src/style.css.map
+src/main.prod.js.LICENSE.txt
 dist
 dll
 main.js
