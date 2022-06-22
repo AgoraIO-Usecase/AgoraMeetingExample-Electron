@@ -72,13 +72,18 @@ export class WhiteBoardManager extends EventEmitter {
   };
 
   reset = () => {
-    if (this.props.board.app) this.props.board.app.destroy();
-    if (this.props.board.element) this.props.board.element.destroy();
+    try {
+      this.props.board.app?.destroy();
+      this.props.board.element?.destroy();
+    } catch (e) {
+      console.warn('whiteboard reset ecxeption', e);
+    } finally {
+      this.props.board = {};
+    }
 
     this.props.connection = WhiteBoardConnection.Disconnected;
     this.props.token = generateSdkToken();
     this.props.params = undefined;
-    this.props.board = {};
   };
 
   isRunning = () => this.props.connection !== WhiteBoardConnection.Disconnected;
@@ -137,8 +142,14 @@ export class WhiteBoardManager extends EventEmitter {
   stop = async () => {
     if (!this.props.board) return;
 
-    this.props.board.element?.destroy();
-    await this.props.board.app?.destroy();
+    try {
+      await this.props.board.app?.destroy();
+      this.props.board.element?.destroy();
+    } catch (e) {
+      console.warn('whiteboard stop ecxeption', e);
+    } finally {
+      this.props.board = {};
+    }
   };
 
   private onWhiteBoardPhaseChanged = (phase: RoomPhase) => {

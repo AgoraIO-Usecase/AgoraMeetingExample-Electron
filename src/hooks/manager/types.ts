@@ -16,7 +16,7 @@ export type AttendeeInfo = {
   isCameraMuted?: boolean;
   isAudioMuted?: boolean;
   isScreenSharing?: boolean;
-}
+};
 
 export enum MeetingConnection {
   Disconnected,

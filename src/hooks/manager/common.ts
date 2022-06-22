@@ -229,6 +229,8 @@ export class CommonManager extends EventEmitter {
   };
 
   leaveMeeting = () => {
+    if (this.whiteboardManager.isRunning()) this.whiteboardManager.stop();
+
     this.meetingManager.leaveMeeting();
   };
 
