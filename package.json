@@ -245,6 +245,7 @@
     "axios": "^0.27.2",
     "electron-debug": "^3.1.0",
     "electron-log": "^4.4.7",
+    "frameless-titlebar": "^2.1.4",
     "history": "^5.0.0",
     "image-js": "^0.34.1",
     "notistack": "^2.0.5",
