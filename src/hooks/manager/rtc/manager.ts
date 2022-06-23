@@ -186,12 +186,7 @@ export class RtcManager extends EventEmitter {
 
     const token = generateRtcToken(channelName, this.state.uid);
     // coz we do not have any backend service for now, we should auto subscribe remote audio and video
-    this.engine.joinChannel(token, channelName, '', this.state.uid, {
-      autoSubscribeAudio: true,
-      autoSubscribeVideo: true,
-      publishLocalAudio: isAudioOn,
-      publishLocalVideo: isCameraOn,
-    });
+    this.engine.joinChannel(token, channelName, '', this.state.uid);
 
     // coz host will auto publish audio stream
     this.engine.muteLocalAudioStream(!isAudioOn);
