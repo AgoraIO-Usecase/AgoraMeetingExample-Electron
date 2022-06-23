@@ -7,28 +7,28 @@ const useStyle = makeStyles(() => {
       width: '100%',
       height: '100%',
     },
-    videoBoxMainContainer: {
+    mainContainer: {
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
       position: 'relative',
     },
-    videoBoxListContainer: {
+    listContainer: {
       width: '160px',
       minWidth: '160px',
       maxWidth: '160px',
       height: '100%',
     },
-    videoBoxListSwitchContainer: {
+    sliderContainer: {
       position: 'absolute',
       boxSizing: 'border-box',
       right: '0px',
       height: '100%',
-      padding: '4px 4px',
+      padding: '48px 4px 48px 4px',
       pointerEvents: 'none',
-      zIndex: '9999999',
+      zIndex: '9999',
     },
-    videoBoxListSwitch: {
+    slider: {
       pointerEvents: 'auto',
     },
   });

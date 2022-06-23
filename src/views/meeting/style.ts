@@ -4,6 +4,13 @@ const useStyle = makeStyles(() => {
   return createStyles({
     mainWrapper: {
       background: '#FFFFFF',
+      width: '100%',
+      height: '100%',
+    },
+    focusedMainWrapper: {
+      background: '#00000000',
+      width: '100%',
+      height: '100%',
     },
     titleBar: {
       position: 'absolute',

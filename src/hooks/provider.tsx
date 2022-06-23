@@ -23,6 +23,9 @@ export const RootProvider: FC = (props) => {
     screenshareState: ScreenShareState.Idle,
     attendeeLayout: AttendeeLayoutType.Speaker,
     whiteboardState: WhiteBoardState.Idle,
+    showScreenShare: false,
+    focusMode: false,
+    markable: false,
   });
   const commonManager = useMemo(() => new CommonManager(), []);
   const { enqueueSnackbar } = useSnackbar();

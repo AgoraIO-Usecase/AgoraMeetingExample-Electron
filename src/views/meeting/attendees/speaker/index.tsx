@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable no-nested-ternary */
 import React, { useEffect, useMemo, useState } from 'react';
 import { ListItem, Stack, Slide, IconButton } from '@mui/material';
@@ -16,6 +17,7 @@ import {
 } from '../../../../hooks';
 import useStyle from './style';
 import { generateVideoboxId } from '../utils';
+import { useFocusHelper } from '../../../../utils/focushelper';
 
 const renderRow = (
   props: ListChildComponentProps<{
@@ -46,10 +48,11 @@ const AttendeeView = () => {
   const commonManager = useCommonManager();
   const [mainViewIndex, setMainViewIndex] = useState(0);
   const needShowAttendeeList = useMemo(() => {
-    return state.attendees.length > 1;
+    return state.attendees.length > 1 || state.focusMode;
   }, [state]);
   const [showAttendeeList, setShowAttendeeList] =
     useState(needShowAttendeeList);
+  const focusHelper = useFocusHelper();
 
   useEffect(() => {
     setShowAttendeeList(needShowAttendeeList);
@@ -81,10 +84,10 @@ const AttendeeView = () => {
 
   return (
     <Stack direction="row" className={style.wrapper}>
-      <Stack className={style.videoBoxMainContainer}>
+      <Stack className={style.mainContainer}>
         {state.whiteboardState === WhiteBoardState.Running ? (
           <WhiteBoardView />
-        ) : mainViewIndex < state.attendees.length ? (
+        ) : mainViewIndex < state.attendees.length && !state.focusMode ? (
           <AttendeeItem
             isMain
             isFit
@@ -94,19 +97,20 @@ const AttendeeView = () => {
           <></>
         )}
         <Stack
-          className={style.videoBoxListSwitchContainer}
+          className={style.sliderContainer}
           alignItems="center"
-          justifyContent="center"
+          justifyContent={state.focusMode ? 'flex-start' : 'center'}
         >
           {needShowAttendeeList ? (
             <IconButton
-              className={style.videoBoxListSwitch}
+              className={style.slider}
               onClick={onSlideButtonClicked}
+              {...focusHelper}
             >
               {showAttendeeList ? (
-                <NavigateBeforeOutlinedIcon color="primary" fontSize="large" />
+                <NavigateBeforeOutlinedIcon color="primary" fontSize="medium" />
               ) : (
-                <NavigateNextOutlinedIcon color="primary" fontSize="large" />
+                <NavigateNextOutlinedIcon color="primary" fontSize="medium" />
               )}
             </IconButton>
           ) : (
@@ -115,7 +119,7 @@ const AttendeeView = () => {
         </Stack>
       </Stack>
       <Slide direction="left" in={showAttendeeList} mountOnEnter unmountOnExit>
-        <Stack className={style.videoBoxListContainer}>
+        <Stack className={style.listContainer} {...focusHelper}>
           <AutoSizer>
             {({ height, width }) => (
               <FixedSizeList

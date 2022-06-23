@@ -11,7 +11,15 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, globalShortcut } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  globalShortcut,
+  ipcMain,
+  screen,
+  Rectangle,
+} from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import './utils/logtransports';
@@ -72,6 +80,11 @@ const createWindow = async () => {
       contextIsolation: false,
       enableRemoteModule: true,
     },
+    transparent: true,
+    frame: false,
+    enableLargerThanScreen: true,
+    titleBarStyle: 'hiddenInset',
+    backgroundColor: '#000000',
   });
 
   if (process.env.NODE_ENV !== 'production')
@@ -142,5 +155,53 @@ app.on('ready', () => {
     });
   });
 });
+
+let oldWindowBounds: Rectangle = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+};
+
+ipcMain.handle('focus-mode', (evt, enable) => {
+  log.info('app main ipc on focus-mode', enable);
+  if (!mainWindow) return;
+
+  if (enable) {
+    oldWindowBounds = mainWindow.getBounds();
+
+    const { width, height, x, y } = screen.getPrimaryDisplay().bounds;
+    mainWindow.setPosition(x, y);
+    mainWindow.setSize(width, height);
+  }
+  if (enable && process.platform === 'darwin') {
+    mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
+  }
+  if (!enable && process.platform === 'darwin') {
+    mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
+  }
+  mainWindow.setHasShadow(!enable);
+  mainWindow.setMovable(!enable);
+  mainWindow.setResizable(!enable);
+  mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
+  mainWindow.setFullScreen(enable && process.platform !== 'darwin');
+  BrowserWindow.fromWebContents(mainWindow.webContents)?.setIgnoreMouseEvents(
+    enable,
+    { forward: true }
+  );
+  mainWindow.setAlwaysOnTop(enable, 'screen-saver');
+  mainWindow.setVisibleOnAllWorkspaces(enable);
+  if (!enable) {
+    mainWindow.setBounds(oldWindowBounds);
+  }
+});
+
+ipcMain.on(
+  'set-ignore-mouse-events',
+  (event, ...args: [ignore: boolean, opts: { forward: boolean }]) => {
+    log.info('app main ipc on set-ignore-mouse-events', args);
+    BrowserWindow.fromWebContents(event.sender)?.setIgnoreMouseEvents(...args);
+  }
+);
 
 log.info('app initialized..............');

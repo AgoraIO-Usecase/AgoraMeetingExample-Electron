@@ -27,6 +27,9 @@ const onMeetingConnection = (
       attendees: [],
       screenshareState: ScreenShareState.Idle,
       whiteboardState: WhiteBoardState.Idle,
+      showScreenShare: false,
+      focusMode: false,
+      markable: false,
     };
 
   return { ...state, connection };
@@ -155,10 +158,33 @@ export const StoreReducer = (
         screenshareState: action.payload as ScreenShareState,
       };
       break;
-    case StoreActionType.ACTION_TYPE_WHITEBOARD_STATE:
+    case StoreActionType.ACTION_TYPE_WHITEBOARD_STATE: {
+      const whiteboardState = action.payload as WhiteBoardState;
       newState = {
         ...state,
-        whiteboardState: action.payload as WhiteBoardState,
+        whiteboardState,
+        markable:
+          whiteboardState === WhiteBoardState.Idle ? false : state.markable,
+      };
+      break;
+    }
+    case StoreActionType.ACTION_TYPE_SHOW_SCREENSHARE:
+      newState = {
+        ...state,
+        showScreenShare: action.payload as boolean,
+      };
+      break;
+    case StoreActionType.ACTION_TYPE_FOCUS_MODE:
+      newState = {
+        ...state,
+        focusMode: action.payload as boolean,
+        markable: false,
+      };
+      break;
+    case StoreActionType.ACTION_TYPE_MARKABLE:
+      newState = {
+        ...state,
+        markable: action.payload as boolean,
       };
       break;
     default:

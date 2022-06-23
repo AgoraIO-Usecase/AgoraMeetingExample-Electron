@@ -24,6 +24,9 @@ export enum StoreActionType {
   ACTION_TYPE_ATTENDEE_LAYOUT,
   ACTION_TYPE_SCREENSHARE_STATE,
   ACTION_TYPE_WHITEBOARD_STATE,
+  ACTION_TYPE_SHOW_SCREENSHARE,
+  ACTION_TYPE_FOCUS_MODE,
+  ACTION_TYPE_MARKABLE,
 }
 
 export type StoreState = {
@@ -41,6 +44,10 @@ export type StoreState = {
   screenshareState: ScreenShareState;
 
   whiteboardState: WhiteBoardState;
+
+  showScreenShare: boolean;
+  focusMode: boolean;
+  markable: boolean;
 };
 
 export type StoreActionPayloadAttendee = {
@@ -67,7 +74,8 @@ export type StoreActionPayload =
   | StoreActionPayloadDevice
   | ScreenShareState
   | AttendeeLayoutType
-  | WhiteBoardState;
+  | WhiteBoardState
+  | boolean;
 
 export type StoreAction = {
   type: StoreActionType;

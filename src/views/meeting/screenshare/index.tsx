@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -9,10 +10,18 @@ import {
   Typography,
   Stack,
   Skeleton,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
-import { ScreenShareSource, useCommonManager } from '../../../hooks';
+import {
+  ScreenShareSource,
+  StoreActionType,
+  useCommonManager,
+  useStore,
+} from '../../../hooks';
+import { useFocusHelper } from '../../../utils/focushelper';
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -156,14 +165,15 @@ const ScreenShareDialogItem = (props: {
   );
 };
 
-const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
-  const { open, onClose } = props;
+const ScreenShareDialog = () => {
+  const { state, dispatch } = useStore();
   const commonManager = useCommonManager();
   const [sources, setSources] = useState<ScreenShareSource[]>([]);
   const [currentSelected, setCurrentSelected] = useState(-1);
+  const focusHelper = useFocusHelper();
 
   useEffect(() => {
-    if (open)
+    if (state.showScreenShare)
       setTimeout(() => {
         commonManager
           .getScreenCaptureSources()
@@ -176,7 +186,7 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
             console.error('screenshare error', e);
           });
       }, 200);
-  }, [open]);
+  }, [state.showScreenShare]);
 
   const onItemClicked = (index: number) => {
     setCurrentSelected(index);
@@ -185,7 +195,11 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   const onPreClose = () => {
     setSources([]);
     setCurrentSelected(-1);
-    onClose();
+
+    dispatch({
+      type: StoreActionType.ACTION_TYPE_SHOW_SCREENSHARE,
+      payload: false,
+    });
   };
 
   const onPreOk = () => {
@@ -201,7 +215,11 @@ const ScreenShareDialog = (props: { open: boolean; onClose: () => void }) => {
   };
 
   return (
-    <StyledDialog aria-labelledby="customized-dialog-title" open={open}>
+    <StyledDialog
+      aria-labelledby="customized-dialog-title"
+      open={state.showScreenShare}
+      {...focusHelper}
+    >
       <ScreenShareDialogTitle id="customized-dialog-title" onClose={onPreClose}>
         ScreenShare
       </ScreenShareDialogTitle>

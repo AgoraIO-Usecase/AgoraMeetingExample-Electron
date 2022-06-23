@@ -1,22 +1,30 @@
-import React, { useCallback, useState, useMemo } from 'react';
-import { Stack, Tooltip } from '@mui/material';
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/no-children-prop */
+/* eslint-disable no-nested-ternary */
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
+import CropFreeOutlinedIcon from '@mui/icons-material/CropFreeOutlined';
+import TitleBar from 'frameless-titlebar';
+
+import { remote } from 'electron';
 
 import LayoutMenu from './layout';
 import SettingView from '../../setting';
+import { useFocusHelper, useSwitchFocusMode } from '../../../utils/focushelper';
 
 export declare type HeaderBarProps = {
-  fixed: boolean;
   title?: string;
+  fixed?: boolean;
   layouts?: boolean;
+  focus?: boolean;
 };
 
 const HeaderBar = (props: HeaderBarProps) => {
-  const { fixed, title, layouts } = props;
+  const { title, fixed, layouts, focus } = props;
   const [showSetting, setShowSetting] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState<Element | null>(
     null
@@ -25,6 +33,33 @@ const HeaderBar = (props: HeaderBarProps) => {
     () => Boolean(layoutMenuAnchor),
     [layoutMenuAnchor]
   );
+  const currentWindow = remote.getCurrentWindow();
+  const [maximized, setMaximized] = useState(currentWindow.isMaximized());
+  const focusHelper = useFocusHelper();
+  const { switchFocusMode } = useSwitchFocusMode();
+
+  // add window listeners for currentWindow
+  useEffect(() => {
+    const onMaximized = () => setMaximized(true);
+    const onRestore = () => setMaximized(false);
+    currentWindow.on('maximize', onMaximized);
+    currentWindow.on('unmaximize', onRestore);
+    currentWindow.on('resized', onRestore);
+    return () => {
+      currentWindow.removeListener('maximize', onMaximized);
+      currentWindow.removeListener('unmaximize', onRestore);
+    };
+  }, []);
+
+  // used by double click on the titlebar
+  // and by the maximize control button
+  const handleMaximize = () => {
+    if (maximized) {
+      currentWindow.restore();
+    } else {
+      currentWindow.maximize();
+    }
+  };
 
   const onSettingClicked = useCallback(() => {
     setShowSetting(true);
@@ -37,71 +72,115 @@ const HeaderBar = (props: HeaderBarProps) => {
     []
   );
 
+  const onFocusModeClicked = () => {
+    switchFocusMode();
+  };
+
   return (
-    <Stack
-      position={fixed ? 'absolute' : 'relative'}
-      width={fixed ? 'auto' : '100%'}
-      height="52px"
-      left="0"
-      right="0"
-      top="0"
-      padding="6px 6px 6px 12px"
-      boxSizing="border-box"
-      direction="row"
-      justifyContent="flex-end"
-      alignItems="center"
-    >
-      <AllInclusiveOutlinedIcon color="primary" />
-      {title ? (
-        <Typography
-          variant="subtitle2"
-          component="div"
-          margin="0px 0px 0px 12px"
-          whiteSpace="nowrap"
-          style={{ userSelect: 'none' }}
-        >
-          {`Channel: ${title}`}
-        </Typography>
+    <>
+      {fixed !== true ? (
+        <div
+          style={{
+            position: 'relative',
+            boxSizing: 'border-box',
+            width: '100%',
+            height: window.process.platform === 'darwin' ? '36px' : '28px',
+            minHeight: window.process.platform === 'darwin' ? '36px' : '28px',
+          }}
+        />
       ) : (
         <></>
       )}
-      <div style={{ width: '100%', height: '10px' }} />
-      {layouts ? (
-        <>
-          <Tooltip arrow title="AttendeeView Layout">
-            <IconButton
-              id="layout-button"
-              aria-controls={showLayoutMenu ? 'layout-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={showLayoutMenu ? 'true' : undefined}
-              onClick={onLayoutClicked}
-            >
-              <GridViewOutlinedIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-          <LayoutMenu
-            id="layout-menu"
-            anchor={layoutMenuAnchor}
-            anchorId="layout-button"
-            open={showLayoutMenu}
-            onClose={() => setLayoutMenuAnchor(null)}
-          />
-        </>
-      ) : (
-        <></>
-      )}
-      <Tooltip arrow title="Setting">
-        <IconButton onClick={onSettingClicked}>
-          <SettingsOutlinedIcon color="primary" />
-        </IconButton>
-      </Tooltip>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: window.process.platform === 'darwin' ? -60 : 0,
+          zIndex: 999,
+          boxSizing: 'border-box',
+        }}
+        {...focusHelper}
+      >
+        <TitleBar
+          icon={<AllInclusiveOutlinedIcon color="primary" fontSize="small" />}
+          title={`Agora Meeting${title ? ': ' : ''}${title}`}
+          currentWindow={currentWindow} // electron window instance
+          platform={window.process.platform as any}
+          onMinimize={() => currentWindow.minimize()}
+          onMaximize={handleMaximize}
+          // when the titlebar is double clicked
+          onDoubleClick={handleMaximize}
+          onClose={() => currentWindow.close()}
+          // hide minimize windows control
+          disableMinimize={false}
+          // hide maximize windows control
+          disableMaximize={false}
+          // is the current window maximized?
+          maximized={maximized}
+          theme={{
+            bar: {
+              height: window.process.platform === 'darwin' ? 36 : 28,
+              background: '#FFFFFFFF',
+              borderBottom: '0px',
+              title: {
+                fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+                fontWeight: 800,
+                color: 'black',
+              },
+            },
+          }}
+          children={
+            <>
+              {focus ? (
+                <Tooltip arrow title="Focus Mode">
+                  <IconButton onClick={onFocusModeClicked}>
+                    <CropFreeOutlinedIcon color="primary" fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <></>
+              )}
+              {layouts ? (
+                <>
+                  <Tooltip arrow title="AttendeeView Layout">
+                    <IconButton
+                      id="layout-button"
+                      aria-controls={showLayoutMenu ? 'layout-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={showLayoutMenu ? 'true' : undefined}
+                      onClick={onLayoutClicked}
+                    >
+                      <GridViewOutlinedIcon color="primary" fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <LayoutMenu
+                    id="layout-menu"
+                    anchor={layoutMenuAnchor}
+                    anchorId="layout-button"
+                    open={showLayoutMenu}
+                    onClose={() => setLayoutMenuAnchor(null)}
+                  />
+                </>
+              ) : (
+                <></>
+              )}
+              <Tooltip arrow title="Setting">
+                <IconButton onClick={onSettingClicked}>
+                  <SettingsOutlinedIcon color="primary" fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          }
+        />
+      </div>
       <SettingView
         open={showSetting}
         onClose={() => {
           setShowSetting(false);
         }}
       />
-    </Stack>
+    </>
   );
 };
 
