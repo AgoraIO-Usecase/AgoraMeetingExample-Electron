@@ -130,6 +130,13 @@ export class CommonManager extends EventEmitter {
       );
     });
 
+    this.rtcManager.on('whiteboardInfo', (uuid, timespan) => {
+      this.whiteboardManager.autoJoinOrStop(
+        { uuid: '', timespan: '' },
+        { uuid, timespan }
+      );
+    });
+
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
       `${remote.app.getPath('logs')}/`

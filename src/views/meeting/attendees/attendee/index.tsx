@@ -6,6 +6,7 @@ import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
+import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 
 import { AttendeeInfo, useCommonManager } from '../../../../hooks';
 import useStyle from './style';
@@ -80,7 +81,15 @@ export type AttendeeItemProps = {
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, isFit, attendee } = props;
-  const { uid, nickname, isSelf, isCameraOn, isAudioOn, parentId } = attendee;
+  const {
+    uid,
+    nickname,
+    isSelf,
+    isCameraOn,
+    isAudioOn,
+    parentId,
+    hasWhiteBoard,
+  } = attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
     [nickname, uid]
@@ -126,6 +135,11 @@ const AttendeeItem = (props: AttendeeItemProps) => {
                 ) : (
                   <VideocamOutlinedIcon color="primary" />
                 )
+              ) : (
+                <></>
+              )}
+              {hasWhiteBoard ? (
+                <DeveloperBoardOutlinedIcon color="primary" />
               ) : (
                 <></>
               )}

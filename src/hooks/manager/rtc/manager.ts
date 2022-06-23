@@ -74,6 +74,8 @@ export declare interface RtcManager {
     evt: 'screenshareError',
     cb: (reason: RtcScreenShareStateReason) => void
   ): this;
+
+  on(evt: 'whiteboardInfo', cb: (uuid: string, timespan: string) => void): this;
 }
 
 export class RtcManager extends EventEmitter {
@@ -859,6 +861,20 @@ export class RtcManager extends EventEmitter {
             whiteboardTimeSpan: info.whiteboardTimeSpan,
           },
           RtcUserUpdateReason.WhiteBoard
+        );
+
+      // in case that sync info through datastream can not make effect 100%
+      // so we emit whiteboardInfo here when we get a valid whiteboard room
+      if (
+        info.whiteboardUUID &&
+        info.whiteboardUUID.length &&
+        info.whiteboardTimeSpan &&
+        info.whiteboardTimeSpan.length
+      )
+        this.emit(
+          'whiteboardInfo',
+          info.whiteboardUUID,
+          info.whiteboardTimeSpan
         );
 
       // update share user

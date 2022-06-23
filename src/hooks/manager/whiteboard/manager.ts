@@ -7,7 +7,11 @@ import {
 } from '@netless/fastboard';
 import log from 'electron-log';
 
-import { WhiteBoardError, WhiteBoardConnection, WhiteBoardRoomInfo } from './types';
+import {
+  WhiteBoardError,
+  WhiteBoardConnection,
+  WhiteBoardRoomInfo,
+} from './types';
 import { generateRoomToken, generateSdkToken } from './cert';
 import { banRoom, createRoom } from './api';
 
@@ -245,7 +249,6 @@ export class WhiteBoardManager extends EventEmitter {
     oldRoomInfo: WhiteBoardRoomInfo,
     newRoomInfo: WhiteBoardRoomInfo
   ) => {
-    console.warn('whiteboard manager autoJoinOrStop', oldRoomInfo, newRoomInfo);
     if (
       this.isDisconnected() &&
       newRoomInfo.uuid.length &&
@@ -281,6 +284,9 @@ export class WhiteBoardManager extends EventEmitter {
       }
 
       log.info('whiteboard manager should auto stop and rejoin a new room');
+
+      await this.stop();
+      await this.join(newRoomInfo.uuid, newRoomInfo.timespan);
     }
   };
 

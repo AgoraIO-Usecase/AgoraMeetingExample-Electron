@@ -74,6 +74,10 @@ const MeetingView = () => {
         isCamerOn={selfUser.isCameraOn || false}
         screenshareState={state.screenshareState}
         whiteboardState={state.whiteboardState}
+        disableWhiteBoard={
+          state.whiteboardState === WhiteBoardState.Running &&
+          !commonManager.whiteboardIsSelfCreator()
+        }
         onMicrophoneClicked={onMicrophoneClicked}
         onCameraClicked={onCameraClicked}
         onScreenShareClicked={onScreenShareClicked}

@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react';
 import { Stack, Tooltip } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -17,6 +18,7 @@ export declare type ToolBarProps = {
   isCamerOn: boolean;
   screenshareState: ScreenShareState;
   whiteboardState: WhiteBoardState;
+  disableWhiteBoard: boolean;
 
   onMicrophoneClicked: () => void;
   onCameraClicked: () => void;
@@ -31,6 +33,7 @@ const ToolBar = (props: ToolBarProps) => {
     isCamerOn,
     screenshareState,
     whiteboardState,
+    disableWhiteBoard,
     onMicrophoneClicked,
     onCameraClicked,
     onScreenShareClicked,
@@ -93,11 +96,14 @@ const ToolBar = (props: ToolBarProps) => {
           onClick={onWhiteBoardClicked}
           loading={whiteboardState === WhiteBoardState.Waitting}
           loadingPosition="center"
+          disabled={disableWhiteBoard}
         >
           {whiteboardState !== WhiteBoardState.Waitting ? (
             <DeveloperBoardOutlinedIcon
               color={
-                whiteboardState === WhiteBoardState.Running
+                disableWhiteBoard
+                  ? 'disabled'
+                  : whiteboardState === WhiteBoardState.Running
                   ? 'success'
                   : 'primary'
               }

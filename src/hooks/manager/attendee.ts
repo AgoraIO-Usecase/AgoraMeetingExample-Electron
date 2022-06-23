@@ -98,6 +98,11 @@ export class AttendeeManager extends EventEmitter {
     if (index === -1) return;
 
     const attendee = { ...this.state.attendees[index], ...newUser };
+    attendee.hasWhiteBoard =
+      newUser.whiteboardUUID !== undefined &&
+      newUser.whiteboardUUID.length > 0 &&
+      newUser.whiteboardTimeSpan !== undefined &&
+      newUser.whiteboardTimeSpan.length > 0;
     if (reason === RtcUserUpdateReason.Info || index === 0 || index === 1) {
       this.state.attendees[index] = attendee;
       this.emit('update', index, attendee);
@@ -152,12 +157,13 @@ export class AttendeeManager extends EventEmitter {
   };
 
   private getAttendeePriority = (attendee: AttendeeInfo) => {
-    const { isSelf, isAudioOn, isCameraOn } = attendee;
+    const { isSelf, isAudioOn, isCameraOn, hasWhiteBoard } = attendee;
     if (isSelf) return -9999;
 
     let priority = 0;
     if (isAudioOn) priority -= 1;
     if (isCameraOn) priority -= 2;
+    if (hasWhiteBoard) priority -= 4;
 
     return priority;
   };
