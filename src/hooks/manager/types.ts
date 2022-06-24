@@ -15,7 +15,6 @@ export type AttendeeInfo = {
 
   isCameraMuted?: boolean;
   isAudioMuted?: boolean;
-  isScreenSharing?: boolean;
   hasWhiteBoard?: boolean;
 };
 

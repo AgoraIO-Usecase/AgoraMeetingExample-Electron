@@ -13,6 +13,7 @@ export enum WhiteBoardError {
 }
 
 export type WhiteBoardRoomInfo = {
+  parentId: number;
   uuid: string;
   timespan: string;
 };

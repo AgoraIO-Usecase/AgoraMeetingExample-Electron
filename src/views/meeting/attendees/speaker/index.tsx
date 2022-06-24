@@ -16,7 +16,7 @@ import {
   WhiteBoardState,
 } from '../../../../hooks';
 import useStyle from './style';
-import { generateVideoboxId } from '../utils';
+import { generateVideoboxId } from '../../../../utils/generate';
 import { useFocusHelper } from '../../../../utils/focushelper';
 
 const renderRow = (
@@ -53,6 +53,18 @@ const AttendeeView = () => {
   const [showAttendeeList, setShowAttendeeList] =
     useState(needShowAttendeeList);
   const focusHelper = useFocusHelper();
+  const currentWhiteBoardAttendee = useMemo(() => {
+    if (
+      state.whiteboardState !== WhiteBoardState.Running ||
+      commonManager.whiteboardIsSelfCreator()
+    )
+      return undefined;
+
+    const whiteboardRoomInfo = commonManager.whiteboardGetRoomInfo();
+    return state.attendees.find((attendee) => {
+      return attendee.uid === whiteboardRoomInfo.parentId;
+    });
+  }, [state]);
 
   useEffect(() => {
     setShowAttendeeList(needShowAttendeeList);
@@ -86,7 +98,7 @@ const AttendeeView = () => {
     <Stack direction="row" className={style.wrapper}>
       <Stack className={style.mainContainer}>
         {state.whiteboardState === WhiteBoardState.Running ? (
-          <WhiteBoardView />
+          <WhiteBoardView attendee={currentWhiteBoardAttendee} />
         ) : mainViewIndex < state.attendees.length && !state.focusMode ? (
           <AttendeeItem
             isMain

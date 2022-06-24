@@ -75,7 +75,10 @@ export declare interface RtcManager {
     cb: (reason: RtcScreenShareStateReason) => void
   ): this;
 
-  on(evt: 'whiteboardInfo', cb: (uuid: string, timespan: string) => void): this;
+  on(
+    evt: 'whiteboardInfo',
+    cb: (parentId: number, uuid: string, timespan: string) => void
+  ): this;
 }
 
 export class RtcManager extends EventEmitter {
@@ -873,6 +876,7 @@ export class RtcManager extends EventEmitter {
       )
         this.emit(
           'whiteboardInfo',
+          info.uid,
           info.whiteboardUUID,
           info.whiteboardTimeSpan
         );

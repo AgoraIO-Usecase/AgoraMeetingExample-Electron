@@ -120,20 +120,22 @@ export class CommonManager extends EventEmitter {
 
       this.whiteboardManager.autoJoinOrStop(
         {
+          parentId: oldUser.uid,
           uuid: oldUser.whiteboardUUID || '',
           timespan: oldUser.whiteboardTimeSpan || '',
         },
         {
+          parentId: newUser.uid,
           uuid: newUser.whiteboardUUID || '',
           timespan: newUser.whiteboardTimeSpan || '',
         }
       );
     });
 
-    this.rtcManager.on('whiteboardInfo', (uuid, timespan) => {
+    this.rtcManager.on('whiteboardInfo', (parentId, uuid, timespan) => {
       this.whiteboardManager.autoJoinOrStop(
-        { uuid: '', timespan: '' },
-        { uuid, timespan }
+        { parentId: 0, uuid: '', timespan: '' },
+        { parentId, uuid, timespan }
       );
     });
 
@@ -414,4 +416,6 @@ export class CommonManager extends EventEmitter {
   };
 
   whiteboardIsSelfCreator = () => this.whiteboardManager.isCreator();
+
+  whiteboardGetRoomInfo = () => this.whiteboardManager.getRoomInfo();
 }

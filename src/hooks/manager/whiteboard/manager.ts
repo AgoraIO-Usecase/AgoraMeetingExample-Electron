@@ -39,6 +39,7 @@ export class WhiteBoardManager extends EventEmitter {
           }
         | undefined;
     };
+    parentId: number;
   };
 
   constructor() {
@@ -53,6 +54,7 @@ export class WhiteBoardManager extends EventEmitter {
       uuid: '',
       timespan: '',
       board: {},
+      parentId: 0,
     };
   }
 
@@ -91,6 +93,7 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.isCreator = false;
     this.props.uuid = '';
     this.props.timespan = '';
+    this.props.parentId = 0;
   };
 
   isConnected = () => this.props.connection === WhiteBoardConnection.Connected;
@@ -102,6 +105,7 @@ export class WhiteBoardManager extends EventEmitter {
 
   getRoomInfo = (): WhiteBoardRoomInfo => {
     return {
+      parentId: this.props.parentId,
       uuid: this.props.uuid,
       timespan: this.props.timespan,
     };
@@ -162,7 +166,7 @@ export class WhiteBoardManager extends EventEmitter {
     }
   };
 
-  private join = async (uuid: string, timespan: string) => {
+  private join = async (info: WhiteBoardRoomInfo) => {
     if (!this.isDisconnected()) return;
 
     log.info('whiteboard manager join');
@@ -178,8 +182,8 @@ export class WhiteBoardManager extends EventEmitter {
         },
         joinRoom: {
           uid: String(Number(`${new Date().getTime()}`.slice(4))),
-          uuid,
-          roomToken: generateRoomToken(uuid),
+          uuid: info.uuid,
+          roomToken: generateRoomToken(info.uuid),
           callbacks: {
             onPhaseChanged: this.onWhiteBoardPhaseChanged,
             onDisconnectWithError: this.onWhiteBoardDisconnectWithError,
@@ -193,8 +197,9 @@ export class WhiteBoardManager extends EventEmitter {
 
       this.props.board.app = app;
       this.props.isCreator = false;
-      this.props.uuid = uuid;
-      this.props.timespan = timespan;
+      this.props.uuid = info.uuid;
+      this.props.timespan = info.timespan;
+      this.props.parentId = info.parentId;
 
       this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
     } catch (error) {
@@ -224,6 +229,7 @@ export class WhiteBoardManager extends EventEmitter {
       this.props.isCreator = false;
       this.props.uuid = '';
       this.props.timespan = '';
+      this.props.parentId = 0;
     }
   };
 
@@ -256,7 +262,7 @@ export class WhiteBoardManager extends EventEmitter {
     ) {
       // should auto join
       log.info('whiteboard manager should auto join room', newRoomInfo);
-      await this.join(newRoomInfo.uuid, newRoomInfo.timespan);
+      await this.join(newRoomInfo);
     } else if (
       this.isConnected() &&
       !newRoomInfo.uuid.length &&
@@ -286,7 +292,7 @@ export class WhiteBoardManager extends EventEmitter {
       log.info('whiteboard manager should auto stop and rejoin a new room');
 
       await this.stop();
-      await this.join(newRoomInfo.uuid, newRoomInfo.timespan);
+      await this.join(newRoomInfo);
     }
   };
 

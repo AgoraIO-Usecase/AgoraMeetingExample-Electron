@@ -39,7 +39,7 @@ const ToolBar = () => {
   const selfUser = useMemo(() => {
     if (state.attendees && state.attendees.length) return state.attendees[0];
 
-    return { isAudioOn: false, isCameraOn: false, isScreenSharing: false };
+    return { isAudioOn: false, isCameraOn: false };
   }, [state]);
 
   const disableWhiteBoard = useMemo(() => {
