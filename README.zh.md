@@ -19,7 +19,7 @@ _Read this in other languages: [English](README.md)_
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
 - [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
-- [Yarn](https://yarnpkg.com/) package manager >= 1.21.3
+- [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 
 #### 运行步骤
 
