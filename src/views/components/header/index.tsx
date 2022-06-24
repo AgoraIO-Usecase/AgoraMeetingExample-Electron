@@ -80,6 +80,7 @@ const HeaderBar = (props: HeaderBarProps) => {
     <>
       {fixed !== true ? (
         <div
+          className="headerbar-holder"
           style={{
             position: 'relative',
             boxSizing: 'border-box',
@@ -92,6 +93,7 @@ const HeaderBar = (props: HeaderBarProps) => {
         <></>
       )}
       <div
+        className="headerbar"
         style={{
           position: 'fixed',
           top: 0,
@@ -104,7 +106,7 @@ const HeaderBar = (props: HeaderBarProps) => {
       >
         <TitleBar
           icon={<AllInclusiveOutlinedIcon color="primary" fontSize="small" />}
-          title={`Agora Meeting${title ? ': ' : ''}${title}`}
+          title={`Agora Meeting${title ? ': ' : ''}${title || ''}`}
           currentWindow={currentWindow} // electron window instance
           platform={window.process.platform as any}
           onMinimize={() => currentWindow.minimize()}
@@ -120,8 +122,9 @@ const HeaderBar = (props: HeaderBarProps) => {
           maximized={maximized}
           theme={{
             bar: {
+              palette: 'light',
               height: window.process.platform === 'darwin' ? 36 : 28,
-              background: '#FFFFFFFF',
+              // background: '#FFFFFFFF',
               borderBottom: '0px',
               title: {
                 fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
@@ -132,44 +135,51 @@ const HeaderBar = (props: HeaderBarProps) => {
           }}
           children={
             <>
-              {focus ? (
-                <Tooltip arrow title="Focus Mode">
-                  <IconButton onClick={onFocusModeClicked}>
-                    <CropFreeOutlinedIcon color="primary" fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              ) : (
-                <></>
-              )}
-              {layouts ? (
-                <>
-                  <Tooltip arrow title="AttendeeView Layout">
-                    <IconButton
-                      id="layout-button"
-                      aria-controls={showLayoutMenu ? 'layout-menu' : undefined}
-                      aria-haspopup="true"
-                      aria-expanded={showLayoutMenu ? 'true' : undefined}
-                      onClick={onLayoutClicked}
-                    >
-                      <GridViewOutlinedIcon color="primary" fontSize="small" />
+              <div className="headerbar-controls">
+                {focus ? (
+                  <Tooltip arrow title="Focus Mode">
+                    <IconButton onClick={onFocusModeClicked}>
+                      <CropFreeOutlinedIcon color="primary" fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <LayoutMenu
-                    id="layout-menu"
-                    anchor={layoutMenuAnchor}
-                    anchorId="layout-button"
-                    open={showLayoutMenu}
-                    onClose={() => setLayoutMenuAnchor(null)}
-                  />
-                </>
-              ) : (
-                <></>
-              )}
-              <Tooltip arrow title="Setting">
-                <IconButton onClick={onSettingClicked}>
-                  <SettingsOutlinedIcon color="primary" fontSize="small" />
-                </IconButton>
-              </Tooltip>
+                ) : (
+                  <></>
+                )}
+                {layouts ? (
+                  <>
+                    <Tooltip arrow title="AttendeeView Layout">
+                      <IconButton
+                        id="layout-button"
+                        aria-controls={
+                          showLayoutMenu ? 'layout-menu' : undefined
+                        }
+                        aria-haspopup="true"
+                        aria-expanded={showLayoutMenu ? 'true' : undefined}
+                        onClick={onLayoutClicked}
+                      >
+                        <GridViewOutlinedIcon
+                          color="primary"
+                          fontSize="small"
+                        />
+                      </IconButton>
+                    </Tooltip>
+                    <LayoutMenu
+                      id="layout-menu"
+                      anchor={layoutMenuAnchor}
+                      anchorId="layout-button"
+                      open={showLayoutMenu}
+                      onClose={() => setLayoutMenuAnchor(null)}
+                    />
+                  </>
+                ) : (
+                  <></>
+                )}
+                <Tooltip arrow title="Setting">
+                  <IconButton onClick={onSettingClicked}>
+                    <SettingsOutlinedIcon color="primary" fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </div>
             </>
           }
         />
