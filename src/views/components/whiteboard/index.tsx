@@ -10,6 +10,16 @@ const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
   const commonManager = useCommonManager();
   const { attendee } = props;
 
+  const showVideoBox = useMemo(
+    () =>
+      attendee &&
+      !attendee.isSelf &&
+      attendee.shareId !== 0 &&
+      attendee.isSharingDisplay &&
+      attendee.isSharingFocusMode,
+    [attendee]
+  );
+
   useEffect(() => {
     const dom = document.getElementById('whiteboard-view');
     commonManager.whiteboardSetView(dom! as HTMLDivElement);
@@ -17,15 +27,15 @@ const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
     return () => commonManager.whiteboardSetView(null);
   }, []);
 
+  useEffect(() => {
+    if (showVideoBox) {
+    }
+  }, [attendee, showVideoBox]);
+
   return (
     <Stack className={style.wrapper}>
-      {attendee && !attendee.isSelf && attendee.shareId !== 0 ? (
-        <VideoBox
-          uid={attendee.shareId}
-          isSelf={attendee.isSelf || false}
-          isMain
-          isFit
-        />
+      {showVideoBox ? (
+        <VideoBox uid={attendee?.shareId} isSelf={false} isMain isFit />
       ) : (
         <></>
       )}

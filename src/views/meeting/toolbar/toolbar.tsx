@@ -11,7 +11,6 @@ import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
-import CropFreeOutlinedIcon from '@mui/icons-material/CropFreeOutlined';
 
 import { useNavigate } from 'react-router-dom';
 import useStyle from './style';
@@ -84,10 +83,6 @@ const ToolBar = () => {
     commonManager.leaveMeeting();
     navigate('/main');
   }, [state.focusMode]);
-
-  const onFocusModeClicked = () => {
-    switchFocusMode();
-  };
 
   return (
     <Stack
@@ -186,15 +181,6 @@ const ToolBar = () => {
           <LocalPhoneOutlinedIcon color="error" />
         </LoadingButton>
       </Tooltip>
-      {state.focusMode ? (
-        <Tooltip arrow title="Exit Focus Mode">
-          <LoadingButton onClick={onFocusModeClicked}>
-            <CropFreeOutlinedIcon color="success" fontSize="small" />
-          </LoadingButton>
-        </Tooltip>
-      ) : (
-        <></>
-      )}
     </Stack>
   );
 };

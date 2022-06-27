@@ -4,6 +4,7 @@ import log from 'electron-log';
 import { SIZE } from 'agora-electron-sdk/types/Api/native_type';
 
 import {
+  RtcScreenShareParams,
   RtcScreenShareSource,
   RtcScreenShareState,
   RtcScreenShareStateReason,
@@ -14,7 +15,11 @@ import { readImage } from './utils';
 export interface RtcScreenShareManager {
   on(
     evt: 'state',
-    cb: (state: RtcScreenShareState, reason: RtcScreenShareStateReason) => void
+    cb: (
+      state: RtcScreenShareState,
+      reason: RtcScreenShareStateReason,
+      params: RtcScreenShareParams
+    ) => void
   ): this;
 
   on(evt: 'error', cb: (reason: RtcScreenShareStateReason) => void): this;
@@ -27,19 +32,15 @@ export class RtcScreenShareManager extends EventEmitter {
     isInitialized: boolean;
     uid: number;
 
-    displayId?: number | undefined;
-    windowId?: number | undefined;
     state: RtcScreenShareState;
-
+    params: RtcScreenShareParams;
     excludeWindowIds: number[];
   } = {
     isInitialized: false,
     uid: 0,
 
-    displayId: undefined,
-    windowId: undefined,
     state: RtcScreenShareState.Idle,
-
+    params: {},
     excludeWindowIds: [],
   };
 
@@ -73,8 +74,7 @@ export class RtcScreenShareManager extends EventEmitter {
 
     this.engine.videoSourceRelease();
 
-    this.props.displayId = undefined;
-    this.props.windowId = undefined;
+    this.props.params = {};
 
     this.removeAllListeners();
 
@@ -160,14 +160,10 @@ export class RtcScreenShareManager extends EventEmitter {
     return transformedSources;
   };
 
-  start = (
-    channelName: string,
-    params: { windowId?: number; displayId?: number }
-  ) => {
+  start = (channelName: string, params: RtcScreenShareParams) => {
     if (this.isRunning()) return;
 
-    this.props.windowId = params.windowId;
-    this.props.displayId = params.displayId;
+    this.props.params = params;
 
     this.setState(RtcScreenShareState.Waitting, RtcScreenShareStateReason.None);
 
@@ -201,7 +197,7 @@ export class RtcScreenShareManager extends EventEmitter {
   };
 
   private startScreenShare = () => {
-    const { displayId, windowId } = this.props;
+    const { displayId, windowId } = this.props.params;
 
     const captureParam = {
       width: 0,
@@ -243,6 +239,7 @@ export class RtcScreenShareManager extends EventEmitter {
 
   private stopScreenShare = () => {
     this.engine.stopScreenCapture2();
+    this.props.params = {};
   };
 
   private setState = (
@@ -252,7 +249,7 @@ export class RtcScreenShareManager extends EventEmitter {
     log.info('screenshare manager set state', state, reason);
 
     this.props.state = state;
-    this.emit('state', this.props.state, reason);
+    this.emit('state', this.props.state, reason, this.props.params);
   };
 
   private registerEngineEvents = () => {

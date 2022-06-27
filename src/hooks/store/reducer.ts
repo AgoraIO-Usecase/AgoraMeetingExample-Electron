@@ -1,3 +1,4 @@
+import { ipcRenderer } from 'electron';
 import log from 'electron-log';
 import {
   DeviceType,
@@ -13,6 +14,7 @@ import {
   StoreActionPayloadDevice,
   AttendeeLayoutType,
   StoreActionPayloadAttendeeReplace,
+  StoreActionPayloadFocusMode,
 } from './types';
 
 const onMeetingConnection = (
@@ -108,6 +110,17 @@ const onAttendeeReplace = (
   return { ...oldState, attendees: newAttendees };
 };
 
+const onFocusMode = (
+  oldState: StoreState,
+  payload: StoreActionPayloadFocusMode
+) => {
+  const { focusMode, displayId } = payload;
+  if (oldState.focusMode === focusMode) return oldState;
+
+  ipcRenderer.invoke('focus-mode', focusMode, displayId);
+  return { ...oldState, focusMode, markable: false };
+};
+
 export const StoreReducer = (
   state: StoreState,
   action: StoreAction
@@ -163,8 +176,11 @@ export const StoreReducer = (
       newState = {
         ...state,
         whiteboardState,
-        markable:
-          whiteboardState === WhiteBoardState.Idle ? false : state.markable,
+        markable: whiteboardState === WhiteBoardState.Running,
+        attendeeLayout:
+          whiteboardState === WhiteBoardState.Running
+            ? AttendeeLayoutType.Speaker
+            : state.attendeeLayout,
       };
       break;
     }
@@ -175,11 +191,10 @@ export const StoreReducer = (
       };
       break;
     case StoreActionType.ACTION_TYPE_FOCUS_MODE:
-      newState = {
-        ...state,
-        focusMode: action.payload as boolean,
-        markable: false,
-      };
+      newState = onFocusMode(
+        state,
+        action.payload as StoreActionPayloadFocusMode
+      );
       break;
     case StoreActionType.ACTION_TYPE_MARKABLE:
       newState = {

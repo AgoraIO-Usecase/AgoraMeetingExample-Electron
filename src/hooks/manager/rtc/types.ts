@@ -43,6 +43,10 @@ export interface RtcUser {
 
   whiteboardUUID?: string;
   whiteboardTimeSpan?: string;
+  whiteboardRatio?: number;
+
+  isSharingDisplay?: boolean;
+  isSharingFocusMode?: boolean;
 }
 
 export enum RtcUserUpdateReason {
@@ -85,6 +89,12 @@ export enum RtcScreenShareStateReason {
   Error,
   WindowClosed,
 }
+
+export type RtcScreenShareParams = {
+  windowId?: number | undefined;
+  displayId?: number | undefined;
+  focusMode?: boolean | undefined;
+};
 
 export type RtcScreenShareSource = {
   id: number;

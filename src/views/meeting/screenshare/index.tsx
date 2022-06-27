@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -171,6 +171,17 @@ const ScreenShareDialog = () => {
   const [sources, setSources] = useState<ScreenShareSource[]>([]);
   const [currentSelected, setCurrentSelected] = useState(-1);
   const focusHelper = useFocusHelper();
+  const [focusMode, setFocusMode] = useState(true);
+  const showFocusMode = useMemo(() => {
+    if (
+      currentSelected === -1 ||
+      sources.length === 0 ||
+      !sources[currentSelected].isDisplay
+    )
+      return false;
+
+    return true;
+  }, [currentSelected, sources]);
 
   useEffect(() => {
     if (state.showScreenShare)
@@ -200,6 +211,8 @@ const ScreenShareDialog = () => {
       type: StoreActionType.ACTION_TYPE_SHOW_SCREENSHARE,
       payload: false,
     });
+
+    setFocusMode(true);
   };
 
   const onPreOk = () => {
@@ -208,6 +221,7 @@ const ScreenShareDialog = () => {
       commonManager.startScreenShare({
         windowId: source.isDisplay ? undefined : source.id,
         displayId: source.isDisplay ? source.id : undefined,
+        focusMode: focusMode && showFocusMode,
       });
     }
 
@@ -251,6 +265,22 @@ const ScreenShareDialog = () => {
         </StyledScreenShareItemContainer>
       </DialogContent>
       <DialogActions>
+        {showFocusMode ? (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={focusMode}
+                onChange={(_evt, checked: boolean) => {
+                  setFocusMode(checked);
+                }}
+                name="Focus Mode"
+              />
+            }
+            label="Focus Mode"
+          />
+        ) : (
+          <></>
+        )}
         <Button autoFocus onClick={onPreClose}>
           Cancel
         </Button>

@@ -3,6 +3,7 @@ import { useSnackbar, VariantType } from 'notistack';
 import {
   AttendeeLayoutType,
   StoreActionPayloadDevice,
+  StoreActionPayloadFocusMode,
   StoreActionType,
   StoreContext,
   StoreReducer,
@@ -101,7 +102,7 @@ export const RootProvider: FC = (props) => {
         },
       });
     });
-    commonManager.on('screenshareState', (screenshareState, reason) => {
+    commonManager.on('screenshareState', (screenshareState, params, reason) => {
       if (screenshareState === ScreenShareState.Running)
         showNotification('screenshare begin', 'success');
       else if (screenshareState === ScreenShareState.Idle)
@@ -111,6 +112,24 @@ export const RootProvider: FC = (props) => {
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
         payload: screenshareState,
       });
+
+      if (screenshareState === ScreenShareState.Running && params.focusMode) {
+        dispatch({
+          type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
+          payload: {
+            focusMode: params.focusMode,
+            displayId: params.displayId,
+          } as StoreActionPayloadFocusMode,
+        });
+      } else if (screenshareState === ScreenShareState.Idle) {
+        dispatch({
+          type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
+          payload: {
+            focusMode: false,
+            displayId: 0,
+          } as StoreActionPayloadFocusMode,
+        });
+      }
     });
     commonManager.on('whiteboardState', (whiteboardState) => {
       if (whiteboardState === WhiteBoardState.Running)
@@ -120,12 +139,6 @@ export const RootProvider: FC = (props) => {
         );
       else if (whiteboardState === WhiteBoardState.Idle)
         showNotification('whiteboard finished', 'info');
-
-      if (whiteboardState === WhiteBoardState.Running)
-        dispatch({
-          type: StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT,
-          payload: AttendeeLayoutType.Speaker,
-        });
 
       dispatch({
         type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,

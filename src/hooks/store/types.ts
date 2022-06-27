@@ -66,6 +66,11 @@ export type StoreActionPayloadDevice = {
   devices: DeviceInfo[];
 };
 
+export type StoreActionPayloadFocusMode = {
+  focusMode: boolean;
+  displayId: number;
+};
+
 export type StoreActionPayload =
   | string
   | MeetingConnection
@@ -75,6 +80,7 @@ export type StoreActionPayload =
   | ScreenShareState
   | AttendeeLayoutType
   | WhiteBoardState
+  | StoreActionPayloadFocusMode
   | boolean;
 
 export type StoreAction = {

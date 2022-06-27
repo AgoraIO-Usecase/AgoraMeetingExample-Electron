@@ -31,6 +31,7 @@ import {
   RtcVideoStreamType,
   RtcClientRole,
   RtcUserUpdateReason,
+  RtcScreenShareParams,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { RtcScreenShareManager } from './screenshare';
@@ -65,7 +66,11 @@ export declare interface RtcManager {
   ): this;
   on(
     evt: 'screenshareState',
-    cb: (state: RtcScreenShareState, reason: RtcScreenShareStateReason) => void
+    cb: (
+      state: RtcScreenShareState,
+      params: RtcScreenShareManager,
+      reason: RtcScreenShareStateReason.Error
+    ) => void
   ): this;
 
   on(
@@ -394,7 +399,7 @@ export class RtcManager extends EventEmitter {
     );
   };
 
-  startScreenShare = (params: { windowId?: number; displayId?: number }) => {
+  startScreenShare = (params: RtcScreenShareParams) => {
     log.info('rtc manager start screenshare', params);
 
     this.screenshareManager.start(this.state.channelName, params);
@@ -461,10 +466,9 @@ export class RtcManager extends EventEmitter {
     this.engine.on('userJoined', (uid) => {
       log.info(`rtc manager on userJoined ---- ${uid}`);
       if (uid === this.state.shareId) {
-        // un subscribe self screenshare stream
-        // no need to do in electron sdk, already unscribed
-        // this.engine.muteRemoteAudioStream(uid, true);
-        // this.engine.muteRemoteVideoStream(uid, true);
+        // unsubscribe self screenshare stream
+        this.engine.muteRemoteAudioStream(uid, true);
+        this.engine.muteRemoteVideoStream(uid, true);
         return;
       }
 
@@ -666,6 +670,10 @@ export class RtcManager extends EventEmitter {
     //     // in autoChangeClientRole
     //   }
     // });
+
+    this.engine.on('videoSizeChanged', (uid, width, height) => {
+      log.info('rtc manager on video size changed', uid, width, height);
+    });
   };
 
   private generateRtcUid = () => {
@@ -694,20 +702,31 @@ export class RtcManager extends EventEmitter {
 
   private initializeScreenShareManager = (appId: string, logPath: string) => {
     this.screenshareManager.initialize(appId, logPath, this.state.shareId);
-    this.screenshareManager.on('state', (state, reason) => {
+    this.screenshareManager.on('state', (state, reason, params) => {
       if (state === RtcScreenShareState.Running) {
         this.updateUser(
-          { uid: this.state.uid, shareId: this.state.shareId },
+          {
+            uid: this.state.uid,
+            shareId: this.state.shareId,
+            isSharingDisplay: params.displayId !== undefined,
+            isSharingFocusMode: params.focusMode,
+          },
           RtcUserUpdateReason.Info
         );
       } else if (state === RtcScreenShareState.Idle) {
         this.updateUser(
-          { uid: this.state.uid, shareId: 0 },
+          {
+            uid: this.state.uid,
+            shareId: 0,
+            isSharingDisplay: false,
+            isSharingFocusMode: false,
+          },
           RtcUserUpdateReason.Info
         );
       }
-      this.emit('screenshareState', state, reason);
+      this.emit('screenshareState', state, params, reason);
     });
+
     this.screenshareManager.on('error', (reason) => {
       this.emit('screenshareError', reason);
     });
@@ -787,7 +806,9 @@ export class RtcManager extends EventEmitter {
       if (
         oldUser.nickname !== info.nickname ||
         oldUser.parentId !== info.parentId ||
-        oldUser.shareId !== info.shareId
+        oldUser.shareId !== info.shareId ||
+        oldUser.isSharingDisplay !== info.isSharingDisplay ||
+        oldUser.isSharingFocusMode !== info.isSharingFocusMode
       )
         this.updateUser(
           {
@@ -795,6 +816,8 @@ export class RtcManager extends EventEmitter {
             nickname: info.nickname,
             parentId: info.parentId,
             shareId: info.shareId,
+            isSharingDisplay: info.isSharingDisplay,
+            isSharingFocusMode: info.isSharingFocusMode,
           },
           RtcUserUpdateReason.Info
         );
@@ -841,6 +864,8 @@ export class RtcManager extends EventEmitter {
             uid: info.shareId,
             nickname: info.nickname,
             parentId: info.uid,
+            isSharingDisplay: info.isSharingDisplay,
+            isSharingFocusMode: info.isSharingFocusMode,
           },
           RtcUserUpdateReason.Info
         );

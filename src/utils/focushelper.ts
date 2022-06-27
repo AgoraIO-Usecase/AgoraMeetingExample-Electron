@@ -56,10 +56,9 @@ export const useSwitchFocusMode = () => {
   const { state, dispatch } = useStore();
 
   const switchFocusMode = useCallback(() => {
-    ipcRenderer.invoke('focus-mode', !state.focusMode);
     dispatch({
       type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
-      payload: !state.focusMode,
+      payload: { focusMode: !state.focusMode, displayId: 0 },
     });
     if (!state.focusMode)
       dispatch({

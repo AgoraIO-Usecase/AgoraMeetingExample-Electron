@@ -5,6 +5,7 @@ import log from 'electron-log';
 import { remote } from 'electron';
 import {
   RtcManager,
+  RtcScreenShareParams,
   RtcUserUpdateReason,
   RtcVideoEncoderConfigurationType,
   RtcVideoStreamType,
@@ -19,6 +20,7 @@ import {
   MeetingConnection,
   MeetingConnectionReason,
   MeetingParams,
+  ScreenShareParams,
   ScreenShareSource,
   ScreenShareState,
   ScreenShareStateReason,
@@ -68,7 +70,11 @@ export interface CommonManager {
   // screenshare events
   on(
     evt: 'screenshareState',
-    cb: (state: ScreenShareState, reason: ScreenShareStateReason) => void
+    cb: (
+      state: ScreenShareState,
+      params: ScreenShareParams,
+      reason: ScreenShareStateReason
+    ) => void
   ): this;
   on(
     evt: 'screenshareError',
@@ -107,9 +113,9 @@ export class CommonManager extends EventEmitter {
     this.rtcManager.on('volumeIndications', (indications) => {
       this.emit('volumeIndications', indications as VolumeIndication[]);
     });
-    this.rtcManager.on('screenshareState', (state, reason) => {
+    this.rtcManager.on('screenshareState', (state, params, reason) => {
       log.info('common manager on screenshareState', state, reason);
-      this.emit('screenshareState', state, reason);
+      this.emit('screenshareState', state, params as ScreenShareParams, reason);
     });
     this.rtcManager.on('screenshareError', (reason) => {
       log.error('common manager on screenshareError', reason);
@@ -130,6 +136,16 @@ export class CommonManager extends EventEmitter {
           timespan: newUser.whiteboardTimeSpan || '',
         }
       );
+    });
+
+    this.rtcManager.on('userRemove', (uid) => {
+      // in case that remote user crashed or disconnected
+      // should auto stop whiteboard if parentId == uid && isRunning
+      if (
+        this.whiteboardManager.isConnected() &&
+        this.whiteboardManager.getRoomInfo().parentId === uid
+      )
+        this.whiteboardManager.stop();
     });
 
     this.rtcManager.on('whiteboardInfo', (parentId, uuid, timespan) => {
@@ -388,8 +404,8 @@ export class CommonManager extends EventEmitter {
     return sources as ScreenShareSource[];
   };
 
-  startScreenShare = (params: { windowId?: number; displayId?: number }) => {
-    this.rtcManager.startScreenShare(params);
+  startScreenShare = (params: ScreenShareParams) => {
+    this.rtcManager.startScreenShare(params as RtcScreenShareParams);
   };
 
   stopScreenShare = () => {
@@ -418,4 +434,7 @@ export class CommonManager extends EventEmitter {
   whiteboardIsSelfCreator = () => this.whiteboardManager.isCreator();
 
   whiteboardGetRoomInfo = () => this.whiteboardManager.getRoomInfo();
+
+  whiteboardUpdateRatio = (ratio: number) =>
+    this.whiteboardManager.updateRatio(ratio);
 }

@@ -3,6 +3,7 @@ import {
   createFastboard,
   FastboardApp,
   mount,
+  MountProps,
   RoomPhase,
 } from '@netless/fastboard';
 import log from 'electron-log';
@@ -36,6 +37,7 @@ export class WhiteBoardManager extends EventEmitter {
       mounted?:
         | {
             destroy: () => void;
+            update: (props?: MountProps | undefined) => void;
           }
         | undefined;
     };
@@ -148,6 +150,7 @@ export class WhiteBoardManager extends EventEmitter {
         },
         managerConfig: {
           cursor: true,
+          disableCameraTransform: true,
         },
       });
 
@@ -254,6 +257,18 @@ export class WhiteBoardManager extends EventEmitter {
       }
     } catch (error) {
       log.error('whiteboard manager set element throw an exception', error);
+    }
+  };
+
+  updateRatio = (ratio: number) => {
+    if (!this.isConnected()) return;
+
+    try {
+      if (!this.props.board.app) throw new Error('invalid app');
+
+      this.props.board.app.manager.setContainerSizeRatio(ratio);
+    } catch (error) {
+      log.error('whiteboard manager update ratio throw an exception,', error);
     }
   };
 

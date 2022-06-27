@@ -7,14 +7,13 @@ import IconButton from '@mui/material/IconButton';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
-import CropFreeOutlinedIcon from '@mui/icons-material/CropFreeOutlined';
 import TitleBar from 'frameless-titlebar';
 
 import { remote } from 'electron';
 
 import LayoutMenu from './layout';
 import SettingView from '../../setting';
-import { useFocusHelper, useSwitchFocusMode } from '../../../utils/focushelper';
+import { useFocusHelper } from '../../../utils/focushelper';
 
 export declare type HeaderBarProps = {
   title?: string;
@@ -36,7 +35,6 @@ const HeaderBar = (props: HeaderBarProps) => {
   const currentWindow = remote.getCurrentWindow();
   const [maximized, setMaximized] = useState(currentWindow.isMaximized());
   const focusHelper = useFocusHelper();
-  const { switchFocusMode } = useSwitchFocusMode();
 
   // add window listeners for currentWindow
   useEffect(() => {
@@ -71,10 +69,6 @@ const HeaderBar = (props: HeaderBarProps) => {
     },
     []
   );
-
-  const onFocusModeClicked = () => {
-    switchFocusMode();
-  };
 
   return (
     <>
@@ -136,15 +130,6 @@ const HeaderBar = (props: HeaderBarProps) => {
           children={
             <>
               <div className="headerbar-controls">
-                {focus ? (
-                  <Tooltip arrow title="Focus Mode">
-                    <IconButton onClick={onFocusModeClicked}>
-                      <CropFreeOutlinedIcon color="primary" fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                ) : (
-                  <></>
-                )}
                 {layouts ? (
                   <>
                     <Tooltip arrow title="AttendeeView Layout">

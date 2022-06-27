@@ -15,7 +15,10 @@ export type AttendeeInfo = {
 
   isCameraMuted?: boolean;
   isAudioMuted?: boolean;
+
   hasWhiteBoard?: boolean;
+  isSharingDisplay?: boolean;
+  isSharingFocusMode?: boolean;
 };
 
 export enum MeetingConnection {
@@ -64,6 +67,12 @@ export type VolumeIndication = {
   uid: number;
   volume: number;
   vad: number;
+};
+
+export type ScreenShareParams = {
+  windowId?: number | undefined;
+  displayId?: number | undefined;
+  focusMode?: boolean | undefined;
 };
 
 export enum ScreenShareState {
