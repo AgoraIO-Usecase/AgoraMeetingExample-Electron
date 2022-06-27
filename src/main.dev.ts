@@ -163,17 +163,33 @@ let oldWindowBounds: Rectangle = {
   height: 0,
 };
 
-ipcMain.handle('focus-mode', (evt, enable) => {
+ipcMain.handle('focus-mode', (evt, enable, id) => {
   log.info('app main ipc on focus-mode', enable);
   if (!mainWindow) return;
 
   if (enable) {
     oldWindowBounds = mainWindow.getBounds();
 
-    const { width, height, x, y } = screen.getPrimaryDisplay().bounds;
+    let display: Electron.Display;
+
+    // find target display by display id
+    if (id) {
+      // eslint-disable-next-line prefer-destructuring
+      display = screen.getAllDisplays().filter((item) => item.id === id)[0];
+    } else {
+      display = screen.getDisplayNearestPoint({
+        x: oldWindowBounds.x,
+        y: oldWindowBounds.y,
+      });
+    }
+
+    if (!display) display = screen.getPrimaryDisplay();
+
+    const { width, height, x, y } = display.bounds;
     mainWindow.setPosition(x, y);
     mainWindow.setSize(width, height);
   }
+
   if (enable && process.platform === 'darwin') {
     mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
   }

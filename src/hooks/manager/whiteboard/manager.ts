@@ -192,6 +192,7 @@ export class WhiteBoardManager extends EventEmitter {
         },
         managerConfig: {
           cursor: true,
+          disableCameraTransform: true,
         },
       });
 
@@ -243,7 +244,12 @@ export class WhiteBoardManager extends EventEmitter {
       if (mounted) mounted.destroy();
 
       if (element && app) {
-        this.props.board.mounted = mount(app, element);
+        this.props.board.mounted = mount(app, element, {
+          config: {
+            zoom_control: { enable: false },
+            page_control: { enable: false },
+          },
+        });
         log.info('whiteboard manager mounted with element ', element.id);
       }
     } catch (error) {

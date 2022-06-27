@@ -6,13 +6,11 @@ const useStyle = makeStyles(() => {
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
-      padding: '4px 4px',
     },
     whiteboard: {
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
-      padding: '4px 4px',
     },
   });
 });
