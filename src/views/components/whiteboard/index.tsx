@@ -11,19 +11,6 @@ const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
   const { attendee } = props;
 
   useEffect(() => {
-    console.warn('whiteboard view attendee changed', attendee);
-    if (attendee && !attendee.isSelf && attendee.shareId !== 0) {
-      const { shareId } = attendee;
-      console.warn('whiteboard view attendee changed begin', shareId);
-      return () => {
-        console.warn('whiteboard view attendee changed end', shareId);
-      };
-    }
-
-    return () => {};
-  }, [attendee]);
-
-  useEffect(() => {
     const dom = document.getElementById('whiteboard-view');
     commonManager.whiteboardSetView(dom! as HTMLDivElement);
 

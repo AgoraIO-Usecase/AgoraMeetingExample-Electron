@@ -1,9 +1,15 @@
 import AgoraRtcEngine from 'agora-electron-sdk';
 import { EventEmitter } from 'events';
 import log from 'electron-log';
+import { SIZE } from 'agora-electron-sdk/types/Api/native_type';
 
-import { RtcScreenShareState, RtcScreenShareStateReason } from './types';
+import {
+  RtcScreenShareSource,
+  RtcScreenShareState,
+  RtcScreenShareStateReason,
+} from './types';
 import { generateRtcToken } from './cert';
+import { readImage } from './utils';
 
 export interface RtcScreenShareManager {
   on(
@@ -24,6 +30,8 @@ export class RtcScreenShareManager extends EventEmitter {
     displayId?: number | undefined;
     windowId?: number | undefined;
     state: RtcScreenShareState;
+
+    excludeWindowIds: number[];
   } = {
     isInitialized: false,
     uid: 0,
@@ -31,6 +39,8 @@ export class RtcScreenShareManager extends EventEmitter {
     displayId: undefined,
     windowId: undefined,
     state: RtcScreenShareState.Idle,
+
+    excludeWindowIds: [],
   };
 
   constructor(engine: AgoraRtcEngine) {
@@ -75,6 +85,80 @@ export class RtcScreenShareManager extends EventEmitter {
   isRunning = () => this.props.state !== RtcScreenShareState.Idle;
 
   getUid = () => this.props.uid;
+
+  getScreenCaptureSources = async (
+    thumbSize: SIZE,
+    iconSize: SIZE,
+    includeScreen: boolean
+  ) => {
+    const originSources = this.engine.getScreenCaptureSources(
+      thumbSize,
+      iconSize,
+      includeScreen
+    ) as {
+      type: number;
+      sourceId: number;
+      sourceName: string;
+      sourceTitle: string;
+      processPath: string;
+      primaryMonitor: boolean;
+      iconImage?: { buffer: Uint8Array; width: number; height: number };
+      thumbImage?: { buffer: Uint8Array; width: number; height: number };
+    }[];
+
+    this.props.excludeWindowIds = originSources
+      .filter(
+        (source) =>
+          source.sourceName === 'Electron' ||
+          source.sourceName === 'AgoraMeetingExample-Electron'
+      )
+      .map((source) => source.sourceId as number);
+
+    log.info('current exclude window id list: ', this.props.excludeWindowIds);
+
+    const transformedSourceIconsPromise = originSources.map((item) => {
+      if (item.iconImage) return readImage(item.iconImage.buffer);
+
+      return new Promise((resolve, reject) => {
+        resolve(undefined);
+      });
+    });
+
+    const transformedSourceThumbPromise = originSources.map((item) => {
+      if (item.thumbImage) return readImage(item.thumbImage.buffer);
+
+      return new Promise((resolve, reject) => {
+        resolve(undefined);
+      });
+    });
+
+    const transformedSourceIcons = await Promise.all(
+      transformedSourceIconsPromise
+    );
+    const transformedSourceThumb = await Promise.all(
+      transformedSourceThumbPromise
+    );
+
+    const transformedSources: RtcScreenShareSource[] = [];
+
+    originSources.map((item, index) => {
+      transformedSources.push({
+        id: item.sourceId,
+        title: item.sourceTitle.length ? item.sourceTitle : item.sourceName,
+        isDisplay: item.type === 1,
+        isPrimaryDisplay: item.primaryMonitor,
+        icon: transformedSourceIcons[index] as string,
+        iconWidth: item.iconImage ? item.iconImage.width : 0,
+        iconHeight: item.iconImage ? item.iconImage.height : 0,
+        thumb: transformedSourceThumb[index] as string,
+        thumbWidth: item.thumbImage ? item.thumbImage.width : 0,
+        thumbHeight: item.thumbImage ? item.thumbImage.height : 0,
+      });
+      return item;
+    });
+
+    return transformedSources;
+  };
 
   start = (
     channelName: string,
@@ -126,12 +210,14 @@ export class RtcScreenShareManager extends EventEmitter {
       frameRate: 5,
       captureMouseCursor: true,
       windowFocus: false,
-      excludeWindowList: [],
+      excludeWindowList: [] as number[],
       excludeWindowCount: 0,
     };
 
     let ret = 0;
     if (displayId !== undefined) {
+      captureParam.excludeWindowList = this.props.excludeWindowIds;
+      captureParam.excludeWindowCount = this.props.excludeWindowIds.length;
       ret = this.engine.videoSourceStartScreenCaptureByDisplayId(
         { id: displayId },
         { x: 0, y: 0, width: 0, height: 0 },

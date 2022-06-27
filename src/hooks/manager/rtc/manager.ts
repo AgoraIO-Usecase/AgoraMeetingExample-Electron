@@ -28,13 +28,11 @@ import {
   RtcDataStreamMessage,
   RtcScreenShareState,
   RtcScreenShareStateReason,
-  RtcScreenShareSource,
   RtcVideoStreamType,
   RtcClientRole,
   RtcUserUpdateReason,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
-import { readImage } from './utils';
 import { RtcScreenShareManager } from './screenshare';
 import { generateRtcToken } from './cert';
 
@@ -389,63 +387,11 @@ export class RtcManager extends EventEmitter {
     iconSize: SIZE,
     includeScreen: boolean
   ) => {
-    const originSources = this.engine.getScreenCaptureSources(
+    return this.screenshareManager.getScreenCaptureSources(
       thumbSize,
       iconSize,
       includeScreen
-    ) as {
-      type: number;
-      sourceId: number;
-      sourceName: string;
-      sourceTitle: string;
-      processPath: string;
-      primaryMonitor: boolean;
-      iconImage?: { buffer: Uint8Array; width: number; height: number };
-      thumbImage?: { buffer: Uint8Array; width: number; height: number };
-    }[];
-
-    const transformedSourceIconsPromise = originSources.map((item) => {
-      if (item.iconImage) return readImage(item.iconImage.buffer);
-
-      return new Promise((resolve, reject) => {
-        resolve(undefined);
-      });
-    });
-
-    const transformedSourceThumbPromise = originSources.map((item) => {
-      if (item.thumbImage) return readImage(item.thumbImage.buffer);
-
-      return new Promise((resolve, reject) => {
-        resolve(undefined);
-      });
-    });
-
-    const transformedSourceIcons = await Promise.all(
-      transformedSourceIconsPromise
     );
-    const transformedSourceThumb = await Promise.all(
-      transformedSourceThumbPromise
-    );
-
-    const transformedSources: RtcScreenShareSource[] = [];
-
-    originSources.map((item, index) => {
-      transformedSources.push({
-        id: item.sourceId,
-        title: item.sourceTitle.length ? item.sourceTitle : item.sourceName,
-        isDisplay: item.type === 1,
-        isPrimaryDisplay: item.primaryMonitor,
-        icon: transformedSourceIcons[index] as string,
-        iconWidth: item.iconImage ? item.iconImage.width : 0,
-        iconHeight: item.iconImage ? item.iconImage.height : 0,
-        thumb: transformedSourceThumb[index] as string,
-        thumbWidth: item.thumbImage ? item.thumbImage.width : 0,
-        thumbHeight: item.thumbImage ? item.thumbImage.height : 0,
-      });
-      return item;
-    });
-
-    return transformedSources;
   };
 
   startScreenShare = (params: { windowId?: number; displayId?: number }) => {
