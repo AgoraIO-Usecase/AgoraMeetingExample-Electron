@@ -40,6 +40,7 @@
   "build": {
     "asar": false,
     "productName": "AgoraMeetingExample-Electron",
+    "artifactName": "${productName}-v${version}-${os}-${arch}.${ext}",
     "appId": "io.agora.agorameeting",
     "files": [
       "dist/",
@@ -77,7 +78,8 @@
     "win": {
       "target": [
         "zip"
-      ]
+      ],
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "linux": {
       "target": [
