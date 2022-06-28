@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo } from 'react';
+/* eslint-disable react/display-name */
+import React, { useEffect, useMemo, memo } from 'react';
 import { Stack } from '@mui/material';
 
 import { AttendeeInfo, useCommonManager } from '../../../hooks';
 import useStyle from './style';
 import VideoBox from '../videobox';
 
-const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
+const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
   const style = useStyle();
   const commonManager = useCommonManager();
   const { attendee } = props;
@@ -27,11 +28,6 @@ const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
     return () => commonManager.whiteboardSetView(null);
   }, []);
 
-  useEffect(() => {
-    if (showVideoBox) {
-    }
-  }, [attendee, showVideoBox]);
-
   return (
     <Stack className={style.wrapper}>
       {showVideoBox ? (
@@ -42,6 +38,6 @@ const WhiteBoardView = (props: { attendee: AttendeeInfo | undefined }) => {
       <Stack className={style.wrapper} id="whiteboard-view" />
     </Stack>
   );
-};
+});
 
 export default WhiteBoardView;
