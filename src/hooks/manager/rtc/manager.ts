@@ -64,6 +64,7 @@ export declare interface RtcManager {
     evt: 'volumeIndications',
     cb: (indications: RtcAudioVolumeIndication[]) => void
   ): this;
+
   on(
     evt: 'screenshareState',
     cb: (
@@ -80,7 +81,12 @@ export declare interface RtcManager {
 
   on(
     evt: 'whiteboardInfo',
-    cb: (parentId: number, uuid: string, timespan: string) => void
+    cb: (
+      parentId: number,
+      uuid: string,
+      timespan: string,
+      ratio: number
+    ) => void
   ): this;
 }
 
@@ -410,6 +416,14 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.stop();
   };
 
+  getScreenShareSourceSize = () => this.screenshareManager.getSourceSize();
+
+  isScreenSharing = () => this.screenshareManager.isRunning();
+
+  isScreenSharingDisplay = () => this.screenshareManager.isSharingDisplay();
+
+  isScreenSharingFocusMode = () => this.screenshareManager.isFocusMode();
+
   setRemoteVideoStreamType = (uid: number, streamType: RtcVideoStreamType) => {
     log.info(
       'rtc manager set remote video stream type',
@@ -424,21 +438,24 @@ export class RtcManager extends EventEmitter {
 
   setLocalWhiteBoardInfo = (
     uuid: string | undefined,
-    timespan: string | undefined
+    timespan: string | undefined,
+    ratio: number | undefined
   ) => {
     const selfUser = this.getSelfUser();
 
     if (
       selfUser.whiteboardUUID !== uuid ||
-      selfUser.whiteboardTimeSpan !== timespan
+      selfUser.whiteboardTimeSpan !== timespan ||
+      selfUser.whiteboardRatio !== ratio
     )
       this.updateUser(
         {
           ...selfUser,
           whiteboardUUID: uuid,
           whiteboardTimeSpan: timespan,
+          whiteboardRatio: ratio,
         },
-        RtcUserUpdateReason.Media
+        RtcUserUpdateReason.WhiteBoard
       );
   };
 
@@ -730,6 +747,16 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.on('error', (reason) => {
       this.emit('screenshareError', reason);
     });
+    this.screenshareManager.on('size', (width, height) => {
+      const selfUser = this.getSelfUser();
+      const newRatio = height / width;
+      if (selfUser.whiteboardRatio !== newRatio) {
+        this.updateUser(
+          { ...selfUser, whiteboardRatio: newRatio },
+          RtcUserUpdateReason.WhiteBoard
+        );
+      }
+    });
   };
 
   private refreshDeviceList = (deviceType: RtcDeviceType) => {
@@ -824,13 +851,15 @@ export class RtcManager extends EventEmitter {
 
       if (
         oldUser.whiteboardUUID !== info.whiteboardUUID ||
-        oldUser.whiteboardTimeSpan !== info.whiteboardTimeSpan
+        oldUser.whiteboardTimeSpan !== info.whiteboardTimeSpan ||
+        oldUser.whiteboardRatio !== info.whiteboardRatio
       )
         this.updateUser(
           {
             uid: info.uid,
             whiteboardUUID: info.whiteboardUUID,
             whiteboardTimeSpan: info.whiteboardTimeSpan,
+            whiteboardRatio: info.whiteboardRatio,
           },
           RtcUserUpdateReason.WhiteBoard
         );
@@ -847,7 +876,8 @@ export class RtcManager extends EventEmitter {
           'whiteboardInfo',
           info.uid,
           info.whiteboardUUID,
-          info.whiteboardTimeSpan
+          info.whiteboardTimeSpan,
+          info.whiteboardRatio
         );
 
       // update share user

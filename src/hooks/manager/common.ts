@@ -122,18 +122,22 @@ export class CommonManager extends EventEmitter {
       this.emit('screenshareError', reason);
     });
     this.rtcManager.on('userUpdate', (oldUser, newUser, reason) => {
-      if (reason !== RtcUserUpdateReason.WhiteBoard) return;
+      if (reason !== RtcUserUpdateReason.WhiteBoard || newUser.isSelf) return;
 
       this.whiteboardManager.autoJoinOrStop(
         {
           parentId: oldUser.uid,
           uuid: oldUser.whiteboardUUID || '',
           timespan: oldUser.whiteboardTimeSpan || '',
+          ratio:
+            oldUser.whiteboardRatio || this.whiteboardManager.getDefaultRatio(),
         },
         {
           parentId: newUser.uid,
           uuid: newUser.whiteboardUUID || '',
           timespan: newUser.whiteboardTimeSpan || '',
+          ratio:
+            oldUser.whiteboardRatio || this.whiteboardManager.getDefaultRatio(),
         }
       );
     });
@@ -148,10 +152,10 @@ export class CommonManager extends EventEmitter {
         this.whiteboardManager.stop();
     });
 
-    this.rtcManager.on('whiteboardInfo', (parentId, uuid, timespan) => {
+    this.rtcManager.on('whiteboardInfo', (parentId, uuid, timespan, ratio) => {
       this.whiteboardManager.autoJoinOrStop(
-        { parentId: 0, uuid: '', timespan: '' },
-        { parentId, uuid, timespan }
+        { parentId: 0, uuid: '', timespan: '', ratio: 0 },
+        { parentId, uuid, timespan, ratio }
       );
     });
 
@@ -219,8 +223,10 @@ export class CommonManager extends EventEmitter {
         this.whiteboardManager.isCreator()
       ) {
         const { uuid, timespan } = this.whiteboardManager.getRoomInfo();
-        this.rtcManager.setLocalWhiteBoardInfo(uuid, timespan);
-      } else this.rtcManager.setLocalWhiteBoardInfo(undefined, undefined);
+        const ratio = this.whiteboardManager.getRatio();
+        this.rtcManager.setLocalWhiteBoardInfo(uuid, timespan, ratio);
+      } else
+        this.rtcManager.setLocalWhiteBoardInfo(undefined, undefined, undefined);
 
       this.emit('whiteboardState', state);
     });
@@ -420,7 +426,22 @@ export class CommonManager extends EventEmitter {
   };
 
   whiteboardStart = async () => {
-    await this.whiteboardManager.start();
+    const isScreenSharing = this.rtcManager.isScreenSharing();
+    const isScreenSharingDisplay = this.rtcManager.isScreenSharingDisplay();
+    const isScreenSharingFocusMode = this.rtcManager.isScreenSharingFocusMode();
+    const { width, height } = this.rtcManager.getScreenShareSourceSize();
+
+    let ratio = this.whiteboardManager.getDefaultRatio();
+    if (
+      isScreenSharing &&
+      isScreenSharingDisplay &&
+      isScreenSharingFocusMode &&
+      width !== 0 &&
+      height !== 0
+    )
+      ratio = height / width;
+
+    await this.whiteboardManager.start(ratio);
   };
 
   whiteboardStop = async () => {

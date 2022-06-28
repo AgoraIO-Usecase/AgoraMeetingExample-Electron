@@ -16,6 +16,7 @@ export type WhiteBoardRoomInfo = {
   parentId: number;
   uuid: string;
   timespan: string;
+  ratio: number;
 };
 
 export default {};

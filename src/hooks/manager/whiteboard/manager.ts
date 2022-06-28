@@ -16,6 +16,8 @@ import {
 import { generateRoomToken, generateSdkToken } from './cert';
 import { banRoom, createRoom } from './api';
 
+const DefaultRatio = 9 / 16;
+
 export declare interface WhiteBoardManager {
   on(
     evt: 'connection',
@@ -110,10 +112,19 @@ export class WhiteBoardManager extends EventEmitter {
       parentId: this.props.parentId,
       uuid: this.props.uuid,
       timespan: this.props.timespan,
+      ratio: this.props.board.app?.manager.containerSizeRatio || DefaultRatio,
     };
   };
 
-  start = async () => {
+  getRatio = () => {
+    if (!this.isConnected()) return DefaultRatio;
+
+    return this.props.board.app?.manager.containerSizeRatio || DefaultRatio;
+  };
+
+  getDefaultRatio = () => DefaultRatio;
+
+  start = async (ratio: number) => {
     if (!this.isDisconnected()) return;
 
     log.info('whiteboard manager start');
@@ -151,6 +162,7 @@ export class WhiteBoardManager extends EventEmitter {
         managerConfig: {
           cursor: true,
           disableCameraTransform: true,
+          containerSizeRatio: ratio,
         },
       });
 
@@ -172,7 +184,7 @@ export class WhiteBoardManager extends EventEmitter {
   private join = async (info: WhiteBoardRoomInfo) => {
     if (!this.isDisconnected()) return;
 
-    log.info('whiteboard manager join');
+    log.info('whiteboard manager join with room info', JSON.stringify(info));
 
     this.setConnection(WhiteBoardConnection.Connecting, WhiteBoardError.None);
 
@@ -196,6 +208,7 @@ export class WhiteBoardManager extends EventEmitter {
         managerConfig: {
           cursor: true,
           disableCameraTransform: true,
+          containerSizeRatio: info.ratio,
         },
       });
 
@@ -266,6 +279,9 @@ export class WhiteBoardManager extends EventEmitter {
     try {
       if (!this.props.board.app) throw new Error('invalid app');
 
+      log.info(
+        `whiteboard manager update ratio old: ${this.getRatio()} new: ${ratio}`
+      );
       this.props.board.app.manager.setContainerSizeRatio(ratio);
     } catch (error) {
       log.error('whiteboard manager update ratio throw an exception,', error);
@@ -282,7 +298,7 @@ export class WhiteBoardManager extends EventEmitter {
       newRoomInfo.timespan.length
     ) {
       // should auto join
-      log.info('whiteboard manager should auto join room', newRoomInfo);
+      log.info('whiteboard manager should auto join room');
       await this.join(newRoomInfo);
     } else if (
       this.isConnected() &&
@@ -314,6 +330,14 @@ export class WhiteBoardManager extends EventEmitter {
 
       await this.stop();
       await this.join(newRoomInfo);
+    } else if (
+      this.isConnected() &&
+      newRoomInfo.uuid === this.props.uuid &&
+      newRoomInfo.timespan === this.props.timespan &&
+      newRoomInfo.ratio !== this.getRatio()
+    ) {
+      // just update ratio here
+      this.updateRatio(newRoomInfo.ratio);
     }
   };
 

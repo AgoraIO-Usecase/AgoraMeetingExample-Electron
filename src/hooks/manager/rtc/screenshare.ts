@@ -23,6 +23,7 @@ export interface RtcScreenShareManager {
   ): this;
 
   on(evt: 'error', cb: (reason: RtcScreenShareStateReason) => void): this;
+  on(evt: 'size', cb: (width: number, height: number) => void): this;
 }
 
 export class RtcScreenShareManager extends EventEmitter {
@@ -35,6 +36,9 @@ export class RtcScreenShareManager extends EventEmitter {
     state: RtcScreenShareState;
     params: RtcScreenShareParams;
     excludeWindowIds: number[];
+
+    width: number;
+    height: number;
   } = {
     isInitialized: false,
     uid: 0,
@@ -42,6 +46,9 @@ export class RtcScreenShareManager extends EventEmitter {
     state: RtcScreenShareState.Idle,
     params: {},
     excludeWindowIds: [],
+
+    width: 0,
+    height: 0,
   };
 
   constructor(engine: AgoraRtcEngine) {
@@ -82,9 +89,17 @@ export class RtcScreenShareManager extends EventEmitter {
     this.props.isInitialized = false;
   };
 
-  isRunning = () => this.props.state !== RtcScreenShareState.Idle;
+  isRunning = () => this.props.state === RtcScreenShareState.Running;
+
+  isSharingDisplay = () => this.props.params.displayId !== undefined;
+
+  isFocusMode = () => this.props.params.focusMode || false;
 
   getUid = () => this.props.uid;
+
+  getSourceSize = () => {
+    return { width: this.props.width, height: this.props.height };
+  };
 
   getScreenCaptureSources = async (
     thumbSize: SIZE,
@@ -240,6 +255,8 @@ export class RtcScreenShareManager extends EventEmitter {
   private stopScreenShare = () => {
     this.engine.stopScreenCapture2();
     this.props.params = {};
+    this.props.width = 0;
+    this.props.height = 0;
   };
 
   private setState = (
@@ -292,7 +309,7 @@ export class RtcScreenShareManager extends EventEmitter {
     });
 
     this.engine.on('videoSourceRequestNewToken', () => {
-      log.info('screenshare manager on videoSourceRequestNewToken');
+      log.warn('screenshare manager on videoSourceRequestNewToken');
     });
 
     this.engine.on('videoSourceScreenCaptureInfoUpdated', (info) => {
@@ -312,6 +329,12 @@ export class RtcScreenShareManager extends EventEmitter {
           height,
           rotation
         );
+
+        if (this.props.width !== width || this.props.height !== height) {
+          this.props.width = width;
+          this.props.height = height;
+          this.emit('size', width, height);
+        }
       }
     );
   };
