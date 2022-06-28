@@ -8,7 +8,6 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 
 ## Todo
 - Real-time Messaging
-- Interactive Whiteboard
 - Conference Control
 
 ## How to run the sample project
@@ -22,7 +21,8 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 #### Steps to run
 
 - Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an AppID.
-- Reanme file [.env.template](.env.template) to .env, and replace 'XXXXXX' with your AppID and AppCert.
+- Follow [WhiteBoard Doc](https://docs.agora.io/cn/whiteboard/enable_whiteboard?platform=Web) to enable WhiteBoard and obtain your AppIdentifier、AK and SK。
+- Reanme file [.env.template](.env.template) to .env, and replace 'XXXXXX' with your AppID、 AppCert、AppIdentifier、AK and SK.
 
 Then do the following:
 

@@ -8,9 +8,7 @@ _Read this in other languages: [English](README.md)_
 
 ## 待完成
 - 实时消息
-- 白板共享
 - 会议控制
-- 会议邀请
 
 
 ## 如何运行示例程序
@@ -23,8 +21,9 @@ _Read this in other languages: [English](README.md)_
 
 #### 运行步骤
 
-- 首先在 [Agora.io 注册](https://dashboard.agora.io/cn/signup/) 注册账号，并创建自己的测试项目，获取到 AppID。
-- 重命名文件[.env.template](.env.template) 为'.env'，并将获取到的AppId和AppCert填入该文件。
+- 首先在 [Agora.io 注册](https://dashboard.agora.io/cn/signup/) 注册账号，并创建自己的测试项目，获取到 AppID和AppCert。
+- 随后在[控制台中按照文档配置互动白板功能](https://docs.agora.io/cn/whiteboard/enable_whiteboard?platform=Web)，并获取到AppIdentifier、AK和SK。
+- 重命名文件[.env.template](.env.template) 为'.env'，并将获取到的AppId、AppCert、AppIdentifier、AK和SK填入该文件。
 
 然后进行以下操作:
 
