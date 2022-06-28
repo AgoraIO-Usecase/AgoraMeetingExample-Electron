@@ -112,6 +112,9 @@ const AttendeeView = () => {
           className={style.sliderContainer}
           alignItems="center"
           justifyContent={state.focusMode ? 'flex-start' : 'center'}
+          style={{
+            right: state.focusMode && showAttendeeList ? '160px' : '0px',
+          }}
         >
           {needShowAttendeeList ? (
             <IconButton
@@ -130,7 +133,13 @@ const AttendeeView = () => {
           )}
         </Stack>
       </Stack>
-      <Slide direction="left" in={showAttendeeList} mountOnEnter unmountOnExit>
+      <Slide
+        direction="left"
+        in={showAttendeeList}
+        mountOnEnter
+        unmountOnExit
+        style={{ position: state.focusMode ? 'absolute' : 'relative' }}
+      >
         <Stack className={style.listContainer} {...focusHelper}>
           <AutoSizer>
             {({ height, width }) => (

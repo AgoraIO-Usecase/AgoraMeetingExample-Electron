@@ -14,10 +14,13 @@ const useStyle = makeStyles(() => {
       position: 'relative',
     },
     listContainer: {
+      position: 'relative',
+      boxSizing: 'border-box',
+      height: '100%',
+      right: '0px',
       width: '160px',
       minWidth: '160px',
       maxWidth: '160px',
-      height: '100%',
     },
     sliderContainer: {
       position: 'absolute',
