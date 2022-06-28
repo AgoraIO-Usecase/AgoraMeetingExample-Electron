@@ -272,6 +272,7 @@ export class CommonManager extends EventEmitter {
   joinMeeting = (params: MeetingParams) => {
     log.info('common manager join meeting with params:', params);
 
+    this.whiteboardManager.setNickName(params.nickname);
     this.meetingManager.joinMeeting(params);
   };
 

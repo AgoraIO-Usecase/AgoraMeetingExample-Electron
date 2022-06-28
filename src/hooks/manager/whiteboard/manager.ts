@@ -44,6 +44,7 @@ export class WhiteBoardManager extends EventEmitter {
         | undefined;
     };
     parentId: number;
+    nickname: string;
   };
 
   constructor() {
@@ -59,6 +60,7 @@ export class WhiteBoardManager extends EventEmitter {
       timespan: '',
       board: {},
       parentId: 0,
+      nickname: '',
     };
   }
 
@@ -98,6 +100,7 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.uuid = '';
     this.props.timespan = '';
     this.props.parentId = 0;
+    this.props.nickname = '';
   };
 
   isConnected = () => this.props.connection === WhiteBoardConnection.Connected;
@@ -106,6 +109,10 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.connection === WhiteBoardConnection.Disconnected;
 
   isCreator = () => this.props.isCreator;
+
+  setNickName = (nickanme: string) => {
+    this.props.nickname = nickanme;
+  };
 
   getRoomInfo = (): WhiteBoardRoomInfo => {
     return {
@@ -144,33 +151,8 @@ export class WhiteBoardManager extends EventEmitter {
 
       // join room
       const { uuid, createdAt } = response.data;
-      const app = await createFastboard({
-        sdkConfig: {
-          appIdentifier: process.env.AGORA_WHITEBOARD_APPID!,
-          region: process.env.AGORA_WHITEBOARD_REGION || 'cn-hz',
-        },
-        joinRoom: {
-          uid: String(Number(`${new Date().getTime()}`.slice(4))),
-          uuid,
-          roomToken: generateRoomToken(uuid),
-          callbacks: {
-            onPhaseChanged: this.onWhiteBoardPhaseChanged,
-            onDisconnectWithError: this.onWhiteBoardDisconnectWithError,
-            onKickedWithReason: this.onWhiteBoardKickedWithReason,
-          },
-        },
-        managerConfig: {
-          cursor: true,
-          containerSizeRatio: ratio,
-        },
-      });
 
-      this.props.board.app = app;
-      this.props.isCreator = true;
-      this.props.uuid = uuid;
-      this.props.timespan = createdAt;
-
-      this.setConnection(WhiteBoardConnection.Connected, WhiteBoardError.None);
+      await this.join({ parentId: 0, uuid, timespan: createdAt, ratio }, true);
     } catch (error) {
       log.error('whiteboard start whiteboard throw an exception', error);
       this.setConnection(
@@ -180,9 +162,7 @@ export class WhiteBoardManager extends EventEmitter {
     }
   };
 
-  private join = async (info: WhiteBoardRoomInfo) => {
-    if (!this.isDisconnected()) return;
-
+  private join = async (info: WhiteBoardRoomInfo, isCreator: boolean) => {
     log.info('whiteboard manager join with room info', JSON.stringify(info));
 
     this.setConnection(WhiteBoardConnection.Connecting, WhiteBoardError.None);
@@ -195,7 +175,9 @@ export class WhiteBoardManager extends EventEmitter {
           region: process.env.AGORA_WHITEBOARD_REGION || 'cn-hz',
         },
         joinRoom: {
-          uid: String(Number(`${new Date().getTime()}`.slice(4))),
+          uid: `${this.props.nickname}(${String(
+            Number(`${new Date().getTime()}`.slice(4))
+          )})`,
           uuid: info.uuid,
           roomToken: generateRoomToken(info.uuid),
           callbacks: {
@@ -211,7 +193,7 @@ export class WhiteBoardManager extends EventEmitter {
       });
 
       this.props.board.app = app;
-      this.props.isCreator = false;
+      this.props.isCreator = isCreator;
       this.props.uuid = info.uuid;
       this.props.timespan = info.timespan;
       this.props.parentId = info.parentId;
@@ -297,9 +279,9 @@ export class WhiteBoardManager extends EventEmitter {
       newRoomInfo.uuid.length &&
       newRoomInfo.timespan.length
     ) {
-      // should auto join
+      // should auto join only connection is disconnected
       log.info('whiteboard manager should auto join room');
-      await this.join(newRoomInfo);
+      if (this.isDisconnected()) await this.join(newRoomInfo, false);
     } else if (
       this.isConnected() &&
       !newRoomInfo.uuid.length &&
@@ -329,7 +311,7 @@ export class WhiteBoardManager extends EventEmitter {
       log.info('whiteboard manager should auto stop and rejoin a new room');
 
       await this.stop();
-      await this.join(newRoomInfo);
+      await this.join(newRoomInfo, false);
     } else if (
       this.isConnected() &&
       newRoomInfo.uuid === this.props.uuid &&
@@ -340,6 +322,8 @@ export class WhiteBoardManager extends EventEmitter {
       this.updateRatio(newRoomInfo.ratio);
     }
   };
+
+  private generateUid = () => {};
 
   private onWhiteBoardPhaseChanged = (phase: RoomPhase) => {
     if (phase === 'disconnected') {
