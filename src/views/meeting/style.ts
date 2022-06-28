@@ -8,7 +8,6 @@ const useStyle = makeStyles(() => {
       height: '100%',
     },
     focusedMainWrapper: {
-      background: '#00000000',
       width: '100%',
       height: '100%',
     },

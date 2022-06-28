@@ -15,7 +15,9 @@ const MeetingView = () => {
 
   return (
     <Stack
-      className={state.focusMode ? style.focusedMainWrapper : style.mainWrapper}
+      className={`${
+        state.focusMode ? style.focusedMainWrapper : style.mainWrapper
+      }  ${state.focusMode ? 'meetingwrapper-focus-mode' : ''}`}
       direction="column"
       justifyContent="center"
       alignItems="center"
