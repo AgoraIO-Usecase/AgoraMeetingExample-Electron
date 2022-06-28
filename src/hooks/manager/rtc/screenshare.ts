@@ -65,6 +65,9 @@ export class RtcScreenShareManager extends EventEmitter {
     this.engine.videoSourceSetLogFile(`${logPath}videosource.log`);
     this.engine.videoSourceSetAddonLogFile(`${logPath}videosource-addon.log`);
     this.engine.videoSourceEnableDualStreamMode(false);
+    this.engine.videoSourceSetParameters(
+      JSON.stringify({ 'che.video.mutigpu_exclude_window': true })
+    );
 
     this.registerEngineEvents();
 
@@ -125,6 +128,7 @@ export class RtcScreenShareManager extends EventEmitter {
       .filter(
         (source) =>
           source.sourceName === 'Electron' ||
+          source.sourceName === 'Agora Meeting' ||
           source.sourceName === 'AgoraMeetingExample-Electron'
       )
       .map((source) => source.sourceId as number);
@@ -229,12 +233,20 @@ export class RtcScreenShareManager extends EventEmitter {
     if (displayId !== undefined) {
       captureParam.excludeWindowList = this.props.excludeWindowIds;
       captureParam.excludeWindowCount = this.props.excludeWindowIds.length;
+      log.info(
+        'screenshare manager start screen capture by display',
+        captureParam
+      );
       ret = this.engine.videoSourceStartScreenCaptureByDisplayId(
         { id: displayId },
         { x: 0, y: 0, width: 0, height: 0 },
         captureParam
       );
     } else if (windowId !== undefined) {
+      log.info(
+        'screenshare manager start screen capture by window',
+        captureParam
+      );
       ret = this.engine.videoSourceStartScreenCaptureByWindow(
         windowId,
         { x: 0, y: 0, width: 0, height: 0 },

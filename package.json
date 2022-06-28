@@ -20,7 +20,8 @@
   },
   "agora_electron": {
     "prebuilt": true,
-    "electron_version": "12.0.0"
+    "electron_version": "12.0.0",
+    "arch": "x64"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
