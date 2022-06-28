@@ -161,7 +161,6 @@ export class WhiteBoardManager extends EventEmitter {
         },
         managerConfig: {
           cursor: true,
-          disableCameraTransform: true,
           containerSizeRatio: ratio,
         },
       });
@@ -207,7 +206,6 @@ export class WhiteBoardManager extends EventEmitter {
         },
         managerConfig: {
           cursor: true,
-          disableCameraTransform: true,
           containerSizeRatio: info.ratio,
         },
       });
@@ -262,10 +260,12 @@ export class WhiteBoardManager extends EventEmitter {
       if (element && app) {
         this.props.board.mounted = mount(app, element, {
           config: {
+            toolbar: { enable: true, apps: { enable: false } },
             zoom_control: { enable: false },
             page_control: { enable: false },
           },
         });
+        app.manager.mainView.disableCameraTransform = true;
         log.info('whiteboard manager mounted with element ', element.id);
       }
     } catch (error) {
