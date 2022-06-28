@@ -140,6 +140,7 @@ app.on('window-all-closed', () => {
 });
 
 app.whenReady().then(createWindow).catch(console.log);
+app.allowRendererProcessReuse = false;
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
@@ -164,7 +165,7 @@ let oldWindowBounds: Rectangle = {
 };
 
 ipcMain.handle('focus-mode', (evt, enable, id) => {
-  log.info('app main ipc on focus-mode', enable);
+  log.info('app main ipc on focus-mode', enable, id);
   if (!mainWindow) return;
 
   if (enable) {
@@ -172,8 +173,12 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
 
     let display: Electron.Display;
 
-    // find target display by display id
-    if (id) {
+    // Find target display by display id
+    // There have a known issue here, coz displayId is just index value from
+    // ::EnumDisplayMonitors in windows, and is not equal the display.id from electron
+    // so find specified display by id in windows will always be null
+    // we can find specified display by bounds when agora-sdk support return bounds
+    if (id !== undefined) {
       // eslint-disable-next-line prefer-destructuring
       display = screen.getAllDisplays().filter((item) => item.id === id)[0];
     } else {
@@ -182,6 +187,8 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
         y: oldWindowBounds.y,
       });
     }
+
+    log.info('app main ipc on focus-mode find specified display', display);
 
     if (!display) display = screen.getPrimaryDisplay();
 

@@ -180,6 +180,13 @@ const ScreenShareDialog = () => {
     )
       return false;
 
+    // known issue here, can not find specified display by id in windows
+    if (
+      process.platform === 'win32' &&
+      !sources[currentSelected].isPrimaryDisplay
+    )
+      return false;
+
     return true;
   }, [currentSelected, sources]);
 
