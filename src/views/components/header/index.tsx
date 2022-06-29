@@ -95,6 +95,7 @@ const HeaderBar = (props: HeaderBarProps) => {
           right: window.process.platform === 'darwin' ? -60 : 0,
           zIndex: 999,
           boxSizing: 'border-box',
+          margin: process.platform === 'win32' ? '4px 4px' : '',
         }}
         {...focusHelper}
       >

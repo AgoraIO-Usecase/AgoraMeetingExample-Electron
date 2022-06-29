@@ -92,9 +92,9 @@ const MainView = () => {
 
   return (
     <Stack
-      className={style.mainWrapper}
-      width="100%"
-      height="100%"
+      className={`${style.mainWrapper} ${
+        process.platform === 'win32' ? style.mainWrapperShadow : ''
+      }`}
       direction="column"
       justifyContent="center"
       alignItems="center"

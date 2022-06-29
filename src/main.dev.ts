@@ -84,7 +84,7 @@ const createWindow = async () => {
     frame: false,
     enableLargerThanScreen: true,
     titleBarStyle: 'hiddenInset',
-    backgroundColor: '#000000',
+    backgroundColor: '#00000000',
   });
 
   if (process.env.NODE_ENV !== 'production')
@@ -212,7 +212,6 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
   mainWindow.setHasShadow(!enable);
   mainWindow.setMovable(!enable);
   mainWindow.setResizable(!enable);
-  mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
   mainWindow.setFullScreen(enable && process.platform !== 'darwin');
   BrowserWindow.fromWebContents(mainWindow.webContents)?.setIgnoreMouseEvents(
     enable,
