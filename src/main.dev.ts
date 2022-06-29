@@ -84,7 +84,7 @@ const createWindow = async () => {
     frame: false,
     enableLargerThanScreen: true,
     titleBarStyle: 'hiddenInset',
-    backgroundColor: '#00000000',
+    backgroundColor: process.platform === 'win32' ? '#00000000' : '#000000',
   });
 
   if (process.env.NODE_ENV !== 'production')
@@ -207,6 +207,7 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
     }
     mainWindow.setFullScreenable(!enable);
     mainWindow.setVisibleOnAllWorkspaces(enable, { visibleOnFullScreen: true });
+    mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
   }
 
   mainWindow.setHasShadow(!enable);
