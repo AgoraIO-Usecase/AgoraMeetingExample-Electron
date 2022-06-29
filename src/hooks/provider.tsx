@@ -117,7 +117,7 @@ export const RootProvider: FC = (props) => {
         dispatch({
           type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
           payload: {
-            focusMode: params.focusMode,
+            focusMode: true,
             displayId: params.displayId,
           } as StoreActionPayloadFocusMode,
         });

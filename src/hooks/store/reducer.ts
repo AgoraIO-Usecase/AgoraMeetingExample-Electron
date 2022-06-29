@@ -118,7 +118,14 @@ const onFocusMode = (
   if (oldState.focusMode === focusMode) return oldState;
 
   ipcRenderer.invoke('focus-mode', focusMode, displayId);
-  return { ...oldState, focusMode, markable: false };
+  return {
+    ...oldState,
+    focusMode,
+    markable: false,
+    attendeeLayout: focusMode
+      ? AttendeeLayoutType.Speaker
+      : oldState.attendeeLayout,
+  };
 };
 
 export const StoreReducer = (
