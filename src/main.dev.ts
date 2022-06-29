@@ -197,12 +197,18 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
     mainWindow.setSize(width, height);
   }
 
-  if (enable && process.platform === 'darwin') {
-    mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
+  if (process.platform === 'darwin') {
+    if (enable) {
+      app.dock.hide();
+      mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
+    } else {
+      app.dock.show();
+      mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
+    }
+    mainWindow.setFullScreenable(!enable);
+    mainWindow.setVisibleOnAllWorkspaces(enable, { visibleOnFullScreen: true });
   }
-  if (!enable && process.platform === 'darwin') {
-    mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
-  }
+
   mainWindow.setHasShadow(!enable);
   mainWindow.setMovable(!enable);
   mainWindow.setResizable(!enable);
@@ -213,7 +219,7 @@ ipcMain.handle('focus-mode', (evt, enable, id) => {
     { forward: true }
   );
   mainWindow.setAlwaysOnTop(enable, 'screen-saver');
-  mainWindow.setVisibleOnAllWorkspaces(enable);
+
   if (!enable) {
     mainWindow.setBounds(oldWindowBounds);
   }
