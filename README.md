@@ -22,13 +22,16 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 
 - Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an AppID.
 - Follow [WhiteBoard Doc](https://docs.agora.io/cn/whiteboard/enable_whiteboard?platform=Web) to enable WhiteBoard and obtain your AppIdentifier、AK and SK。
+- Clone project files
+```shell
+$ git clone https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron.git
+$ cd AgoraMeetingExample-Electron
+```
 - Reanme file [.env.template](.env.template) to .env, and replace 'XXXXXX' with your AppID、 AppCert、AppIdentifier、AK and SK.
 
 Then do the following:
 
 ```shell 
-$ git clone https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron.git
-$ cd AgoraMeetingExample-Electron
 $ yarn
 $ yarn start
 
