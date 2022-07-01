@@ -117,12 +117,6 @@ const createWindow = async () => {
   // menuBuilder.buildMenu();
 
   mainWindow.setMenu(null);
-
-  // Open urls in the user's browser
-  mainWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-    shell.openExternal(url);
-  });
 };
 
 app.allowRendererProcessReuse = false;
@@ -232,5 +226,10 @@ ipcMain.on(
     BrowserWindow.fromWebContents(event.sender)?.setIgnoreMouseEvents(...args);
   }
 );
+
+ipcMain.on('open-external', (event, url) => {
+  event.preventDefault();
+  shell.openExternal(url);
+});
 
 log.info('app initialized..............');

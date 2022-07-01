@@ -54,7 +54,7 @@ export class WhiteBoardManager extends EventEmitter {
       isInitialized: false,
       connection: WhiteBoardConnection.Disconnected,
 
-      token: generateSdkToken(),
+      token: '',
       isCreator: false,
       uuid: '',
       timespan: '',
@@ -68,6 +68,11 @@ export class WhiteBoardManager extends EventEmitter {
     if (this.props.isInitialized) return;
 
     log.info('whiteboard manager initialize');
+    try {
+      this.props.token = generateSdkToken();
+    } catch (error) {
+      log.error('whiteboard manager initialize exception', error);
+    }
 
     this.props.isInitialized = true;
   };
@@ -94,7 +99,7 @@ export class WhiteBoardManager extends EventEmitter {
     }
 
     this.props.connection = WhiteBoardConnection.Disconnected;
-    this.props.token = generateSdkToken();
+    this.props.token = '';
     this.props.board = {};
     this.props.isCreator = false;
     this.props.uuid = '';
