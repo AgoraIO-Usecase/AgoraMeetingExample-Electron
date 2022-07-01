@@ -691,6 +691,12 @@ export class RtcManager extends EventEmitter {
     this.engine.on('videoSizeChanged', (uid, width, height) => {
       log.info('rtc manager on video size changed', uid, width, height);
     });
+
+    this.engine.on('tokenPrivilegeWillExpire', () => {
+      log.info('rtc manager on token will expire');
+      const token = generateRtcToken(this.state.channelName, this.state.uid);
+      this.engine.renewToken(token);
+    });
   };
 
   private generateRtcUid = () => {

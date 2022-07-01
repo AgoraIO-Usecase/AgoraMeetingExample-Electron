@@ -32,6 +32,7 @@ export class RtcScreenShareManager extends EventEmitter {
   private props: {
     isInitialized: boolean;
     uid: number;
+    channelName: string;
 
     state: RtcScreenShareState;
     params: RtcScreenShareParams;
@@ -42,6 +43,7 @@ export class RtcScreenShareManager extends EventEmitter {
   } = {
     isInitialized: false,
     uid: 0,
+    channelName: '',
 
     state: RtcScreenShareState.Idle,
     params: {},
@@ -201,6 +203,8 @@ export class RtcScreenShareManager extends EventEmitter {
       publishLocalAudio: false,
       publishLocalVideo: true,
     });
+
+    this.props.channelName = channelName;
   };
 
   stop = (
@@ -322,6 +326,8 @@ export class RtcScreenShareManager extends EventEmitter {
 
     this.engine.on('videoSourceRequestNewToken', () => {
       log.warn('screenshare manager on videoSourceRequestNewToken');
+      const token = generateRtcToken(this.props.channelName, this.props.uid);
+      this.engine.videoSourceRenewToken(token);
     });
 
     this.engine.on('videoSourceScreenCaptureInfoUpdated', (info) => {

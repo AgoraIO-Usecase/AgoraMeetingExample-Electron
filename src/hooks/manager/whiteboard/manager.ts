@@ -323,8 +323,6 @@ export class WhiteBoardManager extends EventEmitter {
     }
   };
 
-  private generateUid = () => {};
-
   private onWhiteBoardPhaseChanged = (phase: RoomPhase) => {
     if (phase === 'disconnected') {
       this.setConnection(
