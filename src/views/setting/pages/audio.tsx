@@ -17,7 +17,6 @@ import RecordVoiceOverOutlinedIcon from '@mui/icons-material/RecordVoiceOverOutl
 import DeviceSelect from './deviceselect';
 import {
   DeviceType,
-  MeetingConnection,
   useCommonManager,
   useStore,
   VolumeIndication,

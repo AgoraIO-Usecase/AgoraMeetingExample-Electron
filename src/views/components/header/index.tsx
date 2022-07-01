@@ -19,11 +19,10 @@ export declare type HeaderBarProps = {
   title?: string;
   fixed?: boolean;
   layouts?: boolean;
-  focus?: boolean;
 };
 
 const HeaderBar = (props: HeaderBarProps) => {
-  const { title, fixed, layouts, focus } = props;
+  const { title, fixed, layouts } = props;
   const [showSetting, setShowSetting] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState<Element | null>(
     null

@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import SpeakerView from './speaker';
 import GridView from './grid';
 import { AttendeeLayoutType, useStore } from '../../../hooks';
 
 const AttendeeView = () => {
   const { state } = useStore();
-
-  return state.attendeeLayout === AttendeeLayoutType.Speaker ? (
-    <SpeakerView />
-  ) : (
-    <GridView type={state.attendeeLayout} />
+  const isSpeakerLayout = useMemo(
+    () => state.attendeeLayout === AttendeeLayoutType.Speaker,
+    [state.attendeeLayout]
   );
+
+  return isSpeakerLayout ? <SpeakerView /> : <GridView />;
 };
 
 export default AttendeeView;

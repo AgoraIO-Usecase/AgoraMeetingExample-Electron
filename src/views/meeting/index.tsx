@@ -32,7 +32,6 @@ const MeetingView = () => {
         <HeaderBar
           title={commonManager.getChannelName()}
           layouts={state.whiteboardState === WhiteBoardState.Idle}
-          focus
         />
       )}
       <AttendeeView />

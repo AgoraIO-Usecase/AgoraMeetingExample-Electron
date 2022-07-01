@@ -5,18 +5,13 @@ import AttendeeItem from '../attendee';
 import { useStore, AttendeeLayoutType } from '../../../../hooks';
 import useStyle from './style';
 
-export type GridAttendeeViewProps = {
-  type: AttendeeLayoutType;
-};
-
-const GridAttendeeView = (props: GridAttendeeViewProps) => {
-  const { type } = props;
+const GridAttendeeView = () => {
   const style = useStyle();
   const { state } = useStore();
 
   const maxAttendeeCountPerPage = useMemo(() => {
     let count = 4;
-    switch (type) {
+    switch (state.attendeeLayout) {
       case AttendeeLayoutType.Grid4:
         count = 4;
         break;
@@ -31,7 +26,7 @@ const GridAttendeeView = (props: GridAttendeeViewProps) => {
     }
 
     return count;
-  }, [type]);
+  }, [state.attendeeLayout]);
 
   const gridColumnRow = useMemo(() => {
     const info: { col: number; row: number } = {

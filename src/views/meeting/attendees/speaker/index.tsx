@@ -42,7 +42,7 @@ const renderRow = (
   );
 };
 
-const AttendeeView = () => {
+const SpeakerAttendeeView = () => {
   const style = useStyle();
   const { state } = useStore();
   const commonManager = useCommonManager();
@@ -160,4 +160,4 @@ const AttendeeView = () => {
   );
 };
 
-export default AttendeeView;
+export default SpeakerAttendeeView;
