@@ -27,10 +27,17 @@ export interface RtcDeviceInfo {
   devicename: string;
 }
 
+export enum RtcUserType {
+  Media,
+  ScreenShare,
+  MediaPlayer,
+}
+
 export interface RtcUser {
   uid: number;
   nickname?: string;
 
+  type?: RtcUserType;
   shareId?: number;
   parentId?: number;
 

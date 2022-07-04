@@ -32,6 +32,7 @@ import {
   RtcClientRole,
   RtcUserUpdateReason,
   RtcScreenShareParams,
+  RtcUserType,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { RtcScreenShareManager } from './screenshare';
@@ -69,7 +70,7 @@ export declare interface RtcManager {
     evt: 'screenshareState',
     cb: (
       state: RtcScreenShareState,
-      params: RtcScreenShareManager,
+      params: RtcScreenShareParams,
       reason: RtcScreenShareStateReason.Error
     ) => void
   ): this;
@@ -211,6 +212,7 @@ export class RtcManager extends EventEmitter {
 
     this.setConnection(RtcConnection.Connecting);
     this.addUser({
+      type: RtcUserType.Media,
       uid: this.state.uid,
       nickname,
       shareId: 0,
@@ -302,6 +304,44 @@ export class RtcManager extends EventEmitter {
     // there is no workaround solution for stop trans frame from
     // c++ to js when there is no local renderer for now
     // so will get warn info like 'Can't find renderer for uid: 0'
+  };
+
+  setupScreenShareRenderer = (
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
+    log.info('rtc manager setup local screenshare renderer', view.id);
+    this.engine.initRender('videosource', view, undefined, {
+      append: isAppend,
+    });
+
+    // coz sdk can not set view mode by view
+    // force to use fit for now
+    this.engine.setupViewContentMode('videosource', isFit ? 1 : 1, undefined);
+
+    // this is a workaround solution
+    // coz sdk can not auto stop trans frame from c++ to js when there is
+    // no renderer for now
+    // eslint-disable-next-line no-underscore-dangle
+    const renderers = this.engine._getRenderers(3, 0, undefined);
+    if (renderers && renderers.length === 1) {
+      this.engine.startScreenCapturePreview();
+    }
+  };
+
+  destroyScreenShareRenderer = (view: Element) => {
+    log.info('rtc manager destroy local screenshare renderer', view.id);
+    this.engine.destroyRenderView('videosource', undefined, view);
+
+    // this is a workaround solution
+    // coz sdk can not auto stop trans frame from c++ to js when there is
+    // no renderer for now
+    // eslint-disable-next-line no-underscore-dangle
+    const renderers = this.engine._getRenderers(3, 0, undefined);
+    if (!renderers || renderers.length === 0) {
+      this.engine.stopScreenCapturePreview();
+    }
   };
 
   setupRemoteVideoRenderer = (
@@ -496,6 +536,8 @@ export class RtcManager extends EventEmitter {
       this.addUser({
         uid,
         nickname: '',
+
+        type: RtcUserType.Media,
 
         shareId: 0,
         parentId: 0,
@@ -736,7 +778,19 @@ export class RtcManager extends EventEmitter {
           },
           RtcUserUpdateReason.Info
         );
+
+        const selfUser = this.getSelfUser();
+        this.addUser({
+          uid: this.state.shareId,
+          parentId: this.state.uid,
+          nickname: selfUser.nickname,
+          type: RtcUserType.ScreenShare,
+          isSelf: true,
+          isCameraOn: true,
+          isAudioOn: false,
+        });
       } else if (state === RtcScreenShareState.Idle) {
+        this.removeUser(this.state.shareId);
         this.updateUser(
           {
             uid: this.state.uid,
@@ -899,6 +953,7 @@ export class RtcManager extends EventEmitter {
           {
             uid: info.shareId,
             nickname: info.nickname,
+            type: RtcUserType.ScreenShare,
             parentId: info.uid,
             isSharingDisplay: info.isSharingDisplay,
             isSharingFocusMode: info.isSharingFocusMode,

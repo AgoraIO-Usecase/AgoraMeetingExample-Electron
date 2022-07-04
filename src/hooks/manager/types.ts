@@ -2,9 +2,17 @@ export type Version = {
   rtcVersion: string;
 };
 
+export enum AttendeeType {
+  Media,
+  ScreenShare,
+  MediaPlayer,
+}
+
 export type AttendeeInfo = {
   uid: number;
   nickname?: string;
+
+  type?: AttendeeType;
 
   shareId?: number;
   parentId?: number;

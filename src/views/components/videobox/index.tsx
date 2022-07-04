@@ -1,10 +1,11 @@
 import React, { useMemo, useEffect } from 'react';
-import { useCommonManager } from '../../../hooks';
+import { AttendeeType, useCommonManager } from '../../../hooks';
 import { generateVideoboxId } from '../../../utils/generate';
 import useStyle from './style';
 
 export declare type VideoBoxProps = {
   uid?: number | undefined;
+  type: AttendeeType;
   isSelf: boolean;
   isMain: boolean;
   isFit: boolean;
@@ -12,7 +13,7 @@ export declare type VideoBoxProps = {
 
 const VideoBox = (props: VideoBoxProps) => {
   const style = useStyle();
-  const { uid, isSelf, isMain, isFit } = props;
+  const { uid, type, isSelf, isMain, isFit } = props;
   const commonManager = useCommonManager();
   const domId = useMemo(
     () => generateVideoboxId(uid || 0, isMain || false),
@@ -35,12 +36,21 @@ const VideoBox = (props: VideoBoxProps) => {
     }
 
     if (isSelf) {
-      commonManager.setupLocalVideoRenderer(dom!, isFit, isAppend);
+      if (type === AttendeeType.Media)
+        commonManager.setupLocalVideoRenderer(dom!, isFit, isAppend);
+      else if (type === AttendeeType.ScreenShare)
+        commonManager.setupScreenShareRenderer(dom!, isFit, isAppend);
     } else {
       commonManager.setupRemoteVideoRenderer(uid!, dom!, isFit, isAppend);
     }
 
-    console.warn('attendee videobox initialize for ', uid);
+    console.warn(
+      'attendee videobox initialize for ',
+      uid,
+      dom!.id,
+      isSelf,
+      type
+    );
 
     return () => {
       // there has a known issue here
@@ -51,12 +61,21 @@ const VideoBox = (props: VideoBoxProps) => {
       }
 
       if (isSelf) {
-        commonManager.destroyLocalVideoRenderer(dom!);
+        if (type === AttendeeType.Media)
+          commonManager.destroyLocalVideoRenderer(dom!);
+        else if (type === AttendeeType.ScreenShare)
+          commonManager.destroyScreenShareRenderer(dom!);
       } else {
         commonManager.destroyRemoteVideoRenderer(uid!, dom!);
       }
 
-      console.warn('attendee videobox uninitialize for ', uid, dom!.id);
+      console.warn(
+        'attendee videobox uninitialize for ',
+        uid,
+        dom!.id,
+        isSelf,
+        type
+      );
     };
   }, [uid]);
 

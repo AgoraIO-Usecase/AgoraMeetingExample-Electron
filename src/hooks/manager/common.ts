@@ -319,6 +319,18 @@ export class CommonManager extends EventEmitter {
     this.rtcManager.destroyLocalVideoRenderer(view);
   };
 
+  setupScreenShareRenderer = (
+    view: Element,
+    isFit: boolean,
+    isAppend: boolean
+  ) => {
+    this.rtcManager.setupScreenShareRenderer(view, isFit, isAppend);
+  };
+
+  destroyScreenShareRenderer = (view: Element) => {
+    this.rtcManager.destroyScreenShareRenderer(view);
+  };
+
   setupRemoteVideoRenderer = (
     uid: number,
     view: Element,

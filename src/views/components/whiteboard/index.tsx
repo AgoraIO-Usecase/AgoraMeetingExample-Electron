@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, memo } from 'react';
 import { Stack } from '@mui/material';
 
-import { AttendeeInfo, useCommonManager } from '../../../hooks';
+import { AttendeeInfo, AttendeeType, useCommonManager } from '../../../hooks';
 import useStyle from './style';
 import VideoBox from '../videobox';
 
@@ -31,7 +31,13 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
   return (
     <Stack className={style.wrapper}>
       {showVideoBox ? (
-        <VideoBox uid={attendee?.shareId} isSelf={false} isMain isFit />
+        <VideoBox
+          uid={attendee?.shareId}
+          isSelf={false}
+          isMain
+          isFit
+          type={AttendeeType.ScreenShare}
+        />
       ) : (
         <></>
       )}

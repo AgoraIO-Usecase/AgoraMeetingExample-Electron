@@ -8,7 +8,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 
-import { AttendeeInfo } from '../../../../hooks';
+import { AttendeeInfo, AttendeeType } from '../../../../hooks';
 import useStyle from './style';
 import VideoBox from '../../../components/videobox';
 
@@ -21,15 +21,8 @@ export type AttendeeItemProps = {
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, isFit, attendee } = props;
-  const {
-    uid,
-    nickname,
-    isSelf,
-    isCameraOn,
-    isAudioOn,
-    parentId,
-    hasWhiteBoard,
-  } = attendee;
+  const { uid, nickname, type, isSelf, isCameraOn, isAudioOn, hasWhiteBoard } =
+    attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
     [nickname, uid]
@@ -70,7 +63,7 @@ const AttendeeItem = (props: AttendeeItemProps) => {
             <Stack direction="row" spacing={1} alignItems="center">
               {isAudioOn ? <MicNoneOutlinedIcon color="primary" /> : <></>}
               {isCameraOn ? (
-                parentId && parentId !== 0 ? (
+                type === AttendeeType.ScreenShare ? (
                   <ScreenShareOutlinedIcon color="primary" />
                 ) : (
                   <VideocamOutlinedIcon color="primary" />
@@ -92,6 +85,7 @@ const AttendeeItem = (props: AttendeeItemProps) => {
             isSelf={isSelf || false}
             isMain={isMain || false}
             isFit={isFit || false}
+            type={type || AttendeeType.Media}
           />
         ) : (
           <></>
