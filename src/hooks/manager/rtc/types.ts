@@ -87,6 +87,7 @@ export enum RtcScreenShareState {
 export enum RtcScreenShareStateReason {
   None,
   Error,
+  WindowMinimized,
   WindowClosed,
 }
 

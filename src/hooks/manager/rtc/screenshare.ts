@@ -313,10 +313,23 @@ export class RtcScreenShareManager extends EventEmitter {
         error
       );
 
-      // LOCAL_VIDEO_STREAM_ERROR_SCREEN_CAPTURE_WINDOW_CLOSED
-      if (error === 12) {
+      if (state === 3) {
+        let reason: RtcScreenShareStateReason = RtcScreenShareStateReason.Error;
+        switch (error) {
+          // We should auto stop screenshare and notice user for code 11 even
+          // video stream can recovery after restore specified window, coz
+          // sdk have some issue for now.
+          case 11: // LOCAL_VIDEO_STREAM_ERROR_SCREEN_CAPTURE_WINDOW_MINIMIZED
+            reason = RtcScreenShareStateReason.WindowMinimized;
+            break;
+          case 12: // LOCAL_VIDEO_STREAM_ERROR_SCREEN_CAPTURE_WINDOW_CLOSED
+            reason = RtcScreenShareStateReason.WindowClosed;
+            break;
+          default:
+            break;
+        }
         log.error('screenshare manager on specified window closed, auto stop');
-        this.stop(RtcScreenShareStateReason.WindowClosed);
+        this.stop(reason);
       }
     });
 

@@ -13,6 +13,7 @@ import {
   CommonManagerContext,
   MeetingConnection,
   ScreenShareState,
+  ScreenShareStateReason,
   WhiteBoardState,
 } from './manager';
 
@@ -131,6 +132,25 @@ export const RootProvider: FC = (props) => {
         });
       }
     });
+
+    commonManager.on('screenshareError', (reason) => {
+      let errorTips = 'error';
+      switch (reason) {
+        case ScreenShareStateReason.WindowMinimized:
+          errorTips = 'window minimized';
+          break;
+        case ScreenShareStateReason.WindowClosed:
+          errorTips = 'window closed';
+          break;
+        default:
+          break;
+      }
+      showNotification(
+        `screenshare error ${errorTips}(code:${reason as number})`,
+        'error'
+      );
+    });
+
     commonManager.on('whiteboardState', (whiteboardState) => {
       if (whiteboardState === WhiteBoardState.Running)
         showNotification(

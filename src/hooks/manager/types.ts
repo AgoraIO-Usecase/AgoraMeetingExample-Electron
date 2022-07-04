@@ -84,6 +84,7 @@ export enum ScreenShareState {
 export enum ScreenShareStateReason {
   None,
   Error,
+  WindowMinimized,
   WindowClosed,
 }
 
