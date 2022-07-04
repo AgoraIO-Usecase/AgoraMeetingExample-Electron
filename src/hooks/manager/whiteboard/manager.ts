@@ -99,7 +99,7 @@ export class WhiteBoardManager extends EventEmitter {
     }
 
     this.props.connection = WhiteBoardConnection.Disconnected;
-    this.props.token = '';
+    this.props.token = generateSdkToken();
     this.props.board = {};
     this.props.isCreator = false;
     this.props.uuid = '';
