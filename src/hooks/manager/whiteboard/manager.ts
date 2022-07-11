@@ -338,10 +338,10 @@ export class WhiteBoardManager extends EventEmitter {
     }
   };
 
-  enableFollowPPT = (enable: boolean) => {
+  enableFollowPPT = async (enable: boolean) => {
     log.info('whiteboard manager enable follow ppt', enable);
     if (enable && this.props.pptmonitor === undefined) {
-      const timer = startPPTMonitor(this.onPPTMonitorEvent, 2000);
+      const timer = await startPPTMonitor(this.onPPTMonitorEvent, 2000);
       if (timer === undefined) {
         log.error('start ppt monitor failed');
         return;
@@ -402,7 +402,7 @@ export class WhiteBoardManager extends EventEmitter {
 
     const { manager } = board.app;
     const allScenes = manager.displayer.entireScenes()['/'];
-    const currentSceneName = index === -1 ? RootSceneName : `${index}`;
+    const currentSceneName = index === 1 ? RootSceneName : `${index}`;
     const currentScene = allScenes.find((s) => s.name === currentSceneName);
     if (!currentScene) {
       manager.addPage({

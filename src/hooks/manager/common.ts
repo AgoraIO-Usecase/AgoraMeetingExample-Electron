@@ -472,7 +472,7 @@ export class CommonManager extends EventEmitter {
   whiteboardUpdateRatio = (ratio: number) =>
     this.whiteboardManager.updateRatio(ratio);
 
-  whiteboardEnableFollowPPT = (enable: boolean) => {
-    this.whiteboardManager.enableFollowPPT(enable);
+  whiteboardEnableFollowPPT = async (enable: boolean) => {
+    await this.whiteboardManager.enableFollowPPT(enable);
   };
 }
