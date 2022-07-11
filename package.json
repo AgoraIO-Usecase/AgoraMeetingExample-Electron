@@ -261,7 +261,8 @@
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
     "uuid": "^8.3.2",
-    "white-web-sdk": "^2.16.24"
+    "white-web-sdk": "^2.16.24",
+    "worker-timers": "^7.0.50"
   },
   "engines": {
     "node": ">=14.5.0 < 15",

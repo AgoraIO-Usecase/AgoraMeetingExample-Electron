@@ -14,9 +14,11 @@ import {
   WhiteBoardRoomInfo,
 } from './types';
 import { generateRoomToken, generateSdkToken } from './cert';
+import { startPPTMonitor, stopPPTMonitor } from './pptmonitor';
 import { banRoom, createRoom } from './api';
 
 const DefaultRatio = 9 / 16;
+const RootSceneName = 'root';
 
 export declare interface WhiteBoardManager {
   on(
@@ -45,6 +47,7 @@ export class WhiteBoardManager extends EventEmitter {
     };
     parentId: number;
     nickname: string;
+    pptmonitor?: number | undefined;
   };
 
   constructor() {
@@ -61,6 +64,7 @@ export class WhiteBoardManager extends EventEmitter {
       board: {},
       parentId: 0,
       nickname: '',
+      pptmonitor: undefined,
     };
   }
 
@@ -89,6 +93,8 @@ export class WhiteBoardManager extends EventEmitter {
   };
 
   reset = async () => {
+    this.enableFollowPPT(false);
+
     try {
       await this.props.board.app?.destroy();
       this.props.board.mounted?.destroy();
@@ -218,6 +224,8 @@ export class WhiteBoardManager extends EventEmitter {
 
     log.info('whiteboard manager stop');
 
+    this.enableFollowPPT(false);
+
     try {
       await this.props.board.app?.destroy();
       this.props.board.mounted?.destroy();
@@ -253,6 +261,8 @@ export class WhiteBoardManager extends EventEmitter {
           },
         });
         app.manager.mainView.disableCameraTransform = true;
+        app.manager.addPage({ scene: { name: RootSceneName } });
+        app.manager.setMainViewScenePath(`/${RootSceneName}`);
         log.info('whiteboard manager mounted with element ', element.id);
       }
     } catch (error) {
@@ -328,6 +338,24 @@ export class WhiteBoardManager extends EventEmitter {
     }
   };
 
+  enableFollowPPT = (enable: boolean) => {
+    log.info('whiteboard manager enable follow ppt', enable);
+    if (enable && this.props.pptmonitor === undefined) {
+      const timer = startPPTMonitor(this.onPPTMonitorEvent, 2000);
+      if (timer === undefined) {
+        log.error('start ppt monitor failed');
+        return;
+      }
+      this.props.pptmonitor = timer;
+    }
+
+    if (!enable && this.props.pptmonitor !== undefined) {
+      stopPPTMonitor(this.props.pptmonitor);
+      this.props.pptmonitor = undefined;
+      this.props.board.app?.manager.setMainViewScenePath(`/${RootSceneName}`);
+    }
+  };
+
   private onWhiteBoardPhaseChanged = (phase: RoomPhase) => {
     if (phase === 'disconnected') {
       this.setConnection(
@@ -366,5 +394,25 @@ export class WhiteBoardManager extends EventEmitter {
     this.props.connection = connection;
 
     this.emit('connection', connection, error);
+  };
+
+  private onPPTMonitorEvent = (index: number) => {
+    const { pptmonitor, board } = this.props;
+    if (pptmonitor === undefined || !board.app) return;
+
+    const { manager } = board.app;
+    const allScenes = manager.displayer.entireScenes()['/'];
+    const currentSceneName = index === -1 ? RootSceneName : `${index}`;
+    const currentScene = allScenes.find((s) => s.name === currentSceneName);
+    if (!currentScene) {
+      manager.addPage({
+        scene: { name: currentSceneName },
+      });
+    }
+
+    if (manager.displayer.state.sceneState.sceneName !== currentSceneName) {
+      log.info('whiteboard manager auto change scene to ', currentSceneName);
+      manager.setMainViewScenePath(`/${currentSceneName}`);
+    }
   };
 }

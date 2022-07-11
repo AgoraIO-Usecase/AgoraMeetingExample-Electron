@@ -9,8 +9,8 @@ const useStyle = makeStyles(() => {
     },
     draggableContainer: {
       position: 'absolute',
-      top: '10px',
-      right: '400px',
+      top: '100px',
+      right: '300px',
       cursor: 'move',
       zIndex: '1000',
       boxShadow:
