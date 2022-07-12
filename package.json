@@ -93,7 +93,11 @@
     },
     "extraResources": [
       "./assets/**",
-      "./extraResources/**"
+      "./extraResources/**",
+      {
+        "from":"src/worker.js",
+        "to":"app.asar.unpacked/src/worker.js"
+      }
     ]
   },
   "contributors": [
@@ -174,6 +178,7 @@
     "@types/tmp": "^0.2.3",
     "@types/uuid": "^8.3.4",
     "@types/webpack-env": "^1.15.2",
+    "@types/workerpool": "^6.1.0",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "babel-eslint": "^10.1.0",
@@ -245,7 +250,6 @@
     "@netless/fastboard": "^0.3.3",
     "@netless/window-manager": "^0.4.32",
     "agora-access-token": "^2.0.4",
-    "applescript": "^1.0.0",
     "axios": "^0.27.2",
     "electron-debug": "^3.1.0",
     "electron-log": "^4.4.7",
@@ -264,7 +268,7 @@
     "tmp": "^0.2.1",
     "uuid": "^8.3.2",
     "white-web-sdk": "^2.16.24",
-    "worker-timers": "^7.0.50"
+    "workerpool": "^6.2.1"
   },
   "engines": {
     "node": ">=14.5.0 < 15",

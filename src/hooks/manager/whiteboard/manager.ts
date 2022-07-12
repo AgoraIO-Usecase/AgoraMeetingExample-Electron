@@ -14,8 +14,8 @@ import {
   WhiteBoardRoomInfo,
 } from './types';
 import { generateRoomToken, generateSdkToken } from './cert';
-import { startPPTMonitor, stopPPTMonitor } from './pptmonitor';
 import { banRoom, createRoom } from './api';
+import { startPPTMonitor, stopPPTMonitor } from '../../../utils/pptmonitor';
 
 const DefaultRatio = 9 / 16;
 const RootSceneName = 'root';
@@ -47,7 +47,6 @@ export class WhiteBoardManager extends EventEmitter {
     };
     parentId: number;
     nickname: string;
-    pptmonitor?: number | undefined;
   };
 
   constructor() {
@@ -64,7 +63,6 @@ export class WhiteBoardManager extends EventEmitter {
       board: {},
       parentId: 0,
       nickname: '',
-      pptmonitor: undefined,
     };
   }
 
@@ -340,18 +338,12 @@ export class WhiteBoardManager extends EventEmitter {
 
   enableFollowPPT = async (enable: boolean) => {
     log.info('whiteboard manager enable follow ppt', enable);
-    if (enable && this.props.pptmonitor === undefined) {
-      const timer = await startPPTMonitor(this.onPPTMonitorEvent, 2000);
-      if (timer === undefined) {
-        log.error('start ppt monitor failed');
-        return;
-      }
-      this.props.pptmonitor = timer;
+    if (enable) {
+      startPPTMonitor(this.onPPTMonitorEvent);
     }
 
-    if (!enable && this.props.pptmonitor !== undefined) {
-      stopPPTMonitor(this.props.pptmonitor);
-      this.props.pptmonitor = undefined;
+    if (!enable) {
+      stopPPTMonitor();
       this.props.board.app?.manager.setMainViewScenePath(`/${RootSceneName}`);
     }
   };
@@ -397,10 +389,9 @@ export class WhiteBoardManager extends EventEmitter {
   };
 
   private onPPTMonitorEvent = (index: number) => {
-    const { pptmonitor, board } = this.props;
-    if (pptmonitor === undefined || !board.app) return;
+    if (!this.props.board.app) return;
 
-    const { manager } = board.app;
+    const { manager } = this.props.board.app;
     const allScenes = manager.displayer.entireScenes()['/'];
     const currentSceneName = index === 1 ? RootSceneName : `${index}`;
     const currentScene = allScenes.find((s) => s.name === currentSceneName);

@@ -117,7 +117,7 @@ const onFocusMode = (
   const { focusMode, displayId } = payload;
   if (oldState.focusMode === focusMode) return oldState;
 
-  ipcRenderer.invoke('focus-mode', focusMode, displayId);
+  ipcRenderer.send('focus-mode', focusMode, displayId);
   return {
     ...oldState,
     focusMode,
