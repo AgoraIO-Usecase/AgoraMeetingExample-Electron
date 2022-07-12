@@ -220,16 +220,15 @@ class AgoraMeeting {
       else if (process.platform === 'win32') {
         const script = await writeTempFile(vbScript, '.vbs');
         this.pptmonitorHandler = setInterval(() => {
-          const res = spawn('cscript.exe', [script]);
-          res.stdin.end();
-
-          res.on('error', (error) => {
-            log.error('on pptmonitor script error', error);
-          });
-
-          res.on('exit', (code) => {
-            this.mainWindow?.webContents.send('pptmonitor', code || 1);
-          });
+          this.pool
+            .exec('spawn', ['cscript.exe', [script]])
+            .then((result) => {
+              this.mainWindow?.webContents.send('pptmonitor', result || 1);
+              return 0;
+            })
+            .catch((error) => {
+              log.error('on pptmonitor script error', error);
+            });
         }, 1000);
       }
     } else {

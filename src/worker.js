@@ -7,9 +7,12 @@ const spawn = async (commond, args) =>
     res.on('error', (error) => {
       reject(error);
     });
-    res.stdout.on('data', (data) => {
-      resolve(data.toString());
+    res.on('exit', (code) => {
+      resolve(code);
     });
+    // res.stdout.on('data', (data) => {
+    //   resolve(data.toString());
+    // });
     res.stdin.end();
   });
 
