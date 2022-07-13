@@ -220,7 +220,7 @@ export class RtcScreenShareManager extends EventEmitter {
   };
 
   private startScreenShare = () => {
-    const { displayId, windowId } = this.props.params;
+    const { displayId, windowId, focusMode } = this.props.params;
 
     const captureParam = {
       width: 0,
@@ -231,6 +231,9 @@ export class RtcScreenShareManager extends EventEmitter {
       windowFocus: false,
       excludeWindowList: [] as number[],
       excludeWindowCount: 0,
+      enableHighLight: !focusMode,
+      highLightWidth: 2,
+      highLightColor: 0x000000,
     };
 
     let ret = 0;
