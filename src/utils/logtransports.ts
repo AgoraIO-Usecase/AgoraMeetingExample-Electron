@@ -1,4 +1,5 @@
 import log from 'electron-log';
+import path from 'path';
 
 // https://www.npmjs.com/package/electron-log
 
@@ -14,5 +15,11 @@ log.transports.console.format =
 // on Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\{process type}.log
 log.transports.file.level = 'debug';
 log.transports.file.fileName = 'main.log';
+log.transports.file.resolvePath = (variables) => {
+  return path.join(
+    variables.electronDefaultDir || variables.libraryDefaultDir,
+    variables.fileName!
+  );
+};
 log.transports.file.format = '[{y}{m}{d} {h}:{i}:{s}.{ms}][{level}]{text}';
 log.transports.file.maxSize = 1048576;
