@@ -1,27 +1,43 @@
 import tmp from 'tmp';
 import fs from 'fs';
+import { app, remote } from 'electron';
+import path from 'path';
 
 const writeTempFile = (context: string, postfix?: string | undefined) => {
   return new Promise<string>((resolve, reject) => {
-    tmp.tmpName({ prefix: 'agora-', postfix }, (tmperr, path) => {
+    tmp.tmpName({ prefix: 'agora-', postfix }, (tmperr, destPath) => {
       if (tmperr) {
         reject(tmperr);
         return;
       }
-      fs.writeFile(path, context, (writeError) => {
+      fs.writeFile(destPath, context, (writeError) => {
         if (writeError) {
           reject(writeError);
           return;
         }
-        resolve(path);
+        resolve(destPath);
       });
     });
   });
 };
 
-const deleteTempFile = (path: string) => {
+const writeFileToTemp = (context: string, name: string) => {
+  return new Promise<string>((resolve, reject) => {
+    const destPath = path.join(app.getPath('temp'), name);
+    fs.writeFile(destPath, context, (writeError) => {
+      if (writeError) {
+        reject(writeError);
+        return;
+      }
+      resolve(destPath);
+    });
+    resolve(destPath);
+  });
+};
+
+const deleteTempFile = (destPath: string) => {
   return new Promise<boolean>((resolve, reject) => {
-    fs.unlink(path, (err) => {
+    fs.unlink(destPath, (err) => {
       if (err) {
         reject(err);
         return;
@@ -31,4 +47,4 @@ const deleteTempFile = (path: string) => {
   });
 };
 
-export { writeTempFile, deleteTempFile };
+export { writeTempFile, writeFileToTemp, deleteTempFile };

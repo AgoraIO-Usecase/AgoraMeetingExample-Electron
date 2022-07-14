@@ -7,12 +7,9 @@ const spawn = async (commond, args) =>
     res.on('error', (error) => {
       reject(error);
     });
-    res.on('exit', (code) => {
-      resolve(code);
+    res.stdout.on('data', (code) => {
+      resolve(code.toString());
     });
-    // res.stdout.on('data', (data) => {
-    //   resolve(data.toString());
-    // });
     res.stdin.end();
   });
 
@@ -27,12 +24,28 @@ const exec = async (commond) =>
   new Promise((resolve, reject) => {
     childprocess.exec(commond, (error, stdout, stderror) => {
       if (error) reject(error);
-      resolve(stdout);
+      resolve(stdout.toString());
     });
+  });
+
+const execFile = async (file) =>
+  new Promise((resolve, reject) => {
+    try {
+      const res = childprocess.execFile(file);
+      res.on('error', (error) => {
+        reject(error);
+      });
+      res.on('exit', (code) => {
+        resolve(code);
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 
 workerpool.worker({
   spawn,
   spawnSync,
   exec,
+  execFile,
 });

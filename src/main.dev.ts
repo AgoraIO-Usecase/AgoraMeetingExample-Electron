@@ -16,9 +16,7 @@ import log from 'electron-log';
 import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
-import { spawn } from 'child_process';
-import { appleScript, vbScript } from './utils/pptmonitor';
-import { writeTempFile } from './utils/tempfile';
+import { appleScript } from './utils/pptmonitor';
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -218,12 +216,21 @@ class AgoraMeeting {
             });
         }, 1000);
       else if (process.platform === 'win32') {
-        const script = await writeTempFile(vbScript, '.vbs');
+        // coz windows defender will treate vbs as virus
+        // so we need to convert vbs to exe with scriptcrypto and sign it
+        const script =
+          process.env.NODE_ENV === 'development'
+            ? path.join(__dirname, '../extraResources/agora-pptmonitor.exe')
+            : path.join(
+                process.resourcesPath,
+                '/extraResources/agora-pptmonitor.exe'
+              );
         this.pptmonitorHandler = setInterval(() => {
           this.pool
-            .exec('spawn', ['cscript.exe', [script]])
+            .exec('execFile', [`${script}`])
             .then((result) => {
-              this.mainWindow?.webContents.send('pptmonitor', result || 1);
+              const index = Number.parseInt(result, 10);
+              this.mainWindow?.webContents.send('pptmonitor', index);
               return 0;
             })
             .catch((error) => {

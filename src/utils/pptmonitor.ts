@@ -18,10 +18,11 @@ end tell
 `;
 
 const vbScript = `
-''coz slide index start from 1, so we use 1 as default page
+'coz slide index start from 1, so we use 1 as default page
 On Error Resume Next
 Set objPPT = CreateObject("PowerPoint.Application")
 If Err.Number <> 0 Then
+WScript.StdOut.Write 1
 WScript.Quit(1)
 End If
 Dim caption,posLeft,posTop,index
@@ -45,6 +46,8 @@ posLeft = activePresentation.SlideShowWindow.Left
 posTop = activePresentation.SlideShowWindow.Top
 caption = activePresentation.Name
 End If
+
+WScript.StdOut.Write index
 
 WScript.Quit(index)
 `;

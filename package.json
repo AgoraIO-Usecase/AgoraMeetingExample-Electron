@@ -95,8 +95,8 @@
       "./assets/**",
       "./extraResources/**",
       {
-        "from":"src/worker.js",
-        "to":"app.asar.unpacked/src/worker.js"
+        "from": "src/worker.js",
+        "to": "app.asar.unpacked/src/worker.js"
       }
     ]
   },
