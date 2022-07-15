@@ -16,7 +16,9 @@ import log from 'electron-log';
 import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
+import { ChildProcess, execFile } from 'child_process';
 import { appleScript } from './utils/pptmonitor';
+import { PipeServer } from './utils/pipe';
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -40,11 +42,15 @@ class AgoraMeeting {
       ? path.join(__dirname, 'worker.js')
       : path.join(process.resourcesPath, 'app.asar.unpacked/src/worker.js'),
     {
-      workerType: 'process',
+      workerType: 'thread',
     }
   );
 
-  private pptmonitorHandler: NodeJS.Timeout | undefined = undefined;
+  private pptmonitor: {
+    handler?: NodeJS.Timeout | undefined;
+    pip?: PipeServer | undefined;
+    cp?: ChildProcess | undefined;
+  } = {};
 
   constructor() {
     this.initialize();
@@ -91,7 +97,7 @@ class AgoraMeeting {
     this.mainWindow.loadURL(`file://${__dirname}/index.html`);
 
     // @TODO: Use 'ready-to-show' event
-    //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
+    // https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
     this.mainWindow.webContents.on('did-finish-load', () => {
       if (!this.mainWindow) {
         throw new Error('"mainWindow" is not defined');
@@ -196,51 +202,73 @@ class AgoraMeeting {
   // coz macos has bug here with spawn, spawn will spend a lot of time
   // in Big Sur with electron 12 so we use workerpool to work around
   // https://github.com/electron/electron/issues/26143
-  private onEnablePPTMonitor = async (enable: boolean) => {
-    log.info('app main ipc on enable ppt monitor', enable);
-    if (this.pptmonitorHandler !== undefined)
-      clearInterval(this.pptmonitorHandler);
+  // applescript can not use namedpipe so we call applescript directly
+  private enablePPTMonitorMac = async (enable: boolean) => {
+    if (this.pptmonitor.handler !== undefined)
+      clearInterval(this.pptmonitor.handler);
 
     if (enable) {
-      if (process.platform === 'darwin')
-        this.pptmonitorHandler = setInterval(() => {
-          this.pool
-            .exec('exec', [`osascript -e '${appleScript}'`])
-            .then((result) => {
-              const index = Number.parseInt(result, 10);
-              this.mainWindow?.webContents.send('pptmonitor', index);
-              return 0;
-            })
-            .catch((error) => {
-              log.error('on pptmonitor script errorr', error);
-            });
-        }, 1000);
-      else if (process.platform === 'win32') {
-        // coz windows defender will treate vbs as virus
-        // so we need to convert vbs to exe with scriptcrypto and sign it
-        const script =
-          process.env.NODE_ENV === 'development'
-            ? path.join(__dirname, '../extraResources/agora-pptmonitor.exe')
-            : path.join(
-                process.resourcesPath,
-                '/extraResources/agora-pptmonitor.exe'
-              );
-        this.pptmonitorHandler = setInterval(() => {
-          this.pool
-            .exec('execFile', [`${script}`])
-            .then((result) => {
-              const index = Number.parseInt(result, 10);
-              this.mainWindow?.webContents.send('pptmonitor', index);
-              return 0;
-            })
-            .catch((error) => {
-              log.error('on pptmonitor script error', error);
-            });
-        }, 1000);
-      }
+      this.pptmonitor.handler = setInterval(() => {
+        this.pool
+          .exec('exec', [`osascript -e '${appleScript}'`])
+          .then((result) => {
+            const index = Number.parseInt(result, 10);
+            this.mainWindow?.webContents.send('pptmonitor', index);
+            return 0;
+          })
+          .catch((error) => {
+            log.error('on pptmonitor script errorr', error);
+          });
+      }, 1000);
     } else {
-      this.pptmonitorHandler = undefined;
+      this.pptmonitor.handler = undefined;
     }
+  };
+
+  // spawn/exec/execFile will show hourglass mouse effect erveyr time
+  // so we can use named pipe with vbs script process or write your
+  // own native addon to replace execFile
+  private enablePPTMonitorWin = async (enable: boolean) => {
+    if (enable) {
+      this.pptmonitor.pip = new PipeServer();
+      this.pptmonitor.pip.listen('AgoraMeeting');
+      this.pptmonitor.pip.on('data', (data) => {
+        const index = Number.parseInt(data, 10);
+        this.mainWindow?.webContents.send('pptmonitor', index);
+      });
+
+      // coz windows defender will treate vbs as virus
+      // so we need to convert vbs to exe with scriptcrypto and sign it
+      const script =
+        process.env.NODE_ENV === 'development'
+          ? path.join(__dirname, '../extraResources/agora-pptmonitor.exe')
+          : path.join(
+              process.resourcesPath,
+              '/extraResources/agora-pptmonitor.exe'
+            );
+
+      // https://nodejs.org/api/child_process.html#child_processexecfilefile-args-options-callback
+      this.pptmonitor.cp = execFile(script);
+    } else {
+      if (this.pptmonitor.cp) this.pptmonitor.cp.kill();
+      if (this.pptmonitor.pip) this.pptmonitor.pip.close();
+      this.pptmonitor.pip = undefined;
+      this.pptmonitor.cp = undefined;
+    }
+  };
+
+  // maybe we can use addin, but have not found solutation to install addin
+  // by script for now
+  private onEnablePPTMonitor = async (enable: boolean) => {
+    log.info('app main ipc on enable ppt monitor', enable);
+    if (process.platform === 'darwin') await this.enablePPTMonitorMac(enable);
+    else if (process.platform === 'win32')
+      await this.enablePPTMonitorWin(enable);
+    else
+      log.error(
+        'app main ipc on enable ppt monitor on invalid platform',
+        process.platform
+      );
   };
 
   private registerIpc = () => {
