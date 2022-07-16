@@ -230,12 +230,16 @@ class AgoraMeeting {
   // own native addon to replace execFile
   private enablePPTMonitorWin = async (enable: boolean) => {
     if (enable) {
-      this.pptmonitor.pip = new PipeServer();
-      this.pptmonitor.pip.listen('AgoraMeeting');
-      this.pptmonitor.pip.on('data', (data) => {
-        const index = Number.parseInt(data, 10);
-        this.mainWindow?.webContents.send('pptmonitor', index);
-      });
+      // we can not use pipe any moe coz:
+      // 1.app need to run as admin
+      // 2.vbs can not get ppt object when run admin
+      // 3.vbs pipe can not connect to named pipe which is running as admin
+      // this.pptmonitor.pip = new PipeServer();
+      // this.pptmonitor.pip.listen('AgoraMeeting');
+      // this.pptmonitor.pip.on('data', (data) => {
+      //   const index = Number.parseInt(data, 10);
+      //   this.mainWindow?.webContents.send('pptmonitor', index);
+      // });
 
       // coz windows defender will treate vbs as virus
       // so we need to convert vbs to exe with scriptcrypto and sign it
@@ -249,6 +253,11 @@ class AgoraMeeting {
 
       // https://nodejs.org/api/child_process.html#child_processexecfilefile-args-options-callback
       this.pptmonitor.cp = execFile(script);
+      this.pptmonitor.cp.stdout?.on('data', (data: string) => {
+        const index = Number.parseInt(data, 10);
+        // log.info('on pptmonitor data', index);
+        this.mainWindow?.webContents.send('pptmonitor', index);
+      });
     } else {
       if (this.pptmonitor.cp) this.pptmonitor.cp.kill();
       if (this.pptmonitor.pip) this.pptmonitor.pip.close();
@@ -258,7 +267,7 @@ class AgoraMeeting {
   };
 
   // maybe we can use addin, but have not found solutation to install addin
-  // by script for now
+  // by script yet
   private onEnablePPTMonitor = async (enable: boolean) => {
     log.info('app main ipc on enable ppt monitor', enable);
     if (process.platform === 'darwin') await this.enablePPTMonitorMac(enable);

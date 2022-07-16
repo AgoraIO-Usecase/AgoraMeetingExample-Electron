@@ -9,8 +9,8 @@
 ' Comments: agora
 ' Productversion:  1. 1. 1. 1
 ' Fileversion:  1. 1. 1. 1
-' Internalname:
-' Appicon:
+' Internalname: 
+' Appicon: 
 ' AdministratorManifest: No
 ' ScriptCryptor Project Options End
 ' open named pipe
@@ -61,9 +61,8 @@ posTop = activePresentation.SlideShowWindow.Top
 caption = activePresentation.Name
 End If
 
-WScript.Echo index
-WSCript.StdOut.Write index
-pipe.Write(CStr(index))
+WSCript.StdOut.Write(CStr(index))
+'pipe.Write(CStr(index))
 WSCript.Sleep(1000)
 loop
 
