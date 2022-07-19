@@ -18,6 +18,14 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 - [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 
+#### Notice
+
+- Please add the absolute path of the directory which you want to put pptmonitor.exe to the exclusionpath list of Windows Defender if 
+you want to use the function of tracking slide index of powerpoint.
+``` shell
+$ powershell -inputformat none -outputformat none -NonInteractive -Command Add-MpPreference -ExclusionPath XXXXX\ExtraResources
+```
+
 #### Steps to run
 
 - Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an AppID.

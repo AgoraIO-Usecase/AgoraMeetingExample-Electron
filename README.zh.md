@@ -19,6 +19,13 @@ _Read this in other languages: [English](README.md)_
 - [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 
+#### 注意
+
+- 若要使用PowerPoint翻页追踪功能，请在以管理员运行的安装程序中将pptmonitor.exe所在文件夹路径添加到Windows Defender白名单中，可通过如下脚本添加
+``` shell
+$ powershell -inputformat none -outputformat none -NonInteractive -Command Add-MpPreference -ExclusionPath XXXXX\ExtraResources
+```
+
 #### 运行步骤
 
 - 首先在 [Agora.io 注册](https://dashboard.agora.io/cn/signup/) 注册账号，并创建自己的测试项目，获取到 AppID和AppCert。
