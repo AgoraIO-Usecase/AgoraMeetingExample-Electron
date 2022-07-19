@@ -9,8 +9,8 @@
 ' Comments: agora
 ' Productversion:  1. 1. 1. 1
 ' Fileversion:  1. 1. 1. 1
-' Internalname: 
-' Appicon: 
+' Internalname:
+' Appicon:
 ' AdministratorManifest: No
 ' ScriptCryptor Project Options End
 ' open named pipe
@@ -46,6 +46,15 @@ posLeft=0
 posTop=0
 index=1
 
+Set activePresentation = objPPT.ActivePresentation
+On Error Resume Next
+Set activePresentationSlideShowWindow = activePresentation.SlideShowWindow
+If Err.Number = 0 Then
+index = activePresentationSlideShowWindow.View.Slide.SlideIndex
+posLeft = activePresentationSlideShowWindow.Left
+posTop = activePresentationSlideShowWindow.Top
+caption = activePresentation.Name
+Else
 On Error Resume Next
 Set activeWindow = objPPT.ActiveWindow
 If Err.Number = 0 Then
@@ -53,12 +62,7 @@ index = activeWindow.View.Slide.SlideIndex
 posLeft = activeWindow.Left
 posTop = activeWindow.Top
 caption = activeWindow.Caption
-Else
-Set activePresentation = objPPT.ActivePresentation
-index = activePresentation.SlideShowWindow.View.Slide.SlideIndex
-posLeft = activePresentation.SlideShowWindow.Left
-posTop = activePresentation.SlideShowWindow.Top
-caption = activePresentation.Name
+End If
 End If
 
 WSCript.StdOut.Write(CStr(index))
