@@ -342,9 +342,11 @@ class AgoraMeeting {
         )}`
       );
 
-      // in newest macOS, we should ask for media access
-      systemPreferences.askForMediaAccess('camera');
-      systemPreferences.askForMediaAccess('microphone');
+      if (systemPreferences.askForMediaAccess) {
+        // in newest macOS, we should ask for media access
+        systemPreferences.askForMediaAccess('camera');
+        systemPreferences.askForMediaAccess('microphone');
+      }
     });
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
