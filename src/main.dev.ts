@@ -17,7 +17,7 @@ import log from 'electron-log';
 import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
-import { ChildProcess, execFile } from 'child_process';
+import { ChildProcess, execFile, ExecException } from 'child_process';
 import { appleScript } from './utils/pptmonitor';
 import { PipeServer } from './utils/pipe';
 
@@ -43,7 +43,7 @@ class AgoraMeeting {
       ? path.join(__dirname, 'worker.js')
       : path.join(process.resourcesPath, 'app.asar.unpacked/src/worker.js'),
     {
-      workerType: 'thread',
+      workerType: 'process',
     }
   );
 
@@ -209,11 +209,24 @@ class AgoraMeeting {
       clearInterval(this.pptmonitor.handler);
 
     if (enable) {
+      // do not know why, the pptMonitor works fine but
+      // will not trigger the callback function
+      // this.pool.exec('pptMonitor', [appleScript], {
+      //   on: (payload: {
+      //     signal: 'ppt-monitor-error' | 'ppt-monitor-index';
+      //     error?: ExecException;
+      //     index?: number;
+      //   }) => {
+      //     const { signal, error, index } = payload;
+      //     log.info('on pptmonitor result', signal, error, index);
+      //   },
+      // });
       this.pptmonitor.handler = setInterval(() => {
         this.pool
           .exec('exec', [`osascript -e '${appleScript}'`])
           .then((result) => {
             const index = Number.parseInt(result, 10);
+            log.info('on pptmonitor result', index);
             this.mainWindow?.webContents.send('pptmonitor', index);
             return 0;
           })
@@ -223,6 +236,7 @@ class AgoraMeeting {
       }, 1000);
     } else {
       this.pptmonitor.handler = undefined;
+      this.pool.terminate(true);
     }
   };
 

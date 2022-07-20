@@ -43,9 +43,32 @@ const execFile = async (file) =>
     }
   });
 
+const pptMonitor = (scripts) => {
+  setInterval(() => {
+    childprocess.exec(
+      `osascript -e '${scripts}'`,
+      (error, stdout, stderror) => {
+        if (error) {
+          workerpool.workerEmit({
+            signal: 'ppt-monitor-error',
+            error,
+          });
+          return;
+        }
+
+        workerpool.workerEmit({
+          signal: 'ppt-monitor-index',
+          index: Number.parseInt(stdout, 10),
+        });
+      }
+    );
+  }, 1000);
+};
+
 workerpool.worker({
   spawn,
   spawnSync,
   exec,
   execFile,
+  pptMonitor,
 });
