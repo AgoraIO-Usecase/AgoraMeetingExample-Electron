@@ -11,6 +11,7 @@ import {
   ipcMain,
   screen,
   Rectangle,
+  systemPreferences,
 } from 'electron';
 import log from 'electron-log';
 import workerpool from 'workerpool';
@@ -310,6 +311,26 @@ class AgoraMeeting {
       this.createMainWindow();
       this.registerShortCut();
       this.registerIpc();
+
+      log.info(
+        `preferences camera: ${systemPreferences.getMediaAccessStatus(
+          'camera'
+        )}`
+      );
+      log.info(
+        `preferences mic: ${systemPreferences.getMediaAccessStatus(
+          'microphone'
+        )}`
+      );
+      log.info(
+        `preferences screen: ${systemPreferences.getMediaAccessStatus(
+          'screen'
+        )}`
+      );
+
+      // in newest macOS, we should ask for media access
+      systemPreferences.askForMediaAccess('camera');
+      systemPreferences.askForMediaAccess('microphone');
     });
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
