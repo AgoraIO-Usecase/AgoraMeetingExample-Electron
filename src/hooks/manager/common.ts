@@ -31,7 +31,7 @@ import {
 } from './types';
 import storage from './localstorage';
 import { getResourcePath } from '../../utils/resource';
-import { WhiteBoardConnection, WhiteBoardManager } from './whiteboard';
+import { WhiteBoardConnection, WhiteBoardError, WhiteBoardManager } from './whiteboard';
 
 export interface CommonManager {
   // common events
@@ -82,7 +82,10 @@ export interface CommonManager {
   ): this;
 
   // whiteboard events
-  on(evt: 'whiteboardState', cb: (state: WhiteBoardState) => void): this;
+  on(
+    evt: 'whiteboardState',
+    cb: (state: WhiteBoardState, error: WhiteBoardError) => void
+  ): this;
 }
 
 export class CommonManager extends EventEmitter {
@@ -228,7 +231,7 @@ export class CommonManager extends EventEmitter {
       } else
         this.rtcManager.setLocalWhiteBoardInfo(undefined, undefined, undefined);
 
-      this.emit('whiteboardState', state);
+      this.emit('whiteboardState', state, error);
     });
 
     this.whiteboardManager.initialize();

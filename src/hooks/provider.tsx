@@ -16,6 +16,7 @@ import {
   ScreenShareStateReason,
   WhiteBoardState,
 } from './manager';
+import { WhiteBoardError } from './manager/whiteboard';
 
 export const RootProvider: FC = (props) => {
   const { children } = props;
@@ -151,14 +152,32 @@ export const RootProvider: FC = (props) => {
       );
     });
 
-    commonManager.on('whiteboardState', (whiteboardState) => {
+    commonManager.on('whiteboardState', (whiteboardState, error) => {
+      let errorTips = '';
+      switch (error) {
+        case WhiteBoardError.CreateRoom:
+          errorTips = 'create room failed';
+          break;
+        case WhiteBoardError.Exception:
+          errorTips = 'exception';
+          break;
+        default:
+          break;
+      }
+
       if (whiteboardState === WhiteBoardState.Running)
         showNotification(
           'whiteboard begin, layout will change to speaker',
           'success'
         );
-      else if (whiteboardState === WhiteBoardState.Idle)
-        showNotification('whiteboard finished', 'info');
+      else if (whiteboardState === WhiteBoardState.Idle) {
+        if (errorTips === '') showNotification('whiteboard finished', 'info');
+        else
+          showNotification(
+            `whiteboard finished with error ${errorTips}`,
+            'error'
+          );
+      }
 
       dispatch({
         type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,

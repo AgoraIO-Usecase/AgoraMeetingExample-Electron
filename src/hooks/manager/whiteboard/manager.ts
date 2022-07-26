@@ -162,11 +162,14 @@ export class WhiteBoardManager extends EventEmitter {
       const { uuid, createdAt } = response.data;
 
       await this.join({ parentId: 0, uuid, timespan: createdAt, ratio }, true);
-    } catch (error) {
-      log.error('whiteboard start whiteboard throw an exception', error);
+    } catch (error: any) {
+      log.error(
+        'whiteboard start whiteboard throw an exception',
+        error.message
+      );
       this.setConnection(
         WhiteBoardConnection.Disconnected,
-        WhiteBoardError.Exception
+        WhiteBoardError.CreateRoom
       );
     }
   };
