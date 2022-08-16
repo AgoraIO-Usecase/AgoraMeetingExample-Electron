@@ -27,7 +27,7 @@ typedef struct {
   int bottom;
 } WindowMonitorCRect;
 
-typedef void (*WindoeMonitorCallback)(agora_pid, WindowMonitorEvent,
+typedef void (*WindoeMonitorCallback)(agora_pid, enum WindowMonitorEvent,
                                       WindowMonitorCRect);
 
 #if defined(_WIN32)
@@ -41,7 +41,7 @@ typedef void (*WindoeMonitorCallback)(agora_pid, WindowMonitorEvent,
 #endif
 #elif defined(__APPLE__)
 #include <TargetConditionals.h>
-#define RAY_API __attribute__((visibility("default"))) extern "C"
+#define RAY_API __attribute__((visibility("default")))
 #define RAY_CALL
 #elif defined(__ANDROID__) || defined(__linux__)
 #define RAY_API extern "C" __attribute__((visibility("default")))
@@ -51,8 +51,15 @@ typedef void (*WindoeMonitorCallback)(agora_pid, WindowMonitorEvent,
 #define RAY_CALL
 #endif
 
-RAY_API RAY_CALL int registerWindowMonitorCallback(
-    agora_pid pid, WindoeMonitorCallback callback);
-RAY_API RAY_CALL void unregisterWindowMonitorCallback(agora_pid pid);
-
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+int RAY_API RAY_CALL
+registerWindowMonitorCallback(agora_pid pid, WindoeMonitorCallback callback);
+void RAY_API RAY_CALL unregisterWindowMonitorCallback(agora_pid pid);
+
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
+#endif  // AGORA_WINDOW_MONITOR

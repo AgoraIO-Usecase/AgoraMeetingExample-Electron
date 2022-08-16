@@ -3,8 +3,8 @@
 
 #include "base.h"
 
-int registerWindowMonitorCallback(agora_pid pid, WindoeMonitorCallback callback) { return 0; }
-void unregisterWindowMonitorCallback(agora_pid pid) {}
+int RAY_API RAY_CALL registerWindowMonitorCallback(agora_pid pid, WindoeMonitorCallback callback) { return 0; }
+void RAY_API RAY_CALL unregisterWindowMonitorCallback(agora_pid pid) {}
 
 void onObserverCallback(AXObserverRef observer, AXUIElementRef element,
                         CFStringRef notificationName, void *refCon) {
