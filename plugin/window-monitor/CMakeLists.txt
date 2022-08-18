@@ -59,12 +59,19 @@ message(STATUS "_IS_Win32: ${_IS_Win32} _IS_MacOS: ${_IS_MacOS} _IS_IOS: ${_IS_I
 # Platform options
 if(_IS_MacOS)
   set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
-  set(CMAKE_MACOSX_RPATH TRUE)
-  set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-  set(CMAKE_INSTALL_NAME_DIR "@rpath/")
+  # set(CMAKE_MACOSX_RPATH TRUE)
+  # set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+  # set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  # set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  # set(CMAKE_INSTALL_NAME_DIR "@rpath/")
 endif()
+
+# Target Section
+add_library(monitor SHARED ${_LOCAL_SOURCES})
+
+# Export include
+include(GenerateExportHeader)
+generate_export_header(monitor EXPORT_FILE_NAME "${CMAKE_SOURCE_DIR}/include/export.h")
 
 # Public include
 set(_LOCAL_PUBLIC_HEADERS_DIR ${CMAKE_SOURCE_DIR}/include)
@@ -74,21 +81,19 @@ enum_files(${_LOCAL_PUBLIC_HEADERS_DIR} "h" _LOCAL_PUBLIC_HEADERS)
 message(STATUS "_LOCAL_PUBLIC_HEADERS_DIR: " ${_LOCAL_PUBLIC_HEADERS_DIR})
 message(STATUS "_LOCAL_PUBLIC_HEADERS: " ${_LOCAL_PUBLIC_HEADERS})
 
-# Target Section
-add_library(monitor SHARED ${_LOCAL_SOURCES} ${_LOCAL_PUBLIC_HEADERS})
-target_include_directories(monitor PUBLIC ${_LOCAL_PUBLIC_HEADERS_DIR})
+# Target properties
+target_include_directories(monitor PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
 set_target_properties(monitor PROPERTIES PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}")
 
-# include(GenerateExportHeader)
-# generate_export_header(monitor EXPORT_FILE_NAME "${CMAKE_SOURCE_DIR}/include/export.h")
-
-if(APPLE)
-    target_link_libraries(monitor PRIVATE "-framework Foundation" "-framework Cocoa")
+if(_IS_MacOS)
+    target_link_libraries(monitor PRIVATE "-framework AppKit"
+      "-framework Foundation")
     set_target_properties(monitor PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION A
         MACOSX_FRAMEWORK_IDENTIFIER io.agora.windowmonitor
         PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Mac Developer"
     )
 endif()
 
@@ -101,3 +106,9 @@ INSTALL(TARGETS monitor
     ARCHIVE DESTINATION lib
     FRAMEWORK DESTINATION .
 )
+
+
+# Test section
+add_executable(test "${CMAKE_SOURCE_DIR}/test/main.mm")
+target_include_directories(test PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
+target_link_libraries(test monitor "-framework Foundation" "-framework Cocoa")
