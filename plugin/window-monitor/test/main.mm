@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #import <Foundation/Foundation.h>
-#include "../include/base.h"
+#include "../include/monitor.h"
 
 void onWindowMonitorCallback(agora::plugin::windowmonitor::WNDID id,
                              agora::plugin::windowmonitor::EventType evt,

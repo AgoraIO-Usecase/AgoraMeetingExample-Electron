@@ -2,11 +2,13 @@
   "name": "plugin",
   "version": "1.0.0",
   "description": "Agora meeting example plugin",
-  "main": "index.js",
+  "main": "script/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node-gyp build",
-    "install": "node-gyp rebuild"
+    "build": "tsc",
+    "install-macOS": "node-gyp clean && node-gyp rebuild --target=12.0.0 --dist-url=https://npm.taobao.org/mirrors/atom-shell && install_name_tool -add_rpath '@loader_path' ./build/Release/agora_plugin.node",
+    "install-win": "node-gyp clean && node-gyp rebuild --arch=ia32 --target=12.0.0 --dist-url=https://npm.taobao.org/mirrors/atom-shell"
   },
   "author": "sylar",
   "license": "ISC",
@@ -17,7 +19,7 @@
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "just-task": "^1.5.0",
-    "node-gyp": "^9.1.0"
+    "node-gyp": "8.3.0"
   },
   "devDependencies": {
     "@types/node": "^18.7.6",
