@@ -67,7 +67,7 @@ if(_IS_MacOS)
 endif()
 
 # Target Section
-add_library(monitor SHARED ${_LOCAL_SOURCES})
+add_library(monitor STATIC ${_LOCAL_SOURCES})
 
 # Export include
 include(GenerateExportHeader)
@@ -89,9 +89,9 @@ if(_IS_MacOS)
     target_link_libraries(monitor PRIVATE "-framework AppKit"
       "-framework Foundation")
     set_target_properties(monitor PROPERTIES
-        FRAMEWORK TRUE
-        FRAMEWORK_VERSION A
-        MACOSX_FRAMEWORK_IDENTIFIER io.agora.windowmonitor
+        # FRAMEWORK TRUE
+        # FRAMEWORK_VERSION A
+        # MACOSX_FRAMEWORK_IDENTIFIER io.agora.windowmonitor
         PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Mac Developer"
     )

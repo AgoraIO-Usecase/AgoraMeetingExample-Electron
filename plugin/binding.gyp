@@ -95,12 +95,16 @@
                         'copies': [{
                             'destination': '<(PRODUCT_DIR)',
                             'files': [
-                                './window-monitor/install/monitor.framework',
+                                # './window-monitor/install/monitor.framework',
                             ]
                         }],
+                        'library_dirs': [
+                            '../window-monitor/install/lib',
+                        ],
+                        'libraries': ['libmonitor.a',],
                         'link_settings': {
                             'libraries': [
-                                'monitor.framework',
+                                # 'monitor.framework',
                                 'Cocoa.framework',
                                 'Foundation.framework',
                             ]
