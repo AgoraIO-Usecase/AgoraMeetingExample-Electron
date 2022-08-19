@@ -38,7 +38,7 @@
     ]
   },
   "build": {
-    "asar": false,
+    "asar": true,
     "productName": "AgoraMeetingExample-Electron",
     "artifactName": "${productName}-v${version}-${os}-${arch}.${ext}",
     "appId": "io.agora.agorameeting",
