@@ -1,3 +1,5 @@
 bin
 build
 package-lock.json
+dist
+yarn.lock

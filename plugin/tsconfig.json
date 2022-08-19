@@ -12,6 +12,6 @@
     "declaration": true,
     "types": ["node"]
   },
-  "include": ["./script/**/*.ts"],
+  "include": ["./libs/**/*.ts"],
   "exclude": ["node_modules/**/*"]
 }

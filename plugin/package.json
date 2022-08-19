@@ -2,14 +2,22 @@
   "name": "plugin",
   "version": "1.0.0",
   "description": "Agora meeting example plugin",
-  "main": "script/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "install-macOS": "node-gyp clean && node-gyp rebuild --target=12.0.0 --dist-url=https://npm.taobao.org/mirrors/atom-shell && install_name_tool -add_rpath '@loader_path' ./build/Release/agora_plugin.node",
-    "install-win": "node-gyp clean && node-gyp rebuild --arch=ia32 --target=12.0.0 --dist-url=https://npm.taobao.org/mirrors/atom-shell"
+    "build": "tsc -p tsconfig.json",
+    "install-macOS": "node-gyp clean && node-gyp rebuild --target=12.0.0 --dist-url=https://atom.io/download/electron && install_name_tool -add_rpath '@loader_path' ./build/Release/agora_plugin.node",
+    "install-win": "node-gyp clean && node-gyp rebuild --arch=ia32 --target=12.0.0 --dist-url=https://atom.io/download/electron",
+    "install": "just install && npm run build",
+    "depends": "just depends"
   },
+  "files": [
+    "scripts",
+    "libs",
+    "just-task.js",
+    "src",
+    "window-monitor"
+  ],
   "author": "sylar",
   "license": "ISC",
   "gypfile": true,
@@ -19,7 +27,9 @@
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "just-task": "^1.5.0",
-    "node-gyp": "8.3.0"
+    "node-gyp": "8.3.0",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.5"
   },
   "devDependencies": {
     "@types/node": "^18.7.6",

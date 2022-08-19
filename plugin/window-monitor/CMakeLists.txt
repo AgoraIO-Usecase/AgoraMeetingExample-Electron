@@ -83,7 +83,7 @@ message(STATUS "_LOCAL_PUBLIC_HEADERS: " ${_LOCAL_PUBLIC_HEADERS})
 
 # Target properties
 target_include_directories(monitor PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
-set_target_properties(monitor PROPERTIES PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}")
+# set_target_properties(monitor PROPERTIES PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}")
 
 if(_IS_MacOS)
     target_link_libraries(monitor PRIVATE "-framework AppKit"
@@ -104,6 +104,7 @@ INSTALL(TARGETS monitor
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
     FRAMEWORK DESTINATION .
 )
 
