@@ -2,6 +2,10 @@
 # project specific logic here.
 #
 cmake_minimum_required(VERSION 3.21)
+if (POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif (POLICY CMP0091)
+
 project("window-monitor")
 
 set(CMAKE_CXX_STANDARD 11)
@@ -57,7 +61,18 @@ endif()
 message(STATUS "_IS_Win32: ${_IS_Win32} _IS_MacOS: ${_IS_MacOS} _IS_IOS: ${_IS_IOS} _IS_ANDROID: ${_IS_ANDROID} _IS_UNIX: ${_IS_UNIX}")
 
 # Platform options
-if(_IS_MacOS)
+if(_IS_Win32)
+  message(STATUS "set platform options for win32")
+  # before 3.15 we should use this https://gitlab.kitware.com/cmake/cmake/-/issues/18390
+  # if(MSVC)
+  #   add_compile_options(
+  #       $<$<CONFIG:>:/MT> #---------|
+  #       $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+  #       $<$<CONFIG:Release>:/MT> #--|
+  #   )
+  # endif()
+elseif(_IS_MacOS)
+  message(STATUS "set platform options for macOS")
   set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
   # set(CMAKE_MACOSX_RPATH TRUE)
   # set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -83,9 +98,13 @@ message(STATUS "_LOCAL_PUBLIC_HEADERS: " ${_LOCAL_PUBLIC_HEADERS})
 
 # Target properties
 target_include_directories(monitor PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
-# set_target_properties(monitor PROPERTIES PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}")
+set_target_properties(monitor PROPERTIES PUBLIC_HEADER "${_LOCAL_PUBLIC_HEADERS}")
 
-if(_IS_MacOS)
+# Target platform properties
+if(_IS_Win32)
+  set_property(TARGET monitor PROPERTY
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+elseif(_IS_MacOS)
     target_link_libraries(monitor PRIVATE "-framework AppKit"
       "-framework Foundation")
     set_target_properties(monitor PROPERTIES
@@ -110,6 +129,8 @@ INSTALL(TARGETS monitor
 
 
 # Test section
-add_executable(test "${CMAKE_SOURCE_DIR}/test/main.mm")
-target_include_directories(test PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
-target_link_libraries(test monitor "-framework Foundation" "-framework Cocoa")
+if(_IS_MacOS)
+  add_executable(test "${CMAKE_SOURCE_DIR}/test/main.mm")
+  target_include_directories(test PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
+  target_link_libraries(test monitor "-framework Foundation" "-framework Cocoa")
+endif()

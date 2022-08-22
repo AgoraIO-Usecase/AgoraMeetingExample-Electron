@@ -1,12 +1,13 @@
+#include "plugin.h"
+
 #include <node_api.h>
 
 #include "monitor.h"
-#include "napi_event.h"
-#include "napi_utils.h"
 
 namespace {
 using namespace agora::plugin;
-static agora::plugin::NodeValoranEventBase<int> _window_monitor_events;
+static agora::plugin::NodeValoranEventBase<windowmonitor::WNDID>
+    _window_monitor_events;
 
 static void onWindowMonitorCallback(windowmonitor::WNDID winId,
                                     windowmonitor::EventType event,
@@ -14,7 +15,8 @@ static void onWindowMonitorCallback(windowmonitor::WNDID winId,
   const int argc = 3;
   _window_monitor_events.Fire(
       winId, argc, [=](napi_env &env, napi_value argv[]) {
-        NAPI_CALL_NORETURN(env, napi_create_int32(env, winId, &argv[0]));
+        NAPI_CALL_NORETURN(env,
+                           napi_create_int32(env, (int32_t)winId, &argv[0]));
         NAPI_CALL_NORETURN(
             env, napi_create_int32(env, static_cast<int32_t>(event), &argv[1]));
         // pack crect
@@ -43,7 +45,7 @@ napi_value registerWindowMonitor(napi_env env, napi_callback_info info) {
   NAPI_CALL(env, napi_get_value_int32(env, args[0], &winId));
 
   int code = windowmonitor::registerWindowMonitorCallback(
-      winId, onWindowMonitorCallback);
+      (windowmonitor::WNDID)winId, onWindowMonitorCallback);
 
   napi_value result;
   NAPI_CALL(env, napi_create_int32(env, code, &result));
@@ -53,7 +55,8 @@ napi_value registerWindowMonitor(napi_env env, napi_callback_info info) {
     napi_value global;
     NAPI_CALL(env, napi_get_global(env, &global));
 
-    _window_monitor_events.AddEvent(winId, env, cb, global);
+    _window_monitor_events.AddEvent((windowmonitor::WNDID)winId, env, cb,
+                                    global);
   }
 
   return result;
@@ -67,9 +70,9 @@ napi_value unregisterWindowMonitor(napi_env env, napi_callback_info info) {
   int winId;
   NAPI_CALL(env, napi_get_value_int32(env, args[0], &winId));
 
-  windowmonitor::unregisterWindowMonitorCallback(winId);
+  windowmonitor::unregisterWindowMonitorCallback((windowmonitor::WNDID)winId);
 
-  _window_monitor_events.RemoveEvent(winId);
+  _window_monitor_events.RemoveEvent((windowmonitor::WNDID)winId);
 
   return napi_value();
 }

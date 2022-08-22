@@ -20,42 +20,24 @@
                         'copies': [{
                             'destination': '<(PRODUCT_DIR)',
                             'files': [
-                                './base/bin/dll/agora_rtc_sdk.dll',
-                                './base/bin/dll/agora_rtm_sdk.dll',
-                                './base/bin/dll/av1.dll',
-                                './base/bin/dll/libagora_ai_denoise_extension.dll',
-                                './base/bin/dll/libagora_dav1d_extension.dll',
-                                './base/bin/dll/libagora_fd_extension.dll',
-                                './base/bin/dll/libagora_jnd_extension.dll',
-                                './base/bin/dll/libagora_segmentation_extension.dll',
-                                './base/bin/dll/libagora-core.dll',
-                                './base/bin/dll/libagora-fdkaac.dll',
-                                './base/bin/dll/libagora-ffmpeg.dll',
-                                './base/bin/dll/libagora-mpg123.dll',
-                                './base/bin/dll/libagora-soundtouch.dll',
-                                './base/bin/dll/libagora-wgc.dll',
-                                './base/bin/dll/libhwcodec.dll',
-                                './base/bin/dll/zlibwapi.dll',
+                                # './base/bin/dll/zlibwapi.dll',
                             ]
                         }],
                         'library_dirs': [
-                            './base/bin/lib',
-                            './third_party/libyuv/lib',
+                            './window-monitor/install/lib',
                         ],
                         'link_settings': {
                             'libraries': [
-                                '-lsqlite3.lib',
-                                '-lvaloran.lib',
-                                '-lws2_32.lib',
-                                '-lgdiplus.lib',
-                                '-lyuv.lib'
+                                '-lmonitor.lib',
+                                # '-lws2_32.lib',
+                                # '-lgdiplus.lib',
                             ]
                         },
                         'defines':[
                             'OS_WIN'
                         ],
                         'defines!': [
-                            '_USING_V110_SDK71_',
+                            # '_USING_V110_SDK71_',
                             '_HAS_EXCEPTIONS=0'
                         ],
                         'sources': [
@@ -90,7 +72,7 @@
                     'OS=="mac"',
                     {
                         'mac_framework_dirs': [
-                            '../window-monitor/install'
+                            './window-monitor/install'
                         ],
                         'copies': [{
                             'destination': '<(PRODUCT_DIR)',
@@ -99,7 +81,7 @@
                             ]
                         }],
                         'library_dirs': [
-                            '../window-monitor/install/lib',
+                            './window-monitor/install/lib',
                         ],
                         'libraries': ['libmonitor.a',],
                         'link_settings': {

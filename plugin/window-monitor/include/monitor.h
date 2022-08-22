@@ -1,15 +1,18 @@
 #ifndef AGORA_WINDOW_MONITOR_BASE_H
 #define AGORA_WINDOW_MONITOR_BASE_H
 
-#include "export.h"
-
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
 #include <stdlib.h>
+
+#include "export.h"
 
 namespace agora {
 namespace plugin {
 namespace windowmonitor {
 
-typedef enum {
+typedef enum _ErrorCode{
   Success = 0,
   NoRights,
   AlreadyExist,
@@ -21,7 +24,7 @@ typedef enum {
 /**
  * @brief Window monitor event type.
  */
-typedef enum {
+typedef enum _EventType{
   Unknown = 0,
   Focused,
   UnFocused,
@@ -94,7 +97,6 @@ void MONITOR_EXPORT unregisterWindowMonitorCallback(WNDID id);
 }  // namespace agora
 
 #endif  // AGORA_WINDOW_MONITOR_BASE_H
-
 
 // #if defined(_WIN32)
 // #define WIN32_LEAN_AND_MEAN
