@@ -27,6 +27,9 @@ namespace agora {
 namespace plugin {
 namespace windowmonitor {
 
+// for multiple child process like chrome, all event will trigger for all
+// hookers so we need to call functions to decide whether to trigger event or
+// not such as GetWindowPlacement
 // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wineventproc
 // https://docs.microsoft.com/en-us/windows/win32/winauto/event-constants
 void HookerCallback(EventCallback callback, WNDID hwnd, DWORD event,
