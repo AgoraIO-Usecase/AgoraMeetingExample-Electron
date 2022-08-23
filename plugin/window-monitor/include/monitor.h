@@ -30,13 +30,11 @@ typedef enum _EventType{
   UnFocused,
   Moved,
   Moving,
-  Resizing,
   Resized,
   Shown,
   Hide,
   Minimized,
   Maxmized,
-  FullScreen,
   Restore,
 } EventType;
 

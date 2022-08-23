@@ -129,8 +129,13 @@ INSTALL(TARGETS monitor
 
 
 # Test section
-if(_IS_MacOS)
-  add_executable(test "${CMAKE_SOURCE_DIR}/test/main.mm")
-  target_include_directories(test PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
-  target_link_libraries(test monitor "-framework Foundation" "-framework Cocoa")
+add_executable(test "${CMAKE_SOURCE_DIR}/test/main.cpp")
+target_include_directories(test PRIVATE ${_LOCAL_PUBLIC_HEADERS_DIR})
+target_link_libraries(test PRIVATE monitor)
+if(_IS_Win32)
+  set_property(TARGET test PROPERTY
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+elseif(_IS_MacOS)
+    target_link_libraries(test PRIVATE "-framework AppKit"
+      "-framework Foundation")
 endif()

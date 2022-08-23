@@ -298,7 +298,7 @@ int MONITOR_EXPORT registerWindowMonitorCallback(WNDID id, EventCallback callbac
       break;
     }
 
-    AXObserverRef observer = _observers[pid];
+    AXObserverRef &observer = _observers[pid];
     if (!observer) {
       AXError axErr = AXObserverCreate(pid, onObserverCallback, &observer);
       if (axErr != kAXErrorSuccess) {
