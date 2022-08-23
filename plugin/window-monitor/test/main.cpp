@@ -19,7 +19,8 @@ void onWindowMonitorCallback(windowmonitor::WNDID id,
 }
 
 int main() {
-  int ret = windowmonitor::registerWindowMonitorCallback(
+  int ret = 0;
+  ret = windowmonitor::registerWindowMonitorCallback(
       (windowmonitor::WNDID)2491936, onWindowMonitorCallback);
   printf("register result %d\r\n", ret);
 
