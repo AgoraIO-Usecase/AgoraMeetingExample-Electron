@@ -72,7 +72,7 @@
                     'OS=="mac"',
                     {
                         'mac_framework_dirs': [
-                            './window-monitor/install'
+                            '../window-monitor/install'
                         ],
                         'copies': [{
                             'destination': '<(PRODUCT_DIR)',
@@ -81,7 +81,7 @@
                             ]
                         }],
                         'library_dirs': [
-                            './window-monitor/install/lib',
+                            '../window-monitor/install/lib',
                         ],
                         'libraries': ['libmonitor.a',],
                         'link_settings': {
@@ -92,7 +92,7 @@
                             ]
                         },
                         'include_dirs': [
-                            './window-monitor/include',
+                            '../window-monitor/include',
                         ],
                         'defines!': [
                             '_NOEXCEPT',
@@ -107,7 +107,7 @@
                             'MACOSX_DEPLOYMENT_TARGET': '10.14',
                             'EXECUTABLE_EXTENSION': 'node',
                             'FRAMEWORK_SEARCH_PATHS': [
-                                './window-monitor/install'
+                                '../window-monitor/install'
                             ],
                             "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym"
                         },
