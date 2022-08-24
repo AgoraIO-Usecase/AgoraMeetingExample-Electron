@@ -4,14 +4,12 @@ declare enum WindowMonitorEventType {
   UnFocused = 2,
   Moved = 3,
   Moving = 4,
-  Resizing = 5,
-  Resized = 6,
-  Shown = 7,
-  Hide = 8,
-  Minimized = 9,
-  Maxmized = 10,
-  FullScreen = 11,
-  Restore = 12,
+  Resized = 5,
+  Shown = 6,
+  Hide = 7,
+  Minimized = 8,
+  Maxmized = 9,
+  Restore = 10,
 }
 
 declare enum WindowMonitorErrorCode {
