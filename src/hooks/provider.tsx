@@ -120,7 +120,8 @@ export const RootProvider: FC = (props) => {
           type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
           payload: {
             focusMode: true,
-            displayId: params.displayId,
+            isDisplay: params.displayId !== undefined,
+            targetId: params.displayId ? params.displayId : params.windowId,
           } as StoreActionPayloadFocusMode,
         });
       } else if (screenshareState === ScreenShareState.Idle) {
@@ -128,7 +129,7 @@ export const RootProvider: FC = (props) => {
           type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
           payload: {
             focusMode: false,
-            displayId: 0,
+            targetId: params.displayId ? params.displayId : params.windowId,
           } as StoreActionPayloadFocusMode,
         });
       }

@@ -114,10 +114,10 @@ const onFocusMode = (
   oldState: StoreState,
   payload: StoreActionPayloadFocusMode
 ) => {
-  const { focusMode, displayId } = payload;
+  const { focusMode, isDisplay, targetId } = payload;
   if (oldState.focusMode === focusMode) return oldState;
 
-  ipcRenderer.send('focus-mode', focusMode, displayId);
+  ipcRenderer.send('focus-mode', focusMode, isDisplay, targetId);
   return {
     ...oldState,
     focusMode,

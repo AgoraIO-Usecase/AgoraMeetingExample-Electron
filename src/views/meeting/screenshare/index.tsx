@@ -173,16 +173,12 @@ const ScreenShareDialog = () => {
   const focusHelper = useFocusHelper();
   const [focusMode, setFocusMode] = useState(true);
   const showFocusMode = useMemo(() => {
-    if (
-      currentSelected === -1 ||
-      sources.length === 0 ||
-      !sources[currentSelected].isDisplay
-    )
-      return false;
+    if (currentSelected === -1 || sources.length === 0) return false;
 
     // known issue here, can not find specified display by id in windows
     if (
       process.platform === 'win32' &&
+      sources[currentSelected].isDisplay &&
       !sources[currentSelected].isPrimaryDisplay
     )
       return false;

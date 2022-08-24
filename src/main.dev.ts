@@ -18,6 +18,7 @@ import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
 import { ChildProcess, execFile, ExecException } from 'child_process';
+import AgoraPlugin from 'agora-plugin';
 import { appleScript } from './utils/pptmonitor';
 import { PipeServer } from './utils/pipe';
 
@@ -127,8 +128,7 @@ class AgoraMeeting {
     });
   };
 
-  private onFocusModeSwitch = (enable: boolean, displayId: number) => {
-    log.info('app main ipc on focus-mode', enable, displayId);
+  private switchFocusModeByDisplay = (enable: boolean, displayId: number) => {
     if (!this.mainWindow) return;
 
     if (enable) {
@@ -189,6 +189,32 @@ class AgoraMeeting {
     if (!enable) {
       this.mainWindow.setBounds(this.oldWindowBounds);
     }
+  };
+
+  private switchFocusModeByWindow = (enable: boolean, windowId: number) => {
+    if (!this.mainWindow) return;
+
+    if (enable) {
+      const ret = AgoraPlugin.registerWindowMonitor(
+        windowId,
+        (winId, event, bounds) => {
+          log.info('app window monitor event', winId, event, bounds);
+        }
+      );
+      log.info('app register window monitor result ', ret);
+    } else {
+      AgoraPlugin.unregisterWindowMonitor(windowId);
+    }
+  };
+
+  private onFocusModeSwitch = (
+    enable: boolean,
+    isDisplay: boolean,
+    targetId: number
+  ) => {
+    log.info('app main ipc on focus-mode', enable, isDisplay, targetId);
+    if (isDisplay) this.switchFocusModeByDisplay(enable, targetId);
+    else this.switchFocusModeByWindow(enable, targetId);
   };
 
   private onSetIgnoreMouseEvents = (ignore: boolean, forward: boolean) => {
@@ -298,8 +324,8 @@ class AgoraMeeting {
   private registerIpc = () => {
     ipcMain.on(
       'focus-mode',
-      (evt, ...args: [enable: boolean, displayId: number]) => {
-        this.onFocusModeSwitch(args[0], args[1]);
+      (evt, ...args: [enable: boolean, isDisplay: boolean, target: number]) => {
+        this.onFocusModeSwitch(args[0], args[1], args[2]);
       }
     );
 

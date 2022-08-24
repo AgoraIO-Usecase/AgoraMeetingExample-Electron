@@ -68,7 +68,8 @@ export type StoreActionPayloadDevice = {
 
 export type StoreActionPayloadFocusMode = {
   focusMode: boolean;
-  displayId: number;
+  isDisplay: boolean;
+  targetId: number;
 };
 
 export type StoreActionPayload =
