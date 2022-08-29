@@ -1,8 +1,8 @@
 /* eslint-disable react/display-name */
 import React, { useEffect, useMemo, memo } from 'react';
-import { ipcRenderer, Rectangle } from 'electron';
+import { ipcRenderer, Rectangle, remote } from 'electron';
 import { Stack } from '@mui/material';
-import { WindowMonitorEventType } from 'agora-plugin';
+import AgoraPlugin, { WindowMonitorEventType } from 'agora-plugin';
 
 import {
   AttendeeInfo,
@@ -36,28 +36,37 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
   }, []);
 
   useEffect(() => {
-    ipcRenderer.on(
-      'window-monitor',
-      (evt, ...args: [event: WindowMonitorEventType, bounds: Rectangle]) => {
-        const dom = document.getElementById('whiteboard-view');
-        const event: WindowMonitorEventType = args[0] as WindowMonitorEventType;
-        const bounds: Rectangle = args[1] as Rectangle;
-        if (
-          dom &&
-          (event === WindowMonitorEventType.Moving ||
-            event === WindowMonitorEventType.Moved ||
-            event === WindowMonitorEventType.Resized)
-        ) {
-          dom.style.left = `${bounds.x}px`;
-          dom.style.top = `${bounds.y}px`;
-          dom.style.width = `${bounds.width}px`;
-          dom.style.height = `${bounds.height}px`;
+    const { screenshareIsDisplay, screenshareTargetId, focusMode } = state;
+    const dom = document.getElementById('whiteboard-view');
 
-          console.warn('whitebaord view move to', event, bounds);
+    if (dom && focusMode && !screenshareIsDisplay) {
+      const rect = AgoraPlugin.getWindowRect(screenshareTargetId);
+      const offsetBounds = remote.getCurrentWindow().getBounds();
+      dom.style.width = `${rect.right - rect.left}px`;
+      dom.style.height = `${rect.bottom - rect.top}px`;
+      dom.style.left = `${rect.left - offsetBounds.x}px`;
+      dom.style.top = `${rect.top - offsetBounds.y}px`;
+
+      ipcRenderer.on(
+        'window-monitor',
+        (evt, ...args: [event: WindowMonitorEventType, bounds: Rectangle]) => {
+          const event: WindowMonitorEventType =
+            args[0] as WindowMonitorEventType;
+          const bounds: Rectangle = args[1] as Rectangle;
+          if (
+            event === WindowMonitorEventType.Moving ||
+            event === WindowMonitorEventType.Moved ||
+            event === WindowMonitorEventType.Resized
+          ) {
+            dom.style.left = `${bounds.x}px`;
+            dom.style.top = `${bounds.y}px`;
+            dom.style.width = `${bounds.width}px`;
+            dom.style.height = `${bounds.height}px`;
+          }
         }
-      }
-    );
-  }, []);
+      );
+    }
+  }, [state]);
 
   return (
     <Stack className={style.wrapper}>
