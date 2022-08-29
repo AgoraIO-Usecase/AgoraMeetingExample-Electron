@@ -17,7 +17,11 @@ const MeetingView = () => {
     <Stack
       className={`${
         state.focusMode ? style.focusedMainWrapper : style.mainWrapper
-      }  ${state.focusMode ? 'meetingwrapper-focus-mode' : ''} ${
+      }  ${
+        state.focusMode && state.screenshareIsDisplay
+          ? 'meetingwrapper-focus-mode'
+          : ''
+      } ${
         process.platform === 'win32' && !state.focusMode
           ? style.mainWrapperShadow
           : ''

@@ -15,6 +15,7 @@ import {
   AttendeeLayoutType,
   StoreActionPayloadAttendeeReplace,
   StoreActionPayloadFocusMode,
+  StoreActionPayloadScreenShare,
 } from './types';
 
 const onMeetingConnection = (
@@ -110,6 +111,20 @@ const onAttendeeReplace = (
   return { ...oldState, attendees: newAttendees };
 };
 
+const onScreenShareState = (
+  oldState: StoreState,
+  payload: StoreActionPayloadScreenShare
+) => {
+  const { state, targetId, isDisplay } = payload;
+
+  return {
+    ...oldState,
+    screenshareState: state,
+    screenshareTargetId: targetId,
+    screenshareIsDisplay: isDisplay,
+  };
+};
+
 const onFocusMode = (
   oldState: StoreState,
   payload: StoreActionPayloadFocusMode
@@ -121,6 +136,7 @@ const onFocusMode = (
   return {
     ...oldState,
     focusMode,
+
     markable: false,
     attendeeLayout: focusMode
       ? AttendeeLayoutType.Speaker
@@ -173,10 +189,10 @@ export const StoreReducer = (
       };
       break;
     case StoreActionType.ACTION_TYPE_SCREENSHARE_STATE:
-      newState = {
-        ...state,
-        screenshareState: action.payload as ScreenShareState,
-      };
+      newState = onScreenShareState(
+        state,
+        action.payload as StoreActionPayloadScreenShare
+      );
       break;
     case StoreActionType.ACTION_TYPE_WHITEBOARD_STATE: {
       const whiteboardState = action.payload as WhiteBoardState;

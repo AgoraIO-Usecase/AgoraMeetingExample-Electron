@@ -42,6 +42,8 @@ export type StoreState = {
 
   attendeeLayout: AttendeeLayoutType;
   screenshareState: ScreenShareState;
+  screenshareTargetId: number;
+  screenshareIsDisplay: boolean;
 
   whiteboardState: WhiteBoardState;
 
@@ -66,6 +68,12 @@ export type StoreActionPayloadDevice = {
   devices: DeviceInfo[];
 };
 
+export type StoreActionPayloadScreenShare = {
+  state: ScreenShareState;
+  targetId: number;
+  isDisplay: boolean;
+};
+
 export type StoreActionPayloadFocusMode = {
   focusMode: boolean;
   isDisplay: boolean;
@@ -78,7 +86,7 @@ export type StoreActionPayload =
   | StoreActionPayloadAttendee
   | StoreActionPayloadAttendeeReplace
   | StoreActionPayloadDevice
-  | ScreenShareState
+  | StoreActionPayloadScreenShare
   | AttendeeLayoutType
   | WhiteBoardState
   | StoreActionPayloadFocusMode

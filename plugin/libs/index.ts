@@ -1,4 +1,4 @@
-declare enum WindowMonitorEventType {
+const enum WindowMonitorEventType {
   Unknown = 0,
   Focused = 1,
   UnFocused = 2,
@@ -12,7 +12,7 @@ declare enum WindowMonitorEventType {
   Restore = 10,
 }
 
-declare enum WindowMonitorErrorCode {
+const enum WindowMonitorErrorCode {
   Success = 0,
   NoRights = 1,
   AlreadyExist = 2,
@@ -38,10 +38,10 @@ declare interface IAgoraPlugin {
     ) => void
   ) => WindowMonitorErrorCode;
   unregisterWindowMonitor: (winId: number) => void;
+  getWindowRect: (winId: number) => WindowMonitorBounds;
 }
 
 const AgoraPlugin: IAgoraPlugin = require('../build/Release/agora_plugin.node');
 
 export { WindowMonitorEventType, WindowMonitorErrorCode, WindowMonitorBounds };
-
 export default AgoraPlugin;

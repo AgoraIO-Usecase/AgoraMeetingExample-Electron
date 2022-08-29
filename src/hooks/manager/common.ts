@@ -31,7 +31,11 @@ import {
 } from './types';
 import storage from './localstorage';
 import { getResourcePath } from '../../utils/resource';
-import { WhiteBoardConnection, WhiteBoardError, WhiteBoardManager } from './whiteboard';
+import {
+  WhiteBoardConnection,
+  WhiteBoardError,
+  WhiteBoardManager,
+} from './whiteboard';
 
 export interface CommonManager {
   // common events

@@ -4,6 +4,7 @@ import {
   AttendeeLayoutType,
   StoreActionPayloadDevice,
   StoreActionPayloadFocusMode,
+  StoreActionPayloadScreenShare,
   StoreActionType,
   StoreContext,
   StoreReducer,
@@ -24,6 +25,8 @@ export const RootProvider: FC = (props) => {
     connection: MeetingConnection.Disconnected,
     attendees: [],
     screenshareState: ScreenShareState.Idle,
+    screenshareTargetId: 0,
+    screenshareIsDisplay: false,
     attendeeLayout: AttendeeLayoutType.Speaker,
     whiteboardState: WhiteBoardState.Idle,
     showScreenShare: false,
@@ -112,7 +115,11 @@ export const RootProvider: FC = (props) => {
 
       dispatch({
         type: StoreActionType.ACTION_TYPE_SCREENSHARE_STATE,
-        payload: screenshareState,
+        payload: {
+          state: screenshareState,
+          isDisplay: params.displayId !== undefined,
+          targetId: params.displayId ? params.displayId : params.windowId,
+        } as StoreActionPayloadScreenShare,
       });
 
       if (screenshareState === ScreenShareState.Running && params.focusMode) {

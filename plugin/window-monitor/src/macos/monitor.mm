@@ -349,6 +349,12 @@ void MONITOR_EXPORT unregisterWindowMonitorCallback(WNDID id) {
   }
 }
 
+int MONITOR_EXPORT getWindowRect(WNDID id, CRect& crect){
+  crect = getWindowCRect(id);
+
+  return ErrorCode::Success;
+}
+
 // demo function
 // createApplicationObserver(@"com.microsoft.Powerpoint");
 // void createApplicationObserver(NSString *bundleId) {

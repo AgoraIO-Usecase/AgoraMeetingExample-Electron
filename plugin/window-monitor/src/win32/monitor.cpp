@@ -147,6 +147,17 @@ void MONITOR_EXPORT unregisterWindowMonitorCallback(WNDID wid) {
 
   hookers_.erase(itr);
 }
+
+int MONITOR_EXPORT getWindowRect(WNDID id, CRect& crect) {
+  RECT rect;
+  GetWindowRect(wid, &rect);
+
+  crect = CRect((float)rect.left, (float)rect.top, (float)rect.right,
+                (float)rect.bottom);
+
+  return ErrorCode::Success;
+}
+
 }  // namespace windowmonitor
 }  // namespace plugin
 }  // namespace agora

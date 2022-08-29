@@ -10,7 +10,8 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "preserveConstEnums": true
   },
   "include": ["./libs/**/*.ts"],
   "exclude": ["node_modules/**/*"]

@@ -52,22 +52,21 @@ export const useFocusHelper = () => {
   return { onMouseEnter, onMouseLeave };
 };
 
-export const useSwitchFocusMode = () => {
+export const useClearFocusMode = () => {
   const { state, dispatch } = useStore();
 
-  const switchFocusMode = useCallback(() => {
+  const clearFocusMode = useCallback(() => {
     dispatch({
       type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
-      payload: { focusMode: !state.focusMode, displayId: 0 },
+      payload: { focusMode: false, isDisplay: false, targetId: 0 },
     });
-    if (!state.focusMode)
-      dispatch({
-        type: StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT,
-        payload: AttendeeLayoutType.Speaker,
-      });
+    dispatch({
+      type: StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT,
+      payload: AttendeeLayoutType.Speaker,
+    });
   }, [state.focusMode]);
 
-  return { switchFocusMode };
+  return { clearFocusMode };
 };
 
 export const useSwitchMarkable = () => {

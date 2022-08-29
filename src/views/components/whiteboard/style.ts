@@ -12,6 +12,14 @@ const useStyle = makeStyles(() => {
       width: '100%',
       height: '100%',
     },
+    whiteboardFocused: {
+      boxSizing: 'border-box',
+      position: 'absolute',
+      left: '0px',
+      top: '0px',
+      width: '100%',
+      height: '100%',
+    },
   });
 });
 

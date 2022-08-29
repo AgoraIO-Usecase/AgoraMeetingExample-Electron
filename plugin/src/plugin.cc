@@ -9,6 +9,19 @@ using namespace agora::plugin;
 static agora::plugin::NodeValoranEventBase<windowmonitor::WNDID>
     _window_monitor_events;
 
+static void packageRect(napi_env env, napi_value &value,
+                        const windowmonitor::CRect &rect) {
+  NAPI_CALL_NORETURN(env, napi_create_object(env, &value));
+  NAPI_CALL_NORETURN(env, napi_create_object(env, &value));
+  NAPI_CALL_NORETURN(env,
+                     napi_obj_set_property(env, value, "left", rect.left));
+  NAPI_CALL_NORETURN(env, napi_obj_set_property(env, value, "top", rect.top));
+  NAPI_CALL_NORETURN(env,
+                     napi_obj_set_property(env, value, "right", rect.right));
+  NAPI_CALL_NORETURN(env,
+                     napi_obj_set_property(env, value, "bottom", rect.bottom));
+}
+
 static void onWindowMonitorCallback(windowmonitor::WNDID winId,
                                     windowmonitor::EventType event,
                                     windowmonitor::CRect rect) {
@@ -77,11 +90,28 @@ napi_value unregisterWindowMonitor(napi_env env, napi_callback_info info) {
   return napi_value();
 }
 
+napi_value getWindowRect(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
+  napi_value args[1];
+  NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
+
+  int winId;
+  NAPI_CALL(env, napi_get_value_int32(env, args[0], &winId));
+
+  windowmonitor::CRect rect;
+  windowmonitor::getWindowRect((windowmonitor::WNDID)winId, rect);
+
+  napi_value result;
+  packageRect(env, result, rect);
+  return result;
+}
+
 napi_value init(napi_env env, napi_value exports) {
   NAPI_DEFINE_FUNC(env, exports, registerWindowMonitor,
                    "registerWindowMonitor");
   NAPI_DEFINE_FUNC(env, exports, unregisterWindowMonitor,
                    "unregisterWindowMonitor");
+  NAPI_DEFINE_FUNC(env, exports, getWindowRect, "getWindowRect");
 
   return exports;
 }

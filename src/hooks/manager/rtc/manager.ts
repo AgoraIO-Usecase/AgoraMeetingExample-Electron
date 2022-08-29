@@ -565,7 +565,7 @@ export class RtcManager extends EventEmitter {
     });
 
     this.engine.on('leavechannel', (rtcStats: RtcStats) => {
-      log.info('rtc manager on leavechannel', rtcStats);
+      log.info('rtc manager on leavechannel', JSON.stringify(rtcStats));
 
       this.setConnection(RtcConnection.Disconnected);
     });

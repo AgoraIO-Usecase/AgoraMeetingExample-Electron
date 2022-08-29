@@ -273,8 +273,6 @@ export class RtcScreenShareManager extends EventEmitter {
 
   private stopScreenShare = () => {
     this.engine.stopScreenCapture2();
-    this.props.width = 0;
-    this.props.height = 0;
   };
 
   private setState = (
@@ -285,6 +283,12 @@ export class RtcScreenShareManager extends EventEmitter {
 
     this.props.state = state;
     this.emit('state', this.props.state, reason, this.props.params);
+
+    if (state === RtcScreenShareState.Idle) {
+      this.props.params = {};
+      this.props.width = 0;
+      this.props.height = 0;
+    }
   };
 
   private registerEngineEvents = () => {

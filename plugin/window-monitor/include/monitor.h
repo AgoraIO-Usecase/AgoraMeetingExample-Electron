@@ -86,6 +86,15 @@ int MONITOR_EXPORT registerWindowMonitorCallback(WNDID id,
  */
 void MONITOR_EXPORT unregisterWindowMonitorCallback(WNDID id);
 
+/**
+ * @brief Get the Window Rect object
+ *
+ * @param id Window id
+ * @param rect  CRect
+ * @return int Zero for success, others for error codes.
+ */
+int MONITOR_EXPORT getWindowRect(WNDID id, CRect& crect);
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

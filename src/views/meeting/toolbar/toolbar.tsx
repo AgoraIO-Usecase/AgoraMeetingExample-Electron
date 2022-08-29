@@ -44,7 +44,7 @@ import {
 } from '../../../hooks';
 import {
   useFocusHelper,
-  useSwitchFocusMode,
+  useClearFocusMode,
   useSwitchMarkable,
 } from '../../../utils/focushelper';
 
@@ -54,7 +54,7 @@ const ToolBar = () => {
   const commonManager = useCommonManager();
   const { state, dispatch } = useStore();
   const focusHelper = useFocusHelper();
-  const { switchFocusMode } = useSwitchFocusMode();
+  const { clearFocusMode } = useClearFocusMode();
   const { switchMarkable } = useSwitchMarkable();
   const selfUser = useMemo(() => {
     if (state.attendees && state.attendees.length) return state.attendees[0];
@@ -135,7 +135,7 @@ const ToolBar = () => {
   };
 
   const onLeaveMeetingClicked = useCallback(() => {
-    if (state.focusMode) switchFocusMode();
+    if (state.focusMode) clearFocusMode();
 
     commonManager.leaveMeeting();
     navigate('/main');

@@ -18,7 +18,10 @@ import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
 import { ChildProcess, execFile, ExecException } from 'child_process';
-import AgoraPlugin from 'agora-plugin';
+import AgoraPlugin, {
+  WindowMonitorErrorCode,
+  WindowMonitorEventType,
+} from 'agora-plugin';
 import { appleScript } from './utils/pptmonitor';
 import { PipeServer } from './utils/pipe';
 
@@ -37,7 +40,15 @@ if (
 class AgoraMeeting {
   private mainWindow: BrowserWindow | null = null;
 
-  private oldWindowBounds: Rectangle = { x: 0, y: 0, width: 1024, height: 768 };
+  private focusModeParams: {
+    oldWindowBounds: Rectangle;
+    isDisplay: boolean;
+    targetId: number;
+  } = {
+    oldWindowBounds: { x: 0, y: 0, width: 1024, height: 768 },
+    isDisplay: true,
+    targetId: 0,
+  };
 
   private pool: workerpool.WorkerPool = workerpool.pool(
     process.env.NODE_ENV === 'development'
@@ -132,7 +143,7 @@ class AgoraMeeting {
     if (!this.mainWindow) return;
 
     if (enable) {
-      this.oldWindowBounds = this.mainWindow.getBounds();
+      this.focusModeParams.oldWindowBounds = this.mainWindow.getBounds();
 
       let display: Electron.Display;
 
@@ -148,8 +159,8 @@ class AgoraMeeting {
           .filter((item) => item.id === displayId)[0];
       } else {
         display = screen.getDisplayNearestPoint({
-          x: this.oldWindowBounds.x,
-          y: this.oldWindowBounds.y,
+          x: this.focusModeParams.oldWindowBounds.x,
+          y: this.focusModeParams.oldWindowBounds.y,
         });
       }
 
@@ -187,7 +198,7 @@ class AgoraMeeting {
     this.mainWindow.setAlwaysOnTop(enable, 'screen-saver');
 
     if (!enable) {
-      this.mainWindow.setBounds(this.oldWindowBounds);
+      this.mainWindow.setBounds(this.focusModeParams.oldWindowBounds);
     }
   };
 
@@ -195,16 +206,69 @@ class AgoraMeeting {
     if (!this.mainWindow) return;
 
     if (enable) {
+      this.focusModeParams.oldWindowBounds = this.mainWindow.getBounds();
       const ret = AgoraPlugin.registerWindowMonitor(
         windowId,
         (winId, event, bounds) => {
-          log.info('app window monitor event', winId, event, bounds);
+          if (!this.mainWindow) return;
+
+          if (event === WindowMonitorEventType.Moved) {
+            let display: Electron.Display;
+            display = screen.getDisplayMatching({
+              x: bounds.left,
+              y: bounds.top,
+              width: bounds.right - bounds.left,
+              height: bounds.bottom - bounds.top,
+            });
+
+            if (!display) display = screen.getPrimaryDisplay();
+
+            const { width, height, x, y } = display.bounds;
+            this.mainWindow.setPosition(x, y);
+            this.mainWindow.setSize(width, height);
+          }
+
+          // convert bounds from screen postion to client position
+          const windowBounds = this.mainWindow.getBounds();
+          this.mainWindow.webContents.send('window-monitor', event, {
+            x: bounds.left - windowBounds.x,
+            y: bounds.top - windowBounds.y,
+            width: bounds.right - bounds.left,
+            height: bounds.bottom - bounds.top,
+          });
         }
       );
       log.info('app register window monitor result ', ret);
+
+      if (ret !== WindowMonitorErrorCode.Success) return;
     } else {
       AgoraPlugin.unregisterWindowMonitor(windowId);
+
+      this.mainWindow.setBounds(this.focusModeParams.oldWindowBounds);
     }
+
+    if (process.platform === 'darwin') {
+      if (enable) {
+        // app.dock.hide();
+        this.mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
+      } else {
+        app.dock.show();
+        this.mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
+      }
+      this.mainWindow.setFullScreenable(!enable);
+      this.mainWindow.setVisibleOnAllWorkspaces(enable, {
+        visibleOnFullScreen: true,
+      });
+      this.mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
+    }
+
+    this.mainWindow.setHasShadow(!enable);
+    this.mainWindow.setMovable(!enable);
+    this.mainWindow.setResizable(!enable);
+    BrowserWindow.fromWebContents(
+      this.mainWindow.webContents
+    )?.setIgnoreMouseEvents(enable, { forward: true });
+    this.mainWindow.setAlwaysOnTop(enable, 'screen-saver');
   };
 
   private onFocusModeSwitch = (
@@ -213,8 +277,18 @@ class AgoraMeeting {
     targetId: number
   ) => {
     log.info('app main ipc on focus-mode', enable, isDisplay, targetId);
-    if (isDisplay) this.switchFocusModeByDisplay(enable, targetId);
-    else this.switchFocusModeByWindow(enable, targetId);
+
+    // in case that user leave meeting will trigger focus-mode without correct
+    // parameters
+    if (enable) {
+      if (isDisplay) this.switchFocusModeByDisplay(true, targetId);
+      else this.switchFocusModeByWindow(true, targetId);
+
+      this.focusModeParams.isDisplay = isDisplay;
+      this.focusModeParams.targetId = targetId;
+    } else if (this.focusModeParams.isDisplay)
+      this.switchFocusModeByDisplay(false, this.focusModeParams.targetId);
+    else this.switchFocusModeByWindow(false, this.focusModeParams.targetId);
   };
 
   private onSetIgnoreMouseEvents = (ignore: boolean, forward: boolean) => {
