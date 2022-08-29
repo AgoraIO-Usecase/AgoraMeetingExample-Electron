@@ -130,6 +130,14 @@ int MONITOR_EXPORT registerWindowMonitorCallback(WNDID wid,
 
   hookers_[wid].reset(hooker);
 
+  // trigger it immediately
+  RECT rect;
+  GetWindowRect(wid, &rect);
+  if (callback)
+    callback(wid, EventType::Moved,
+             CRect((float)rect.left, (float)rect.top, (float)rect.right,
+                   (float)rect.bottom));
+
   return ErrorCode::Success;
 }
 

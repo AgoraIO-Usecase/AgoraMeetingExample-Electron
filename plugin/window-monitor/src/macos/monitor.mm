@@ -319,6 +319,9 @@ int MONITOR_EXPORT registerWindowMonitorCallback(WNDID id, EventCallback callbac
 
     auto &list = _callbacks[pid];
     list.emplace_back(std::pair<CGWindowID, EventCallback>(id, callback));
+
+    // trigger it immediately
+    callback(id, EventType::Moved, getWindowCRect(id));
   } while (0);
 
   return code;
