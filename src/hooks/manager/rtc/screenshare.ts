@@ -273,7 +273,6 @@ export class RtcScreenShareManager extends EventEmitter {
 
   private stopScreenShare = () => {
     this.engine.stopScreenCapture2();
-    this.props.params = {};
     this.props.width = 0;
     this.props.height = 0;
   };

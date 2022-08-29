@@ -129,6 +129,7 @@ export const RootProvider: FC = (props) => {
           type: StoreActionType.ACTION_TYPE_FOCUS_MODE,
           payload: {
             focusMode: false,
+            isDisplay: params.displayId !== undefined,
             targetId: params.displayId ? params.displayId : params.windowId,
           } as StoreActionPayloadFocusMode,
         });
