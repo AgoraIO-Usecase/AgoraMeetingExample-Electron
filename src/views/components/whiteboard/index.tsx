@@ -66,6 +66,16 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
         }
       );
     }
+
+    return () => {
+      ipcRenderer.removeAllListeners('window-monitor');
+      if (dom) {
+        dom.style.left = '';
+        dom.style.top = '';
+        dom.style.width = '';
+        dom.style.height = '';
+      }
+    };
   }, [state]);
 
   return (
