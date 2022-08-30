@@ -100,17 +100,11 @@ void HookerCallback(EventCallback callback, WNDID hwnd, DWORD event,
     return;
   }
 
-  RECT rect;
-  GetWindowRect(hwnd, &rect);
-
-  /*std::cout << eventName << " " << (int)hwnd << " " << rect.left << " "
-            << rect.top << " " << rect.right << " " << rect.bottom <<
-     std::endl;*/
-
-  if (callback)
-    callback(hwnd, eventType,
-             CRect((float)rect.left, (float)rect.top, (float)rect.right,
-                   (float)rect.bottom));
+  if (callback){
+    CRect crect;
+    getWindowRect(hwnd, crect);
+    callback(hwnd, eventType, crect);
+  }
 }
 
 int MONITOR_EXPORT registerWindowMonitorCallback(WNDID wid,
@@ -131,12 +125,11 @@ int MONITOR_EXPORT registerWindowMonitorCallback(WNDID wid,
   hookers_[wid].reset(hooker);
 
   // trigger it immediately
-  RECT rect;
-  GetWindowRect(wid, &rect);
-  if (callback)
-    callback(wid, EventType::Moved,
-             CRect((float)rect.left, (float)rect.top, (float)rect.right,
-                   (float)rect.bottom));
+  if (callback) {
+    CRect crect;
+    getWindowRect(wid, crect);
+    callback(wid, EventType::Moved, crect);
+  }
 
   return ErrorCode::Success;
 }
@@ -150,10 +143,17 @@ void MONITOR_EXPORT unregisterWindowMonitorCallback(WNDID wid) {
 
 int MONITOR_EXPORT getWindowRect(WNDID id, CRect& crect) {
   RECT rect;
-  GetWindowRect(wid, &rect);
+  ::GetWindowRect(id, &rect);
 
-  crect = CRect((float)rect.left, (float)rect.top, (float)rect.right,
-                (float)rect.bottom);
+  // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdpiforwindow
+  float dpi = (float)::GetDpiForWindow(id);
+  if (dpi != 0)
+    crect =
+        CRect((float)rect.left * 96.f / dpi, (float)rect.top * 96.f / dpi,
+              (float)rect.right * 96.f / dpi, (float)rect.bottom * 96.f / dpi);
+  else
+    crect = CRect((float)rect.left, (float)rect.top, (float)rect.right,
+                  (float)rect.bottom);
 
   return ErrorCode::Success;
 }
