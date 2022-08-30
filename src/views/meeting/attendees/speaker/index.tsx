@@ -76,7 +76,11 @@ const SpeakerAttendeeView = () => {
   }, [state]);
 
   const onItemClicked = (index: number) => {
-    if (mainViewIndex === index) return;
+    if (
+      mainViewIndex === index ||
+      state.whiteboardState === WhiteBoardState.Running
+    )
+      return;
 
     const oldAttendee = state.attendees[mainViewIndex];
     const dom = document.getElementById(
