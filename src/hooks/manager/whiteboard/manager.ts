@@ -18,7 +18,7 @@ import { banRoom, createRoom } from './api';
 import { startPPTMonitor, stopPPTMonitor } from '../../../utils/pptmonitor';
 
 const DefaultRatio = 9 / 16;
-const RootSceneName = 'root';
+const RootSceneName = '/';
 
 export declare interface WhiteBoardManager {
   on(
@@ -248,6 +248,7 @@ export class WhiteBoardManager extends EventEmitter {
     if (!this.isConnected()) return;
 
     try {
+      const { isCreator } = this.props;
       const { mounted, app } = this.props.board;
 
       // unmount old element
@@ -262,8 +263,6 @@ export class WhiteBoardManager extends EventEmitter {
           },
         });
         app.manager.mainView.disableCameraTransform = true;
-        app.manager.addPage({ scene: { name: RootSceneName } });
-        app.manager.setMainViewScenePath(`/${RootSceneName}`);
         log.info('whiteboard manager mounted with element ', element.id);
       }
     } catch (error) {
@@ -347,7 +346,7 @@ export class WhiteBoardManager extends EventEmitter {
 
     if (!enable) {
       stopPPTMonitor();
-      this.props.board.app?.manager.setMainViewScenePath(`/${RootSceneName}`);
+      this.props.board.app?.manager.setMainViewScenePath(RootSceneName);
     }
   };
 
@@ -395,7 +394,7 @@ export class WhiteBoardManager extends EventEmitter {
     if (!this.props.board.app) return;
 
     const { manager } = this.props.board.app;
-    const allScenes = manager.displayer.entireScenes()['/'];
+    const allScenes = manager.displayer.entireScenes()[RootSceneName];
     const currentSceneName = index === 1 ? RootSceneName : `${index}`;
     const currentScene = allScenes.find((s) => s.name === currentSceneName);
     if (!currentScene) {
