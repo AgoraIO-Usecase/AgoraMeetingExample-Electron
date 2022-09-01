@@ -32,6 +32,8 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
     const dom = document.getElementById('whiteboard-view');
     commonManager.whiteboardSetView(dom! as HTMLDivElement);
 
+    console.warn('current whiteboard attendee ', attendee);
+
     return () => commonManager.whiteboardSetView(null);
   }, []);
 

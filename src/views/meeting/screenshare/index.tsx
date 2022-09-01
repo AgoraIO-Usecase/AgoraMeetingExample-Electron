@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import AgoraPlugin from 'agora-plugin';
+import { useSnackbar } from 'notistack';
 import {
   ScreenShareSource,
   StoreActionType,
@@ -167,6 +169,7 @@ const ScreenShareDialogItem = (props: {
 
 const ScreenShareDialog = () => {
   const { state, dispatch } = useStore();
+  const { enqueueSnackbar } = useSnackbar();
   const commonManager = useCommonManager();
   const [sources, setSources] = useState<ScreenShareSource[]>([]);
   const [currentSelected, setCurrentSelected] = useState(-1);
@@ -219,14 +222,21 @@ const ScreenShareDialog = () => {
   };
 
   const onPreOk = () => {
-    if (currentSelected >= 0) {
-      const source = sources[currentSelected];
-      commonManager.startScreenShare({
-        windowId: source.isDisplay ? undefined : source.id,
-        displayId: source.isDisplay ? source.id : undefined,
-        focusMode: focusMode && showFocusMode,
-      });
+    if (currentSelected < 0) return;
+    const source = sources[currentSelected];
+    if (focusMode && !source.isDisplay && !AgoraPlugin.checkAccessPrivilege()) {
+      enqueueSnackbar(
+        'Please allow AgoraMeetingExample to control your mac before start screenshare with focus mode',
+        { variant: 'error' }
+      );
+      return;
     }
+
+    commonManager.startScreenShare({
+      windowId: source.isDisplay ? undefined : source.id,
+      displayId: source.isDisplay ? source.id : undefined,
+      focusMode: focusMode && showFocusMode,
+    });
 
     onPreClose();
   };

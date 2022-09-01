@@ -249,7 +249,7 @@ class AgoraMeeting {
 
     if (process.platform === 'darwin') {
       if (enable) {
-        // app.dock.hide();
+        app.dock.hide();
         this.mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
       } else {
         app.dock.show();
