@@ -166,6 +166,20 @@ export class CommonManager extends EventEmitter {
       );
     });
 
+    this.rtcManager.on('screenshareSizeChange', (width, height) => {
+      if (
+        !this.whiteboardManager.isConnected() ||
+        !this.whiteboardManager.isCreator() ||
+        !this.rtcManager.isScreenSharing() ||
+        !this.rtcManager.isScreenSharingFocusMode()
+      )
+        return;
+
+      // should we only update ratio when sharing display with this
+      // and sharing window with window-monitor?
+      this.whiteboardManager.updateRatio(height / width);
+    });
+
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
       `${remote.app.getPath('logs')}/`

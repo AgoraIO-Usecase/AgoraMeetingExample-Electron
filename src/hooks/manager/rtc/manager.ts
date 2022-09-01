@@ -81,6 +81,11 @@ export declare interface RtcManager {
   ): this;
 
   on(
+    evt: 'screenshareSizeChange',
+    cb: (width: number, height: number) => void
+  ): this;
+
+  on(
     evt: 'whiteboardInfo',
     cb: (
       parentId: number,
@@ -810,12 +815,19 @@ export class RtcManager extends EventEmitter {
     this.screenshareManager.on('size', (width, height) => {
       const selfUser = this.getSelfUser();
       const newRatio = height / width;
-      if (selfUser.whiteboardRatio !== newRatio) {
+      if (
+        selfUser.whiteboardRatio === undefined ||
+        Math.abs(selfUser.whiteboardRatio - newRatio) > 0.01
+      ) {
         this.updateUser(
           { ...selfUser, whiteboardRatio: newRatio },
           RtcUserUpdateReason.WhiteBoard
         );
       }
+
+      // should we only update ratio when sharing display with this
+      // and sharing window with window-monitor?
+      this.emit('screenshareSizeChange', width, height);
     });
   };
 
