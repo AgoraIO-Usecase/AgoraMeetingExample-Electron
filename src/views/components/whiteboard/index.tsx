@@ -44,10 +44,14 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
     if (dom && focusMode && !screenshareIsDisplay) {
       const rect = AgoraPlugin.getWindowRect(screenshareTargetId);
       const offsetBounds = remote.getCurrentWindow().getBounds();
-      dom.style.width = `${rect.right - rect.left}px`;
-      dom.style.height = `${rect.bottom - rect.top}px`;
+      const width = rect.right - rect.left;
+      const height = rect.bottom - rect.top;
+      dom.style.width = `${width}px`;
+      dom.style.height = `${height}px`;
       dom.style.left = `${rect.left - offsetBounds.x}px`;
       dom.style.top = `${rect.top - offsetBounds.y}px`;
+
+      commonManager.whiteboardUpdateRatio(height / width);
 
       ipcRenderer.on(
         'window-monitor',
@@ -64,6 +68,7 @@ const WhiteBoardView = memo((props: { attendee: AttendeeInfo | undefined }) => {
             dom.style.top = `${bounds.y}px`;
             dom.style.width = `${bounds.width}px`;
             dom.style.height = `${bounds.height}px`;
+            commonManager.whiteboardUpdateRatio(bounds.height / bounds.width);
           }
         }
       );

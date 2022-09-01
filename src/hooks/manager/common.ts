@@ -447,14 +447,12 @@ export class CommonManager extends EventEmitter {
 
   whiteboardStart = async () => {
     const isScreenSharing = this.rtcManager.isScreenSharing();
-    const isScreenSharingDisplay = this.rtcManager.isScreenSharingDisplay();
     const isScreenSharingFocusMode = this.rtcManager.isScreenSharingFocusMode();
     const { width, height } = this.rtcManager.getScreenShareSourceSize();
 
     let ratio = this.whiteboardManager.getDefaultRatio();
     if (
       isScreenSharing &&
-      isScreenSharingDisplay &&
       isScreenSharingFocusMode &&
       width !== 0 &&
       height !== 0

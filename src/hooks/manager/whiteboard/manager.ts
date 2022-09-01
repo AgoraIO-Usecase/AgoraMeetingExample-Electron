@@ -279,6 +279,10 @@ export class WhiteBoardManager extends EventEmitter {
       log.info(
         `whiteboard manager update ratio old: ${this.getRatio()} new: ${ratio}`
       );
+
+      const oldRatio = this.getRatio();
+      if (Math.abs(oldRatio - ratio) < 0.01) return;
+
       this.props.board.app.manager.setContainerSizeRatio(ratio);
     } catch (error) {
       log.error('whiteboard manager update ratio throw an exception,', error);
