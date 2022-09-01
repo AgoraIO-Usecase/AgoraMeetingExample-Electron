@@ -70,6 +70,14 @@ extern "C" {
 #endif
 
 /**
+ * @brief Check whether have the privilege or not.
+ *
+ * @return true Always be true on Windows;
+ * @return false Should require privilege first on Mac.
+ */
+bool MONITOR_EXPORT checkPrivileges();
+
+/**
  * @brief Register a callback function with specified window id.
  *
  * @param id Window id.

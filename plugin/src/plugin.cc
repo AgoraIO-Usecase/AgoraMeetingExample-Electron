@@ -13,8 +13,7 @@ static void packageRect(napi_env env, napi_value &value,
                         const windowmonitor::CRect &rect) {
   NAPI_CALL_NORETURN(env, napi_create_object(env, &value));
   NAPI_CALL_NORETURN(env, napi_create_object(env, &value));
-  NAPI_CALL_NORETURN(env,
-                     napi_obj_set_property(env, value, "left", rect.left));
+  NAPI_CALL_NORETURN(env, napi_obj_set_property(env, value, "left", rect.left));
   NAPI_CALL_NORETURN(env, napi_obj_set_property(env, value, "top", rect.top));
   NAPI_CALL_NORETURN(env,
                      napi_obj_set_property(env, value, "right", rect.right));
@@ -48,6 +47,19 @@ static void onWindowMonitorCallback(windowmonitor::WNDID winId,
 
 namespace agora {
 namespace plugin {
+
+napi_value checkAccessPrivilege(napi_env env, napi_callback_info info) {
+  size_t argc = 0;
+  NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+
+  napi_value result;
+  NAPI_CALL(env,
+            napi_create_int32(
+                env, static_cast<int32_t>(windowmonitor::checkPrivileges()),
+                &result));
+
+  return result;
+}
 
 napi_value registerWindowMonitor(napi_env env, napi_callback_info info) {
   size_t argc = 2;
@@ -107,6 +119,7 @@ napi_value getWindowRect(napi_env env, napi_callback_info info) {
 }
 
 napi_value init(napi_env env, napi_value exports) {
+  NAPI_DEFINE_FUNC(env, exports, checkAccessPrivilege, "checkAccessPrivilege");
   NAPI_DEFINE_FUNC(env, exports, registerWindowMonitor,
                    "registerWindowMonitor");
   NAPI_DEFINE_FUNC(env, exports, unregisterWindowMonitor,

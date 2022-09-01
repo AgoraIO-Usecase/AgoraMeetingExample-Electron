@@ -29,6 +29,7 @@ declare type WindowMonitorBounds = {
 };
 
 declare interface IAgoraPlugin {
+  checkAccessPrivilege: () => boolean;
   registerWindowMonitor: (
     winId: number,
     callback: (

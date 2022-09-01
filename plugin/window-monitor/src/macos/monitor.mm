@@ -26,22 +26,6 @@ static const CFStringRef _NOTIFICATIONS[] = {
     kAXFocusedWindowChangedNotification};
 static const int _NOTIFICATIONS_SIZE = sizeof(_NOTIFICATIONS) / sizeof(_NOTIFICATIONS[0]);
 
-bool checkPrivileges() {
-  bool result = false;
-  const void *keys[] = {kAXTrustedCheckOptionPrompt};
-  const void *values[] = {kCFBooleanTrue};
-
-  CFDictionaryRef options;
-  options =
-      CFDictionaryCreate(kCFAllocatorDefault, keys, values, sizeof(keys) / sizeof(*keys),
-                         &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-
-  result = AXIsProcessTrustedWithOptions(options);
-  CFRelease(options);
-
-  return result;
-}
-
 bool getWindowRef(CGWindowID id, std::function<void(CFDictionaryRef)> onWindow) {
   CFArrayRef ids = CFArrayCreate(NULL, (const void **)&id, 1, NULL);
   CFArrayRef windows = CGWindowListCreateDescriptionFromArray(ids);
@@ -267,6 +251,22 @@ void onObserverCallback(AXObserverRef observer, AXUIElementRef element,
 
 }  // namespace
 
+bool MONITOR_EXPORT checkPrivileges() {
+  bool result = false;
+  const void *keys[] = {kAXTrustedCheckOptionPrompt};
+  const void *values[] = {kCFBooleanTrue};
+
+  CFDictionaryRef options;
+  options =
+      CFDictionaryCreate(kCFAllocatorDefault, keys, values, sizeof(keys) / sizeof(*keys),
+                         &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+
+  result = AXIsProcessTrustedWithOptions(options);
+  CFRelease(options);
+
+  return result;
+}
+
 int MONITOR_EXPORT registerWindowMonitorCallback(WNDID id, EventCallback callback) {
   ErrorCode code = ErrorCode::Success;
   do {
@@ -354,59 +354,6 @@ int MONITOR_EXPORT getWindowRect(WNDID id, CRect& crect){
 
   return ErrorCode::Success;
 }
-
-// demo function
-// createApplicationObserver(@"com.microsoft.Powerpoint");
-// void createApplicationObserver(NSString *bundleId) {
-//   bool ret = checkPrivileges();
-//   NSLog(@"checkPrivileges %d", ret);
-
-//   NSLog(@"createApplicationObserver %@", bundleId);
-
-//   NSArray *apps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
-
-//   if ([apps count] == 0) {
-//     NSLog(@"matched zero app");
-//     return;
-//   }
-
-//   pid_t pid = [apps[0] processIdentifier];
-//   NSLog(@"createApplicationObserver %d", pid);
-
-//   AXError axErr = AXObserverCreate(pid, onObserverCallback, &_observer);
-//   if (axErr != kAXErrorSuccess) {
-//     NSLog(@"create observer error %d", axErr);
-//   }
-
-//   AXUIElementRef axElement = AXUIElementCreateApplication(pid);
-//   AXUIElementRef axWindowElement = nullptr;
-
-//   CFArrayRef windowList;
-//   AXUIElementCopyAttributeValue(axElement, kAXWindowsAttribute, (CFTypeRef *)&windowList);
-//   if (windowList) {
-//     for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-//       AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-//       CGWindowID window_id = 0;
-//       _AXUIElementGetWindow(windowRef, &window_id);
-//       if (window_id == 48360) {
-//         axWindowElement = windowRef;
-//         break;
-//       }
-//       NSLog(@"window id %d", window_id);
-//     }
-//   }
-
-//   AXObserverAddNotification(_observer, axWindowElement, kAXWindowMovedNotification, NULL);  //
-//   moved AXObserverAddNotification(_observer, axWindowElement, kAXWindowResizedNotification,
-//                             NULL);  // resized
-//   AXObserverAddNotification(_observer, axWindowElement, kAXWindowMiniaturizedNotification,
-//                             NULL);  // minimized in docker
-//   AXObserverAddNotification(_observer, axWindowElement, kAXWindowDeminiaturizedNotification,
-//                             NULL);  // unminimized from docker
-
-//   CFRunLoopAddSource(CFRunLoopGetCurrent(), AXObserverGetRunLoopSource(_observer),
-//                      kCFRunLoopDefaultMode);
-// }
 
 }  // namespace windowmonitor
 }  // namespace plugin

@@ -100,12 +100,14 @@ void HookerCallback(EventCallback callback, WNDID hwnd, DWORD event,
     return;
   }
 
-  if (callback){
+  if (callback) {
     CRect crect;
     getWindowRect(hwnd, crect);
     callback(hwnd, eventType, crect);
   }
 }
+
+bool MONITOR_EXPORT checkPrivileges() { return true; }
 
 int MONITOR_EXPORT registerWindowMonitorCallback(WNDID wid,
                                                  EventCallback callback) {
