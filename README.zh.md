@@ -16,7 +16,7 @@ _Read this in other languages: [English](README.md)_
 #### 运行环境
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) >= 14.5.x < 15
+- [Node.js](https://nodejs.org/en/download/) >= 14.16.0 < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 - [CMake](https://cmake.org/download/) native-addon compiler >= 3.21
 - [Xcode](https://developer.apple.com/download/all/?q=Xcode) or [Vistual Studio](https://visualstudio.microsoft.com/downloads/)
