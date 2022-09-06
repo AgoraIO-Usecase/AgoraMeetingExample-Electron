@@ -214,11 +214,13 @@ class AgoraMeeting {
 
           if (event === WindowMonitorEventType.Moved) {
             let display: Electron.Display;
+            // getDisplayMatching required all properties must be integer, ohterwise will
+            // trigger a exception on windows which will make monitor thread stucked
             display = screen.getDisplayMatching({
-              x: bounds.left,
-              y: bounds.top,
-              width: bounds.right - bounds.left,
-              height: bounds.bottom - bounds.top,
+              x: Math.floor(bounds.left),
+              y: Math.floor(bounds.top),
+              width: Math.floor(bounds.right - bounds.left),
+              height: Math.floor(bounds.bottom - bounds.top),
             });
 
             if (!display) display = screen.getPrimaryDisplay();
