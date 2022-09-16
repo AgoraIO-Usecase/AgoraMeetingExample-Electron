@@ -1,12 +1,18 @@
 const { logger } = require('just-task');
 const shell = require('shelljs');
 const path = require('path');
+const fs = require('fs');
 
 // workaround to find executable when install as dependency
-const gypPath = `${path.resolve(
-  __dirname,
-  '../node_modules/node-gyp/bin/node-gyp.js'
-)}`;
+let gypPath = require.resolve(path.join('node-gyp', 'bin', 'node-gyp.js'));
+
+if (!fs.existsSync(gypPath)) {
+  logger.info(`gyp_exec not found at ${gypPath}, switch`);
+  gypPath = `${path.resolve(
+    __dirname,
+    '../node_modules/node-gyp/bin/node-gyp.js'
+  )}`;
+}
 const gypExec = `node ${gypPath}`;
 
 module.exports = ({
