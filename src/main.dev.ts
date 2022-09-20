@@ -18,10 +18,10 @@ import workerpool from 'workerpool';
 import './utils/logtransports';
 import './utils/crashreport';
 import { ChildProcess, execFile, ExecException } from 'child_process';
-import AgoraPlugin, {
-  WindowMonitorErrorCode,
-  WindowMonitorEventType,
-} from 'agora-plugin';
+// import AgoraPlugin, {
+//   WindowMonitorErrorCode,
+//   WindowMonitorEventType,
+// } from 'agora-plugin';
 import { appleScript } from './utils/pptmonitor';
 import { PipeServer } from './utils/pipe';
 
@@ -205,70 +205,70 @@ class AgoraMeeting {
   private switchFocusModeByWindow = (enable: boolean, windowId: number) => {
     if (!this.mainWindow) return;
 
-    if (enable) {
-      this.focusModeParams.oldWindowBounds = this.mainWindow.getBounds();
-      const ret = AgoraPlugin.registerWindowMonitor(
-        windowId,
-        (winId, event, bounds) => {
-          if (!this.mainWindow) return;
+    // if (enable) {
+    //   this.focusModeParams.oldWindowBounds = this.mainWindow.getBounds();
+    //   const ret = AgoraPlugin.registerWindowMonitor(
+    //     windowId,
+    //     (winId, event, bounds) => {
+    //       if (!this.mainWindow) return;
 
-          if (event === WindowMonitorEventType.Moved) {
-            let display: Electron.Display;
-            display = screen.getDisplayMatching({
-              x: bounds.left,
-              y: bounds.top,
-              width: bounds.right - bounds.left,
-              height: bounds.bottom - bounds.top,
-            });
+    //       if (event === WindowMonitorEventType.Moved) {
+    //         let display: Electron.Display;
+    //         display = screen.getDisplayMatching({
+    //           x: bounds.left,
+    //           y: bounds.top,
+    //           width: bounds.right - bounds.left,
+    //           height: bounds.bottom - bounds.top,
+    //         });
 
-            if (!display) display = screen.getPrimaryDisplay();
+    //         if (!display) display = screen.getPrimaryDisplay();
 
-            const { width, height, x, y } = display.bounds;
-            this.mainWindow.setPosition(x, y);
-            this.mainWindow.setSize(width, height);
-          }
+    //         const { width, height, x, y } = display.bounds;
+    //         this.mainWindow.setPosition(x, y);
+    //         this.mainWindow.setSize(width, height);
+    //       }
 
-          // convert bounds from screen postion to client position
-          const windowBounds = this.mainWindow.getBounds();
-          this.mainWindow.webContents.send('window-monitor', event, {
-            x: bounds.left - windowBounds.x,
-            y: bounds.top - windowBounds.y,
-            width: bounds.right - bounds.left,
-            height: bounds.bottom - bounds.top,
-          });
-        }
-      );
-      log.info('app register window monitor result ', ret);
+    //       // convert bounds from screen postion to client position
+    //       const windowBounds = this.mainWindow.getBounds();
+    //       this.mainWindow.webContents.send('window-monitor', event, {
+    //         x: bounds.left - windowBounds.x,
+    //         y: bounds.top - windowBounds.y,
+    //         width: bounds.right - bounds.left,
+    //         height: bounds.bottom - bounds.top,
+    //       });
+    //     }
+    //   );
+    //   log.info('app register window monitor result ', ret);
 
-      if (ret !== WindowMonitorErrorCode.Success) return;
-    } else {
-      AgoraPlugin.unregisterWindowMonitor(windowId);
+    //   if (ret !== WindowMonitorErrorCode.Success) return;
+    // } else {
+    //   AgoraPlugin.unregisterWindowMonitor(windowId);
 
-      this.mainWindow.setBounds(this.focusModeParams.oldWindowBounds);
-    }
+    //   this.mainWindow.setBounds(this.focusModeParams.oldWindowBounds);
+    // }
 
-    if (process.platform === 'darwin') {
-      if (enable) {
-        app.dock.hide();
-        this.mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
-      } else {
-        app.dock.show();
-        this.mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
-      }
-      this.mainWindow.setFullScreenable(!enable);
-      this.mainWindow.setVisibleOnAllWorkspaces(enable, {
-        visibleOnFullScreen: true,
-      });
-      this.mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
-    }
+    // if (process.platform === 'darwin') {
+    //   if (enable) {
+    //     app.dock.hide();
+    //     this.mainWindow.setTrafficLightPosition({ x: -20, y: -20 });
+    //   } else {
+    //     app.dock.show();
+    //     this.mainWindow.setTrafficLightPosition({ x: 0, y: 0 });
+    //   }
+    //   this.mainWindow.setFullScreenable(!enable);
+    //   this.mainWindow.setVisibleOnAllWorkspaces(enable, {
+    //     visibleOnFullScreen: true,
+    //   });
+    //   this.mainWindow.setBackgroundColor(enable ? '#00000000' : '#000000');
+    // }
 
-    this.mainWindow.setHasShadow(!enable);
-    this.mainWindow.setMovable(!enable);
-    this.mainWindow.setResizable(!enable);
-    BrowserWindow.fromWebContents(
-      this.mainWindow.webContents
-    )?.setIgnoreMouseEvents(enable, { forward: true });
-    this.mainWindow.setAlwaysOnTop(enable, 'screen-saver');
+    // this.mainWindow.setHasShadow(!enable);
+    // this.mainWindow.setMovable(!enable);
+    // this.mainWindow.setResizable(!enable);
+    // BrowserWindow.fromWebContents(
+    //   this.mainWindow.webContents
+    // )?.setIgnoreMouseEvents(enable, { forward: true });
+    // this.mainWindow.setAlwaysOnTop(enable, 'screen-saver');
   };
 
   private onFocusModeSwitch = (

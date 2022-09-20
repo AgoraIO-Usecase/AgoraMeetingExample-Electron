@@ -20,9 +20,16 @@
     "test": "jest"
   },
   "agora_electron": {
-    "electron_version": "12.0.0",
+    "electron_version": "12.2.3",
+    "arch": "ia32",
     "prebuilt": false,
-    "silent": true
+    "silent": false
+  },
+  "agora_plugin": {
+    "electron_version": "12.2.3",
+    "arch": "ia32",
+    "prebuilt": false,
+    "silent": false
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

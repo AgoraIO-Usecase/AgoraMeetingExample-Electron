@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
-import AgoraPlugin from 'agora-plugin';
+// import AgoraPlugin from 'agora-plugin';
 import { useSnackbar } from 'notistack';
 import {
   ScreenShareSource,
@@ -176,7 +176,12 @@ const ScreenShareDialog = () => {
   const focusHelper = useFocusHelper();
   const [focusMode, setFocusMode] = useState(true);
   const showFocusMode = useMemo(() => {
-    if (currentSelected === -1 || sources.length === 0) return false;
+    if (
+      currentSelected === -1 ||
+      sources.length === 0 ||
+      !sources[currentSelected].isDisplay
+    )
+      return false;
 
     // known issue here, can not find specified display by id in windows
     if (
@@ -224,13 +229,13 @@ const ScreenShareDialog = () => {
   const onPreOk = () => {
     if (currentSelected < 0) return;
     const source = sources[currentSelected];
-    if (focusMode && !source.isDisplay && !AgoraPlugin.checkAccessPrivilege()) {
-      enqueueSnackbar(
-        'Please allow AgoraMeetingExample to control your mac before start screenshare with focus mode',
-        { variant: 'error' }
-      );
-      return;
-    }
+    // if (focusMode && !source.isDisplay && !AgoraPlugin.checkAccessPrivilege()) {
+    //   enqueueSnackbar(
+    //     'Please allow AgoraMeetingExample to control your mac before start screenshare with focus mode',
+    //     { variant: 'error' }
+    //   );
+    //   return;
+    // }
 
     commonManager.startScreenShare({
       windowId: source.isDisplay ? undefined : source.id,

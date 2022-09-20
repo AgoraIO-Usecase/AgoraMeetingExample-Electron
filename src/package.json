@@ -10,7 +10,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "agora-plugin": "file:../plugin",
     "agora-electron-sdk": "file:../electron-sdk"
   }
 }
