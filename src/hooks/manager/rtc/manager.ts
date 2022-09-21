@@ -107,6 +107,7 @@ export class RtcManager extends EventEmitter {
 
   private state: {
     isInitialized: boolean;
+    logPath: string;
 
     uid: number;
     shareId: number;
@@ -118,6 +119,7 @@ export class RtcManager extends EventEmitter {
     clientRole: RtcClientRole;
   } = {
     isInitialized: false,
+    logPath: '',
 
     uid: 0,
     shareId: 0,
@@ -158,6 +160,7 @@ export class RtcManager extends EventEmitter {
     this.state.shareId = this.generateRtcScreenShareUid();
     this.initializeScreenShareManager(appId, logPath);
 
+    this.state.logPath = logPath;
     this.state.isInitialized = true;
   };
 
@@ -513,6 +516,22 @@ export class RtcManager extends EventEmitter {
         },
         RtcUserUpdateReason.WhiteBoard
       );
+  };
+
+  enableAudioDump = (enable: boolean) => {
+    if (!this.isInChannel()) return;
+
+    if (enable) {
+      this.engine.setParameters(
+        `{"che.audio.start_debug_recording":"${this.state.logPath}rtcdump"}`
+      );
+    } else {
+      this.engine.setParameters(`{"che.audio.stop_debug_recording":true}`);
+    }
+
+    if (this.engine.isSeaxJoined()) {
+      this.engine.enableSeaxAudioDump(`${this.state.logPath}seaxdump`, enable);
+    }
   };
 
   private registerEngineEvents = () => {

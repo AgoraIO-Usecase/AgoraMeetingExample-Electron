@@ -31,6 +31,7 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import Check from '@mui/icons-material/Check';
 
 import { useNavigate } from 'react-router-dom';
@@ -80,6 +81,7 @@ const ToolBar = () => {
       state.focusMode === true,
     [state.whiteboardState, state.focusMode, state.screenshareState]
   );
+  const [enableAudioDump, setEnableAudioDump] = useState(false);
 
   useEffect(() => {
     if (showWhiteBoardDropDown) return;
@@ -101,6 +103,11 @@ const ToolBar = () => {
 
   const onMicrophoneClicked = () => {
     commonManager.enableAudio(!selfUser.isAudioOn);
+  };
+
+  const onAudioDumpClicked = () => {
+    commonManager.enableAudioDump(!enableAudioDump);
+    setEnableAudioDump(!enableAudioDump);
   };
 
   const onCameraClicked = () => {
@@ -158,6 +165,16 @@ const ToolBar = () => {
             <MicNoneOutlinedIcon color="primary" fontSize="small" />
           ) : (
             <MicOffOutlinedIcon color="error" fontSize="small" />
+          )}
+        </LoadingButton>
+      </Tooltip>
+      {/* AudioDump */}
+      <Tooltip title={enableAudioDump ? 'Stop' : 'DumpAudio'} arrow>
+        <LoadingButton onClick={onAudioDumpClicked} size="small">
+          {enableAudioDump ? (
+            <BugReportOutlinedIcon color="error" fontSize="small" />
+          ) : (
+            <BugReportOutlinedIcon color="primary" fontSize="small" />
           )}
         </LoadingButton>
       </Tooltip>

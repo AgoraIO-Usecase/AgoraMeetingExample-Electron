@@ -510,4 +510,7 @@ export class CommonManager extends EventEmitter {
   whiteboardEnableFollowPPT = async (enable: boolean) => {
     await this.whiteboardManager.enableFollowPPT(enable);
   };
+
+  enableAudioDump = (enable: boolean) =>
+    this.rtcManager.enableAudioDump(enable);
 }
