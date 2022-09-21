@@ -33,6 +33,7 @@ import {
   RtcUserUpdateReason,
   RtcScreenShareParams,
   RtcUserType,
+  RtcSeaxRole,
 } from './types';
 import { PresetEncoderConfigurations } from './recommend';
 import { RtcScreenShareManager } from './screenshare';
@@ -94,6 +95,10 @@ export declare interface RtcManager {
       ratio: number
     ) => void
   ): this;
+
+  on(evt: 'seaxError', cb: (uid: number, code: number) => void): this;
+  on(evt: 'seaxState', cb: (msg: string) => void): this;
+  on(evt: 'seaxLocalRoleConfirmed', cb: (role: RtcSeaxRole) => void): this;
 }
 
 export class RtcManager extends EventEmitter {
@@ -638,8 +643,8 @@ export class RtcManager extends EventEmitter {
         // REMOTE_VIDEO_STATE_STOPPED(0) REMOTE_VIDEO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
-        const oldUsaer = this.getUser(uid);
-        if (oldUsaer && oldUsaer.isCameraOn !== isOn) {
+        const oldUser = this.getUser(uid);
+        if (oldUser && oldUser.isCameraOn !== isOn) {
           log.info('remote video state changed,', uid, state, reason, isOn);
 
           this.updateUser(
@@ -665,8 +670,8 @@ export class RtcManager extends EventEmitter {
         // REMOTE_AUDIO_STATE_STOPPED(0) REMOTE_AUDIO_STATE_FAILED(4)
         const isOn = state !== 0 && state !== 4;
 
-        const oldUsaer = this.getUser(uid);
-        if (oldUsaer && oldUsaer.isAudioOn !== isOn) {
+        const oldUser = this.getUser(uid);
+        if (oldUser && oldUser.isAudioOn !== isOn) {
           log.info('remote audio state changed,', uid, state, reason, isOn);
 
           this.updateUser(
@@ -752,22 +757,56 @@ export class RtcManager extends EventEmitter {
     });
 
     this.engine.on('seaxError', (deviceId, code) => {
-      log.warn('rtc manager on seax error', deviceId, code);
+      log.error('rtc manager on seax error', deviceId, code);
+      this.emit('seaxError', Number.parseInt(deviceId, 10), code);
     });
     this.engine.on('seaxState', (stateMsg) => {
-      log.warn('rtc manager on seax state', stateMsg);
+      log.info('rtc manager on seax state', stateMsg);
+      this.emit('seaxState', stateMsg);
     });
     this.engine.on('seaxRoleConfirmed', (deviceId, localUid, hostUid, role) => {
-      log.warn(
+      log.info(
         'rtc manager on seax role confirmed',
         deviceId,
         localUid,
         hostUid,
         role
       );
+      const oldUser = this.getUser(Number.parseInt(deviceId, 10));
+      if (oldUser && oldUser.seaxRole !== role) {
+        log.info('rtc manager on seax user role changed,', deviceId, role);
+
+        this.updateUser(
+          {
+            uid: oldUser.uid,
+            seaxRole: role,
+          },
+          RtcUserUpdateReason.Info
+        );
+
+        if (oldUser.isSelf) this.emit('seaxLocalRoleConfirmed', role);
+      }
     });
     this.engine.on('seaxDeviceListUpdated', (deviceList) => {
-      log.warn('rtc manager on seax device list updated', deviceList);
+      console.warn('rtc manager on seax device list updated', deviceList);
+      deviceList.forEach((info) => {
+        const oldUser = this.getUser(info.uid);
+        if (oldUser && oldUser.seaxRole !== info.role) {
+          log.info(
+            'rtc manager on seax device list role changed,',
+            info.uid,
+            info.role
+          );
+
+          this.updateUser(
+            {
+              uid: oldUser.uid,
+              seaxRole: info.role,
+            },
+            RtcUserUpdateReason.Info
+          );
+        }
+      });
     });
   };
 

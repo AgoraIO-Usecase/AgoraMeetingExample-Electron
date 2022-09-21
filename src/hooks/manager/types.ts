@@ -27,6 +27,8 @@ export type AttendeeInfo = {
   hasWhiteBoard?: boolean;
   isSharingDisplay?: boolean;
   isSharingFocusMode?: boolean;
+
+  seaxRole?: SeaxRole;
 };
 
 export enum MeetingConnection {
@@ -114,4 +116,9 @@ export enum WhiteBoardState {
   Idle,
   Waitting,
   Running,
+}
+
+export enum SeaxRole {
+  Client = 0,
+  Host = 1,
 }

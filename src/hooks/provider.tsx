@@ -15,6 +15,7 @@ import {
   MeetingConnection,
   ScreenShareState,
   ScreenShareStateReason,
+  SeaxRole,
   WhiteBoardState,
 } from './manager';
 import { WhiteBoardError } from './manager/whiteboard';
@@ -192,6 +193,19 @@ export const RootProvider: FC = (props) => {
         type: StoreActionType.ACTION_TYPE_WHITEBOARD_STATE,
         payload: whiteboardState,
       });
+    });
+
+    commonManager.on('seaxError', (uid, code) => {
+      showNotification(`seax error ${uid} code: ${code}`, 'error');
+    });
+    commonManager.on('seaxState', (msg) => {
+      // showNotification(`seax state: ${msg}`, 'info');
+    });
+    commonManager.on('seaxLocalRoleConfirmed', (role) => {
+      showNotification(
+        `seax role confirmed with ${role === SeaxRole.Host ? 'host' : 'clien'}`,
+        'success'
+      );
     });
 
     commonManager.initialize();

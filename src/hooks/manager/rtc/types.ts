@@ -54,6 +54,8 @@ export interface RtcUser {
 
   isSharingDisplay?: boolean;
   isSharingFocusMode?: boolean;
+
+  seaxRole?: RtcSeaxRole;
 }
 
 export enum RtcUserUpdateReason {
@@ -126,4 +128,9 @@ export enum RtcVideoStreamType {
 export enum RtcClientRole {
   Host = 1,
   Audience = 2,
+}
+
+export enum RtcSeaxRole {
+  Client = 0,
+  Host = 1,
 }

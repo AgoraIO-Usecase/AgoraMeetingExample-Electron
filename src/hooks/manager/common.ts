@@ -24,6 +24,7 @@ import {
   ScreenShareSource,
   ScreenShareState,
   ScreenShareStateReason,
+  SeaxRole,
   Version,
   VideoEncoderConfigurationType,
   VolumeIndication,
@@ -90,6 +91,11 @@ export interface CommonManager {
     evt: 'whiteboardState',
     cb: (state: WhiteBoardState, error: WhiteBoardError) => void
   ): this;
+
+  // seax engine
+  on(evt: 'seaxError', cb: (uid: number, code: number) => void): this;
+  on(evt: 'seaxState', cb: (msg: string) => void): this;
+  on(evt: 'seaxLocalRoleConfirmed', cb: (role: SeaxRole) => void): this;
 }
 
 export class CommonManager extends EventEmitter {
@@ -178,6 +184,16 @@ export class CommonManager extends EventEmitter {
       // should we only update ratio when sharing display with this
       // and sharing window with window-monitor?
       this.whiteboardManager.updateRatio(height / width);
+    });
+
+    this.rtcManager.on('seaxState', (msg) => {
+      this.emit('seaxState', msg);
+    });
+    this.rtcManager.on('seaxError', (uid, code) => {
+      this.emit('seaxError', uid, code);
+    });
+    this.rtcManager.on('seaxLocalRoleConfirmed', (role) => {
+      this.emit('seaxLocalRoleConfirmed', role);
     });
 
     this.rtcManager.initialize(

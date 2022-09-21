@@ -8,7 +8,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import DeveloperBoardOutlinedIcon from '@mui/icons-material/DeveloperBoardOutlined';
 
-import { AttendeeInfo, AttendeeType } from '../../../../hooks';
+import { AttendeeInfo, AttendeeType, SeaxRole } from '../../../../hooks';
 import useStyle from './style';
 import VideoBox from '../../../components/videobox';
 
@@ -21,12 +21,31 @@ export type AttendeeItemProps = {
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, isFit, attendee } = props;
-  const { uid, nickname, type, isSelf, isCameraOn, isAudioOn, hasWhiteBoard } =
-    attendee;
+  const {
+    uid,
+    nickname,
+    type,
+    isSelf,
+    isCameraOn,
+    isAudioOn,
+    hasWhiteBoard,
+    seaxRole,
+  } = attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
     [nickname, uid]
   );
+  const titleColor = useMemo(() => {
+    if (seaxRole === SeaxRole.Host) return 'blue';
+    if (seaxRole === SeaxRole.Client) return 'green';
+    return 'white';
+  }, [seaxRole]);
+
+  const titleAppend = useMemo(() => {
+    if (seaxRole === SeaxRole.Host) return '(host)';
+    if (seaxRole === SeaxRole.Client) return '(client)';
+    return '';
+  }, [seaxRole]);
 
   return (
     <Stack className={style.wrapper}>
@@ -53,9 +72,9 @@ const AttendeeItem = (props: AttendeeItemProps) => {
             style={{ userSelect: 'none' }}
             variant="subtitle2"
             display="block"
-            color="white"
+            color={titleColor}
           >
-            {title}
+            {`${title}${titleAppend}`}
           </Typography>
           {isMain ? (
             <></>
