@@ -67,6 +67,7 @@ export interface RtcJoinParams {
   nickname: string;
   isCameraOn: boolean;
   isAudioOn: boolean;
+  enableSeax: boolean;
 }
 
 export enum RtcVideoEncoderConfigurationType {

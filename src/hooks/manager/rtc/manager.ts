@@ -197,7 +197,7 @@ export class RtcManager extends EventEmitter {
 
     log.info('rtc manager join channel', params);
 
-    const { channelName, nickname, isCameraOn, isAudioOn } = params;
+    const { channelName, nickname, isCameraOn, isAudioOn, enableSeax } = params;
     this.state.channelName = channelName;
 
     this.engine.enableAudioVolumeIndication(200, 3, false);
@@ -210,7 +210,13 @@ export class RtcManager extends EventEmitter {
 
     const token = generateRtcToken(channelName, this.state.uid);
     // coz we do not have any backend service for now, we should auto subscribe remote audio and video
-    this.engine.joinChannel(token, channelName, '', this.state.uid);
+    this.engine.joinChannel(token, channelName, '', this.state.uid, {
+      autoSubscribeAudio: true,
+      autoSubscribeVideo: true,
+      publishLocalAudio: isAudioOn,
+      publishLocalVideo: isCameraOn,
+      enableSeax,
+    });
 
     // coz host will auto publish audio stream
     this.engine.muteLocalAudioStream(!isAudioOn);
@@ -743,6 +749,25 @@ export class RtcManager extends EventEmitter {
       log.info('rtc manager on token will expire');
       const token = generateRtcToken(this.state.channelName, this.state.uid);
       this.engine.renewToken(token);
+    });
+
+    this.engine.on('seaxError', (deviceId, code) => {
+      log.warn('rtc manager on seax error', deviceId, code);
+    });
+    this.engine.on('seaxState', (stateMsg) => {
+      log.warn('rtc manager on seax state', stateMsg);
+    });
+    this.engine.on('seaxRoleConfirmed', (deviceId, localUid, hostUid, role) => {
+      log.warn(
+        'rtc manager on seax role confirmed',
+        deviceId,
+        localUid,
+        hostUid,
+        role
+      );
+    });
+    this.engine.on('seaxDeviceListUpdated', (deviceList) => {
+      log.warn('rtc manager on seax device list updated', deviceList);
     });
   };
 

@@ -48,6 +48,7 @@ export declare type MeetingParams = {
 
   isCameraOn: boolean;
   isAudioOn: boolean;
+  enableSeax: boolean;
 };
 
 export enum DeviceType {

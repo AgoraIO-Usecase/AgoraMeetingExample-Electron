@@ -33,6 +33,7 @@ const MainView = () => {
     nickname: getNickname(),
     isCameraOn: getUseCamera(),
     isAudioOn: getUseMicrophone(),
+    enableSeax: true,
   });
   const [isChannelNameInvalid, setChannelNameInvalid] = useState(false);
   const [isNicknameInvalid, setNicknameInvalid] = useState(false);
@@ -158,6 +159,20 @@ const MainView = () => {
               />
             }
             label="Microphone"
+          />
+        </div>
+        <div className={style.containerCheckBoxes}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={joinParams.enableSeax}
+                onChange={(_evt, checked: boolean) => {
+                  setJoinParams({ ...joinParams, enableSeax: checked });
+                }}
+                name="seax"
+              />
+            }
+            label="EnableSeax"
           />
         </div>
         <div className={style.containerSubmit}>

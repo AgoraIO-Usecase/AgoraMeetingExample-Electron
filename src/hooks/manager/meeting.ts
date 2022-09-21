@@ -80,7 +80,7 @@ export class MeetingManager extends EventEmitter {
       return;
     }
 
-    const { channelName, nickname, isCameraOn, isAudioOn } = params;
+    const { channelName, nickname, isCameraOn, isAudioOn, enableSeax } = params;
 
     log.info('meeting manager join meeting with params:', params);
 
@@ -90,6 +90,7 @@ export class MeetingManager extends EventEmitter {
       nickname,
       isCameraOn,
       isAudioOn,
+      enableSeax,
     });
   };
 
