@@ -227,7 +227,7 @@ export class RtcManager extends EventEmitter {
     });
 
     // coz host will auto publish audio stream
-    this.engine.muteLocalAudioStream(!isAudioOn);
+    if (enableSeax) this.engine.muteLocalAudioStream(!isAudioOn);
 
     this.setConnection(RtcConnection.Connecting);
     this.addUser({
