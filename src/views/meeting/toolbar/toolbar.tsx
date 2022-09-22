@@ -38,6 +38,7 @@ import { useNavigate } from 'react-router-dom';
 import useStyle from './style';
 import {
   ScreenShareState,
+  SeaxRole,
   StoreActionType,
   useCommonManager,
   useStore,
@@ -60,7 +61,7 @@ const ToolBar = () => {
   const selfUser = useMemo(() => {
     if (state.attendees && state.attendees.length) return state.attendees[0];
 
-    return { isAudioOn: false, isCameraOn: false };
+    return { isAudioOn: false, isCameraOn: false, seaxRole: undefined };
   }, [state]);
 
   const disableWhiteBoard = useMemo(() => {
@@ -160,11 +161,21 @@ const ToolBar = () => {
     >
       {/* Microphone */}
       <Tooltip title={selfUser.isAudioOn ? 'Mute' : 'Unmute'} arrow>
-        <LoadingButton onClick={onMicrophoneClicked} size="small">
+        <LoadingButton
+          onClick={onMicrophoneClicked}
+          size="small"
+          disabled={selfUser.seaxRole === SeaxRole.Client}
+        >
           {selfUser.isAudioOn ? (
-            <MicNoneOutlinedIcon color="primary" fontSize="small" />
+            <MicNoneOutlinedIcon
+              color={selfUser.seaxRole === SeaxRole.Client ? 'gray' : 'primary'}
+              fontSize="small"
+            />
           ) : (
-            <MicOffOutlinedIcon color="error" fontSize="small" />
+            <MicOffOutlinedIcon
+              color={selfUser.seaxRole === SeaxRole.Client ? 'gray' : 'error'}
+              fontSize="small"
+            />
           )}
         </LoadingButton>
       </Tooltip>
