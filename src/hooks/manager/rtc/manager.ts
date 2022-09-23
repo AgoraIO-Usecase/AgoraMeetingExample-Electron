@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
 import { EventEmitter } from 'events';
 import log from 'electron-log';
+import fs from 'fs';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import {
   LOCAL_AUDIO_STREAM_ERROR,
@@ -522,15 +523,19 @@ export class RtcManager extends EventEmitter {
     if (!this.isInChannel()) return;
 
     if (enable) {
+      const dumpPath = `${this.state.logPath}rtcdump`;
+      if (!fs.existsSync(dumpPath)) fs.mkdirSync(dumpPath);
       this.engine.setParameters(
-        `{"che.audio.start_debug_recording":"${this.state.logPath}rtcdump"}`
+        `{"che.audio.start_debug_recording":"${dumpPath}"}`
       );
     } else {
       this.engine.setParameters(`{"che.audio.stop_debug_recording":true}`);
     }
 
     if (this.engine.isSeaxJoined()) {
-      this.engine.enableSeaxAudioDump(`${this.state.logPath}seaxdump`, enable);
+      const dumpPath = `${this.state.logPath}seaxdump`;
+      if (!fs.existsSync(dumpPath)) fs.mkdirSync(dumpPath);
+      this.engine.enableSeaxAudioDump(`${dumpPath}`, enable);
     }
   };
 
