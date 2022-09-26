@@ -16,6 +16,7 @@ import {
   SIZE,
 } from 'agora-electron-sdk/types/Api/native_type';
 
+import path from 'path';
 import {
   RtcConnection,
   RtcConnectionReason,
@@ -146,10 +147,10 @@ export class RtcManager extends EventEmitter {
 
     this.engine.initialize(appId, undefined, {
       level: 0x0001,
-      filePath: `${logPath}rtc.log`,
+      filePath: path.join(logPath, 'rtc.log'),
       fileSize: 2000,
     });
-    this.engine.setAddonLogFile(`${logPath}addon.log`);
+    this.engine.setAddonLogFile(path.join(logPath, 'addon.log'));
 
     this.registerEngineEvents();
     this.preConfigEngine();
@@ -523,8 +524,11 @@ export class RtcManager extends EventEmitter {
     if (!this.isInChannel()) return;
 
     if (enable) {
-      const dumpPath = `${this.state.logPath}rtcdump`;
+      let dumpPath = path.join(this.state.logPath, 'rtcdump');
       if (!fs.existsSync(dumpPath)) fs.mkdirSync(dumpPath);
+      if (process.platform === 'win32')
+        dumpPath = dumpPath.replaceAll('\\', '\\\\');
+      log.warn(`rtc dump path ${dumpPath}`);
       this.engine.setParameters(
         `{"che.audio.start_debug_recording":"${dumpPath}"}`
       );
@@ -533,8 +537,9 @@ export class RtcManager extends EventEmitter {
     }
 
     if (this.engine.isSeaxJoined()) {
-      const dumpPath = `${this.state.logPath}seaxdump`;
+      const dumpPath = path.join(this.state.logPath, 'seaxdump');
       if (!fs.existsSync(dumpPath)) fs.mkdirSync(dumpPath);
+      log.warn(`seax dump path ${dumpPath}`);
       this.engine.enableSeaxAudioDump(`${dumpPath}`, enable);
     }
   };

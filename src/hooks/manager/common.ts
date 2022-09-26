@@ -198,7 +198,7 @@ export class CommonManager extends EventEmitter {
 
     this.rtcManager.initialize(
       process.env.AGORA_MEETING_APPID || '',
-      `${remote.app.getPath('logs')}/`
+      `${remote.app.getPath('logs')}`
     );
     this.rtcManager.setVideoEncoderConfiguration(
       this.transVideoEncoderConfigruationType(

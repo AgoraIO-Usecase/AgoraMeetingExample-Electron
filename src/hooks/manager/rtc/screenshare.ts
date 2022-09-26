@@ -11,6 +11,7 @@ import {
 } from './types';
 import { generateRtcToken } from './cert';
 import { readImage } from './utils';
+import path from 'path';
 
 export interface RtcScreenShareManager {
   on(
@@ -64,8 +65,10 @@ export class RtcScreenShareManager extends EventEmitter {
     log.info('screenshare manager intialize with ', uid, logPath);
 
     this.engine.videoSourceInitialize(appId);
-    this.engine.videoSourceSetLogFile(`${logPath}videosource.log`);
-    this.engine.videoSourceSetAddonLogFile(`${logPath}videosource-addon.log`);
+    this.engine.videoSourceSetLogFile(path.join(logPath, 'videosource.log'));
+    this.engine.videoSourceSetAddonLogFile(
+      path.join(logPath, 'videosource-addon.log')
+    );
     this.engine.videoSourceEnableDualStreamMode(false);
     this.engine.videoSourceSetParameters(
       JSON.stringify({ 'che.video.mutigpu_exclude_window': true })
@@ -202,6 +205,7 @@ export class RtcScreenShareManager extends EventEmitter {
       autoSubscribeVideo: false,
       publishLocalAudio: false,
       publishLocalVideo: true,
+      enableSeax: false,
     });
 
     this.props.channelName = channelName;
