@@ -494,4 +494,9 @@ export class CommonManager extends EventEmitter {
   whiteboardEnableFollowPPT = async (enable: boolean) => {
     await this.whiteboardManager.enableFollowPPT(enable);
   };
+
+  isVoiceActivatedEnabled = () => !this.rtcManager.isIgnoreVolumeIndications();
+
+  enableVoiceActivated = (enable: boolean) =>
+    this.rtcManager.setIgnoreVolumeIndications(!enable);
 }

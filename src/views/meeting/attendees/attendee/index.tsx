@@ -21,8 +21,16 @@ export type AttendeeItemProps = {
 const AttendeeItem = (props: AttendeeItemProps) => {
   const style = useStyle();
   const { isMain, isFit, attendee } = props;
-  const { uid, nickname, type, isSelf, isCameraOn, isAudioOn, hasWhiteBoard } =
-    attendee;
+  const {
+    uid,
+    nickname,
+    type,
+    isSelf,
+    isCameraOn,
+    isAudioOn,
+    hasWhiteBoard,
+    isSpeaking,
+  } = attendee;
   const title = useMemo(
     () => (nickname && nickname.length ? nickname : uid),
     [nickname, uid]
@@ -30,7 +38,10 @@ const AttendeeItem = (props: AttendeeItemProps) => {
 
   return (
     <Stack className={style.wrapper}>
-      <Stack className={style.container} justifyContent="flex-end">
+      <Stack
+        className={`${style.container} ${isSpeaking ? style.speaker : ''}`}
+        justifyContent="flex-end"
+      >
         {!isCameraOn ? (
           <Stack
             width="100%"

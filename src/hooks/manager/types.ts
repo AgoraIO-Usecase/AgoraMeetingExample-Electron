@@ -27,6 +27,8 @@ export type AttendeeInfo = {
   hasWhiteBoard?: boolean;
   isSharingDisplay?: boolean;
   isSharingFocusMode?: boolean;
+
+  isSpeaking?: boolean;
 };
 
 export enum MeetingConnection {

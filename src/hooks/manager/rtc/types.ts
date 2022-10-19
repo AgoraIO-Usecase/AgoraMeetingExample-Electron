@@ -54,6 +54,8 @@ export interface RtcUser {
 
   isSharingDisplay?: boolean;
   isSharingFocusMode?: boolean;
+
+  isSpeaking?: boolean;
 }
 
 export enum RtcUserUpdateReason {

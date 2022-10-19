@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import log from 'electron-log';
-import { RtcManager, RtcUserType, RtcUser, RtcUserUpdateReason } from './rtc';
+import { RtcManager, RtcUser, RtcUserUpdateReason } from './rtc';
 import { AttendeeInfo, AttendeeType } from './types';
 
 export interface AttendeeManager {
@@ -62,18 +62,24 @@ export class AttendeeManager extends EventEmitter {
     return this.state.isInitialized;
   };
 
-  private findNewAttendeeIndex = (oldIndex: number, attendee: AttendeeInfo) => {
+  private findNewAttendeeIndex = (
+    oldIndex: number,
+    oldPriority: number,
+    newPriority: number
+  ) => {
+    if (oldPriority === newPriority) return oldIndex;
     // start from 1 coz first attendee always be self
-    for (let i = 1; i < this.state.attendees.length; i += 1) {
-      if (
-        this.getAttendeePriority(attendee) <
-        this.getAttendeePriority(this.state.attendees[i])
-      ) {
+    for (
+      let i = newPriority < oldPriority ? 1 : oldIndex;
+      i < this.state.attendees.length;
+      i += 1
+    ) {
+      if (newPriority < this.getAttendeePriority(this.state.attendees[i])) {
         return i;
       }
     }
 
-    return oldIndex;
+    return this.state.attendees.length - 1;
   };
 
   private onRtcUserNew = (user: RtcUser) => {
@@ -86,10 +92,10 @@ export class AttendeeManager extends EventEmitter {
       const attendee = {
         ...user,
       } as AttendeeInfo;
-      const newIndex = this.findNewAttendeeIndex(
-        this.state.attendees.length,
-        attendee
-      );
+      let newIndex = this.state.attendees.length;
+
+      if (attendee.isSelf && attendee.type === AttendeeType.ScreenShare)
+        newIndex = 1;
 
       // eslint-disable-next-line prefer-destructuring
       this.state.attendees.splice(newIndex, 0, attendee);
@@ -133,15 +139,16 @@ export class AttendeeManager extends EventEmitter {
       newUser.whiteboardTimeSpan !== undefined &&
       newUser.whiteboardTimeSpan.length > 0;
 
-    if (
-      reason === RtcUserUpdateReason.Info ||
-      oldIndex === 0 ||
-      oldIndex === 1
-    ) {
+    if (reason === RtcUserUpdateReason.Info || attendee.isSelf) {
       this.state.attendees[oldIndex] = attendee;
       this.emit('update', oldIndex, attendee);
     } else {
-      const newIndex = this.findNewAttendeeIndex(oldIndex, attendee);
+      const newIndex = this.findNewAttendeeIndex(
+        oldIndex,
+        this.getAttendeePriority(this.state.attendees[oldIndex]),
+        this.getAttendeePriority(attendee)
+      );
+
       if (newIndex === oldIndex) {
         this.state.attendees[oldIndex] = attendee;
         this.emit('update', oldIndex, attendee);
@@ -182,15 +189,17 @@ export class AttendeeManager extends EventEmitter {
   };
 
   private getAttendeePriority = (attendee: AttendeeInfo) => {
-    const { type, isSelf, isAudioOn, isCameraOn, hasWhiteBoard } = attendee;
+    const { type, isSelf, isAudioOn, isCameraOn, hasWhiteBoard, isSpeaking } =
+      attendee;
     if (isSelf && type === AttendeeType.ScreenShare) return -9997;
     if (isSelf && type === AttendeeType.MediaPlayer) return -9998;
     if (isSelf) return -9999;
 
     let priority = 0;
-    if (isAudioOn) priority -= 1;
-    if (isCameraOn) priority -= 2;
-    if (hasWhiteBoard) priority -= 4;
+    if (isAudioOn) priority -= 2;
+    if (isCameraOn) priority -= 4;
+    if (isSpeaking) priority -= 8;
+    if (hasWhiteBoard) priority -= 200;
 
     return priority;
   };

@@ -29,26 +29,26 @@ const tabs: {
   icon: string | React.ReactElement;
   panel: React.ReactNode;
 }[] = [
-  // {
-  //   index: 0,
-  //   label: 'Common',
-  //   icon: <InsertDriveFileOutlinedIcon />,
-  //   panel: <CommonPage />,
-  // },
   {
     index: 0,
+    label: 'Common',
+    icon: <InsertDriveFileOutlinedIcon />,
+    panel: <CommonPage />,
+  },
+  {
+    index: 1,
     label: 'Audio',
     icon: <GraphicEqOutlinedIcon />,
     panel: <AudioPage />,
   },
   {
-    index: 1,
+    index: 2,
     label: 'Video',
     icon: <VideocamOutlinedIcon />,
     panel: <VideoPage />,
   },
   {
-    index: 2,
+    index: 3,
     label: 'About',
     icon: <InfoOutlinedIcon />,
     panel: <AboutPage />,

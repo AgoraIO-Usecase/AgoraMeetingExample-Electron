@@ -108,9 +108,11 @@ export class RtcManager extends EventEmitter {
     channelName: string;
     connection: RtcConnection;
     users: { [key: string]: RtcUser | undefined };
+    speakingUsers: { uid: number; volume: number }[];
     dataStreamId: number;
     dataStreamTimerId?: NodeJS.Timeout;
     clientRole: RtcClientRole;
+    ignoreVolumeIndications: boolean;
   } = {
     isInitialized: false,
 
@@ -119,9 +121,11 @@ export class RtcManager extends EventEmitter {
     channelName: '',
     connection: RtcConnection.Disconnected,
     users: {},
+    speakingUsers: [],
     dataStreamId: 0,
     dataStreamTimerId: undefined,
     clientRole: RtcClientRole.Host,
+    ignoreVolumeIndications: true,
   };
 
   constructor() {
@@ -177,6 +181,7 @@ export class RtcManager extends EventEmitter {
   reset = () => {
     this.state.connection = RtcConnection.Disconnected;
     this.state.users = {};
+    this.state.ignoreVolumeIndications = true;
   };
 
   isInitialized = () => {
@@ -504,6 +509,26 @@ export class RtcManager extends EventEmitter {
       );
   };
 
+  isIgnoreVolumeIndications = () => this.state.ignoreVolumeIndications;
+
+  setIgnoreVolumeIndications = (ignore: boolean) => {
+    if (this.state.ignoreVolumeIndications === ignore) return;
+    this.state.ignoreVolumeIndications = ignore;
+
+    if (this.isInChannel() && ignore) {
+      // clear speaking user list and notify speaking state
+      this.state.speakingUsers = this.state.speakingUsers.filter((speaker) => {
+        const rtcUser = this.getUser(speaker.uid);
+        if (rtcUser && rtcUser.isSpeaking)
+          this.updateUser(
+            { ...rtcUser, isSpeaking: false },
+            RtcUserUpdateReason.Media
+          );
+        return false;
+      });
+    }
+  };
+
   private registerEngineEvents = () => {
     this.engine.on('joinedChannel', (channel, uid, elapsed) => {
       log.info(
@@ -667,6 +692,7 @@ export class RtcManager extends EventEmitter {
             {
               uid,
               isAudioOn: isOn,
+              isSpeaking: isOn ? oldUsaer.isSpeaking : false,
             },
             RtcUserUpdateReason.Media
           );
@@ -706,6 +732,7 @@ export class RtcManager extends EventEmitter {
       'groupAudioVolumeIndication',
       (speakers, speakerNumber, totalVolume) => {
         this.emit('volumeIndications', speakers as RtcAudioVolumeIndication[]);
+        this.onAudioIndications(speakers as RtcAudioVolumeIndication[]);
       }
     );
 
@@ -1017,5 +1044,48 @@ export class RtcManager extends EventEmitter {
     // if (newClientRole === RtcClientRole.Host) {
     //   if (!self.isAudioOn) this.muteAudio(true);
     // }
+  };
+
+  private onAudioIndications = (speakers: RtcAudioVolumeIndication[]) => {
+    if (this.state.ignoreVolumeIndications) return;
+
+    // 1500ms / 200ms = 7.5
+    const minSpeakingVolume = 30;
+    const leakerValue = 4;
+
+    const validSpeakers = speakers.filter(
+      (indication) => indication.volume >= minSpeakingVolume
+    );
+
+    validSpeakers.forEach((validSpeaker) => {
+      const index = this.state.speakingUsers.findIndex(
+        (value) => value.uid === validSpeaker.uid
+      );
+      if (index === -1) {
+        this.state.speakingUsers.push({
+          uid: validSpeaker.uid,
+          volume: minSpeakingVolume,
+        });
+        const rtcUser = this.getUser(validSpeaker.uid);
+        if (rtcUser && !rtcUser.isSpeaking)
+          this.updateUser(
+            { ...rtcUser, isSpeaking: true },
+            RtcUserUpdateReason.Media
+          );
+      } else this.state.speakingUsers[index].volume = minSpeakingVolume;
+    });
+
+    this.state.speakingUsers = this.state.speakingUsers.filter((speaker) => {
+      speaker.volume -= leakerValue;
+      if (speaker.volume > 0) return true;
+
+      const rtcUser = this.getUser(speaker.uid);
+      if (rtcUser && rtcUser.isSpeaking)
+        this.updateUser(
+          { ...rtcUser, isSpeaking: false },
+          RtcUserUpdateReason.Media
+        );
+      return false;
+    });
   };
 }

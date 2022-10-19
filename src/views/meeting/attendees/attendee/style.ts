@@ -16,6 +16,10 @@ const useStyle = makeStyles(() => {
       background: '#F3F3F3',
       transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
       position: 'relative',
+      border: '2px solid  #23c34300',
+    },
+    speaker: {
+      border: '2px solid  #23c343',
     },
     videobox: {
       boxSizing: 'border-box',
