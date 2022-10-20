@@ -6,6 +6,17 @@ _**其他语言版本：** [**简体中文**](README.zh.md)_
 
 The AgoraMeetingExample-Electron project is an open-source demo that will show you meeting sence on how to integrate Agora SDK APIs into your project.
 
+## Support
+
+- Manage and test devices
+- Audio and video Conferencing
+- Attendee list with media status
+- Speaker and grid layouts
+- ScreenShare
+- Whiteboard
+- Voice activated
+- Native addon to follow PPT and position changed event of target window on focus mode
+
 ## Todo
 - Real-time Messaging
 - Conference Control
