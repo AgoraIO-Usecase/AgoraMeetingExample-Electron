@@ -14,6 +14,7 @@ import {
   StoreState,
   useCommonManager,
   WhiteBoardState,
+  AttendeeInfo,
 } from '../../../../hooks';
 import useStyle from './style';
 import { generateVideoboxId } from '../../../../utils/generate';
@@ -46,7 +47,6 @@ const SpeakerAttendeeView = () => {
   const style = useStyle();
   const { state } = useStore();
   const commonManager = useCommonManager();
-  const [mainViewIndex, setMainViewIndex] = useState(0);
   const needShowAttendeeList = useMemo(() => {
     return state.attendees.length > 1 || state.focusMode;
   }, [state]);
@@ -70,28 +70,38 @@ const SpeakerAttendeeView = () => {
     setShowAttendeeList(needShowAttendeeList);
   }, [needShowAttendeeList]);
 
+  const [oldMainAttendee, setOldMainAttendee] = useState<
+    AttendeeInfo | undefined
+  >(undefined);
+
   useEffect(() => {
-    if (mainViewIndex >= state.attendees.length)
-      setMainViewIndex(state.attendees.length - 1);
-  }, [state]);
+    if (oldMainAttendee) {
+      if (
+        !state.mainAttendee ||
+        oldMainAttendee.uid !== state.mainAttendee.uid
+      ) {
+        const dom = document.getElementById(
+          generateVideoboxId(oldMainAttendee.uid, true)
+        );
+        if (dom) {
+          if (oldMainAttendee.isSelf)
+            commonManager.destroyLocalVideoRenderer(dom);
+          else
+            commonManager.destroyRemoteVideoRenderer(oldMainAttendee.uid, dom);
+        }
+      }
+    }
+    setOldMainAttendee(state.mainAttendee);
+  }, [state.mainAttendee]);
 
   const onItemClicked = (index: number) => {
     if (
-      mainViewIndex === index ||
+      state.mainAttendee?.uid === state.attendees[index].uid ||
       state.whiteboardState === WhiteBoardState.Running
     )
       return;
 
-    const oldAttendee = state.attendees[mainViewIndex];
-    const dom = document.getElementById(
-      generateVideoboxId(oldAttendee.uid, true)
-    );
-    if (dom) {
-      if (oldAttendee.isSelf) commonManager.destroyLocalVideoRenderer(dom);
-      else commonManager.destroyRemoteVideoRenderer(oldAttendee.uid, dom);
-    }
-
-    setMainViewIndex(index);
+    commonManager.setMainAttendee(state.attendees[index]);
   };
 
   const onSlideButtonClicked = () => {
@@ -103,12 +113,8 @@ const SpeakerAttendeeView = () => {
       <Stack className={style.mainContainer}>
         {state.whiteboardState === WhiteBoardState.Running ? (
           <WhiteBoardView attendee={currentWhiteBoardAttendee} />
-        ) : mainViewIndex < state.attendees.length && !state.focusMode ? (
-          <AttendeeItem
-            isMain
-            isFit
-            attendee={state.attendees[mainViewIndex]}
-          />
+        ) : state.mainAttendee && !state.focusMode ? (
+          <AttendeeItem isMain isFit attendee={state.mainAttendee} />
         ) : (
           <></>
         )}

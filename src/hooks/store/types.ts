@@ -21,6 +21,7 @@ export enum StoreActionType {
   ACTION_TYPE_ATTENDEE_UPDATE,
   ACTION_TYPE_ATTENDEE_REMOVE,
   ACTION_TYPE_ATTENDEE_REPLACE,
+  ACTION_TYPE_ATTENDEE_MAIN,
   ACTION_TYPE_ATTENDEE_LAYOUT,
   ACTION_TYPE_SCREENSHARE_STATE,
   ACTION_TYPE_WHITEBOARD_STATE,
@@ -32,6 +33,7 @@ export enum StoreActionType {
 export type StoreState = {
   connection: MeetingConnection;
   attendees: AttendeeInfo[];
+  mainAttendee?: AttendeeInfo | undefined;
 
   currentCameraId?: string;
   currentSpeakerId?: string;
@@ -90,7 +92,9 @@ export type StoreActionPayload =
   | AttendeeLayoutType
   | WhiteBoardState
   | StoreActionPayloadFocusMode
-  | boolean;
+  | boolean
+  | AttendeeInfo
+  | undefined;
 
 export type StoreAction = {
   type: StoreActionType;

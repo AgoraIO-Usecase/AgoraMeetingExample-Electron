@@ -14,6 +14,7 @@ export interface AttendeeManager {
     evt: 'replace',
     cb: (oldPosition: number, newPosition: number) => void
   ): this;
+  on(evt: 'main', cb: (attendee: AttendeeInfo | undefined) => void): this;
 }
 
 export class AttendeeManager extends EventEmitter {
@@ -21,9 +22,13 @@ export class AttendeeManager extends EventEmitter {
 
   private state: {
     isInitialized: boolean;
+    mainAttendeeDetermined: boolean;
+    mainAttendee: AttendeeInfo | undefined;
     attendees: AttendeeInfo[];
   } = {
     isInitialized: false,
+    mainAttendeeDetermined: false,
+    mainAttendee: undefined,
     attendees: [],
   };
 
@@ -55,11 +60,85 @@ export class AttendeeManager extends EventEmitter {
   };
 
   reset = () => {
+    this.state.mainAttendeeDetermined = false;
+    this.state.mainAttendee = undefined;
     this.state.attendees = [];
   };
 
   isInitialized = () => {
     return this.state.isInitialized;
+  };
+
+  setMainAttendee = (attendee: AttendeeInfo) => {
+    this.state.mainAttendeeDetermined = true;
+    this.determineMainAttendee(attendee);
+  };
+
+  private determineMainAttendee = (attendee: AttendeeInfo) => {
+    console.warn('determineMainAttendee', attendee);
+    this.state.mainAttendee = attendee;
+    this.emit('main', attendee);
+  };
+
+  private determineMainAttendeeByUpdate = (attendee: AttendeeInfo) => {
+    const { attendees, mainAttendee, mainAttendeeDetermined } = this.state;
+    if (
+      !mainAttendee ||
+      (mainAttendeeDetermined && mainAttendee.uid !== attendee.uid)
+    )
+      return;
+
+    let newAttendee: AttendeeInfo | undefined;
+
+    if (mainAttendeeDetermined && mainAttendee.uid === attendee.uid)
+      newAttendee = attendee;
+    else if (mainAttendee.uid === attendee.uid) {
+      // if camera is disabled need to find a new main attendee
+      if (!attendee.isCameraOn) {
+        this.determineMainAttendeeByRemove(attendee.uid);
+        return;
+      }
+      // info or other media status changed
+      newAttendee = attendee;
+    } else if (
+      (mainAttendee.isSelf && attendee.isCameraOn) ||
+      (!attendee.isSelf &&
+        this.getAttendeePriority(attendee) <
+          this.getAttendeePriority(mainAttendee))
+    ) {
+      newAttendee = attendee;
+      console.warn('determineMainAttendeeByUpdate find new main attendee');
+    } else return;
+
+    console.warn('determineMainAttendeeByUpdate', attendee, newAttendee);
+
+    this.determineMainAttendee(newAttendee || attendees[0]);
+  };
+
+  private determineMainAttendeeByRemove = (uid: number) => {
+    const { attendees, mainAttendee } = this.state;
+    if (!mainAttendee || uid !== mainAttendee.uid) return;
+
+    this.state.mainAttendeeDetermined = false;
+
+    let newAttendee: AttendeeInfo | undefined;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < attendees.length; i++) {
+      const attendee = attendees[i];
+      if (!attendee.isSelf && attendee.isCameraOn) {
+        newAttendee = attendee;
+        break;
+      }
+
+      // no media user
+      if (!attendee.isSelf && !attendee.isCameraOn && !attendee.isAudioOn)
+        break;
+    }
+
+    console.warn('determineMainAttendeeByRemove', newAttendee);
+
+    // if no media user found set local to main attendee
+    this.determineMainAttendee(newAttendee || attendees[0]);
   };
 
   private findNewAttendeeIndex = (
@@ -70,12 +149,17 @@ export class AttendeeManager extends EventEmitter {
     if (oldPriority === newPriority) return oldIndex;
     // start from 1 coz first attendee always be self
     for (
-      let i = newPriority < oldPriority ? 1 : oldIndex;
-      i < this.state.attendees.length;
-      i += 1
+      let index = newPriority < oldPriority ? 1 : oldIndex;
+      index < this.state.attendees.length;
+      index += 1
     ) {
-      if (newPriority < this.getAttendeePriority(this.state.attendees[i])) {
-        return i;
+      if (
+        newPriority <= this.getAttendeePriority(this.state.attendees[index])
+      ) {
+        // if new priority is not bigger than priority of next attendee
+        // no need to change position
+        if (index === oldIndex + 1) return oldIndex;
+        return index;
       }
     }
 
@@ -100,13 +184,15 @@ export class AttendeeManager extends EventEmitter {
       // eslint-disable-next-line prefer-destructuring
       this.state.attendees.splice(newIndex, 0, attendee);
       this.emit('new', newIndex, attendee);
+
+      if (newIndex === 0) this.determineMainAttendee(attendee);
     } else {
       const attendee = {
         ...this.state.attendees[oldIndex],
         ...user,
       } as AttendeeInfo;
       this.state.attendees[oldIndex] = attendee;
-      this.emit('update', oldIndex, attendee);
+      this.triggerUpdate(oldIndex, attendee);
     }
   };
 
@@ -141,7 +227,7 @@ export class AttendeeManager extends EventEmitter {
 
     if (reason === RtcUserUpdateReason.Info || attendee.isSelf) {
       this.state.attendees[oldIndex] = attendee;
-      this.emit('update', oldIndex, attendee);
+      this.triggerUpdate(oldIndex, attendee);
     } else {
       const newIndex = this.findNewAttendeeIndex(
         oldIndex,
@@ -151,7 +237,7 @@ export class AttendeeManager extends EventEmitter {
 
       if (newIndex === oldIndex) {
         this.state.attendees[oldIndex] = attendee;
-        this.emit('update', oldIndex, attendee);
+        this.triggerUpdate(oldIndex, attendee);
         return;
       }
 
@@ -162,7 +248,7 @@ export class AttendeeManager extends EventEmitter {
         attendee
       )[0];
 
-      this.emit('update', oldIndex, attendee);
+      this.triggerUpdate(oldIndex, attendee);
       this.emit('replace', oldIndex, newIndex);
     }
   };
@@ -180,6 +266,8 @@ export class AttendeeManager extends EventEmitter {
     if (oldIndex === -1) return;
 
     this.emit('remove', oldIndex);
+
+    this.determineMainAttendeeByRemove(uid);
   };
 
   private registerRtcEvents = () => {
@@ -197,10 +285,17 @@ export class AttendeeManager extends EventEmitter {
 
     let priority = 0;
     if (isAudioOn) priority -= 2;
-    if (isCameraOn) priority -= 4;
-    if (isSpeaking) priority -= 8;
+    if (isCameraOn && type === AttendeeType.Media) priority -= 4;
+    if (isCameraOn && type === AttendeeType.ScreenShare) priority -= 8;
+    if (isSpeaking) priority -= 16;
     if (hasWhiteBoard) priority -= 200;
 
     return priority;
+  };
+
+  private triggerUpdate = (oldIndex: number, attendee: AttendeeInfo) => {
+    this.emit('update', oldIndex, attendee);
+
+    this.determineMainAttendeeByUpdate(attendee);
   };
 }

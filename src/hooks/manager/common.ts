@@ -70,6 +70,10 @@ export interface CommonManager {
     evt: 'attendeeReplace',
     cb: (oldPosition: number, newPosition: number) => void
   ): this;
+  on(
+    evt: 'attendeeMain',
+    cb: (attendee: AttendeeInfo | undefined) => void
+  ): this;
 
   // screenshare events
   on(
@@ -218,6 +222,9 @@ export class CommonManager extends EventEmitter {
     });
     this.attendeeManager.on('replace', (oldPosition, newPosition) => {
       this.emit('attendeeReplace', oldPosition, newPosition);
+    });
+    this.attendeeManager.on('main', (attendee) => {
+      this.emit('attendeeMain', attendee);
     });
     this.attendeeManager.initialize();
   };
@@ -499,4 +506,8 @@ export class CommonManager extends EventEmitter {
 
   enableVoiceActivated = (enable: boolean) =>
     this.rtcManager.setIgnoreVolumeIndications(!enable);
+
+  setMainAttendee = (attendee: AttendeeInfo) => {
+    this.attendeeManager.setMainAttendee(attendee);
+  };
 }

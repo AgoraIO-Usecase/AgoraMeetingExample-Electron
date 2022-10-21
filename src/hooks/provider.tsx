@@ -107,6 +107,12 @@ export const RootProvider: FC = (props) => {
         },
       });
     });
+    commonManager.on('attendeeMain', (attendee) => {
+      dispatch({
+        type: StoreActionType.ACTION_TYPE_ATTENDEE_MAIN,
+        payload: attendee,
+      });
+    });
     commonManager.on('screenshareState', (screenshareState, params, reason) => {
       if (screenshareState === ScreenShareState.Running)
         showNotification('screenshare begin', 'success');

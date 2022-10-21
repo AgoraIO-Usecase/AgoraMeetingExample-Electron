@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
 import log from 'electron-log';
 import {
+  AttendeeInfo,
   DeviceType,
   MeetingConnection,
   ScreenShareState,
@@ -28,6 +29,7 @@ const onMeetingConnection = (
       ...state,
       connection,
       attendees: [],
+      mainAttendee: undefined,
       screenshareState: ScreenShareState.Idle,
       whiteboardState: WhiteBoardState.Idle,
       showScreenShare: false,
@@ -111,6 +113,13 @@ const onAttendeeReplace = (
   return { ...oldState, attendees: newAttendees };
 };
 
+const onAttendeeMain = (
+  oldState: StoreState,
+  payload: AttendeeInfo | undefined
+) => {
+  return { ...oldState, mainAttendee: payload };
+};
+
 const onScreenShareState = (
   oldState: StoreState,
   payload: StoreActionPayloadScreenShare
@@ -180,6 +189,12 @@ export const StoreReducer = (
       newState = onAttendeeReplace(
         state,
         action.payload as StoreActionPayloadAttendeeReplace
+      );
+      break;
+    case StoreActionType.ACTION_TYPE_ATTENDEE_MAIN:
+      newState = onAttendeeMain(
+        state,
+        action.payload as AttendeeInfo | undefined
       );
       break;
     case StoreActionType.ACTION_TYPE_ATTENDEE_LAYOUT:
