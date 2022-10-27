@@ -29,15 +29,18 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 - [Node.js](https://nodejs.org/en/download/) >= 14.16.0 < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 - [CMake](https://cmake.org/download/) native-addon compiler >= 3.21
-- [Xcode](https://developer.apple.com/download/all/?q=Xcode) or [Vistual Studio](https://visualstudio.microsoft.com/downloads/)
+- [Xcode](https://developer.apple.com/download/all/?q=Xcode) for macOS
+- [Vistual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) or [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) for Windows
 
 #### Notice
 
+- Please double check your local environment with the above requeirements, especially versions of Node and Yarn
 - Please add the absolute path of the directory which you want to put pptmonitor.exe to the exclusionpath list of Windows Defender if 
 you want to use the function of tracking slide index of powerpoint.
 ``` shell
 $ powershell -inputformat none -outputformat none -NonInteractive -Command Add-MpPreference -ExclusionPath XXXXX\ExtraResources
 ```
+- As we provided native addon module from [v1.4.0](https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron/releases/tag/v1.4.0),you must install the native build tools if you want to run sample code from sources,learn more about how to compile native addon from [node-gyp 8.3.0](https://github.com/nodejs/node-gyp/tree/v8.3.0)
 
 #### Steps to run
 

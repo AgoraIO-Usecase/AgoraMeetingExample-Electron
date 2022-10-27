@@ -12,10 +12,10 @@ _Read this in other languages: [English](README.md)_
 - 音视频通话
 - 参会人列表，状态维护
 - 演讲者视图、宫格视图
-- 屏幕共享
+- 屏幕共享，专注模式下支持共享区域互动批注
 - 互动白板
 - 语音激励
-- 原生插件，用以专注模式下监听PPT翻页和目标窗口跟随 
+- 原生插件，用以专注模式下监听PPT翻页和目标窗口跟随
 
 ## 待完成
 - 实时消息
@@ -30,14 +30,17 @@ _Read this in other languages: [English](README.md)_
 - [Node.js](https://nodejs.org/en/download/) >= 14.16.0 < 15
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 - [CMake](https://cmake.org/download/) native-addon compiler >= 3.21
-- [Xcode](https://developer.apple.com/download/all/?q=Xcode) or [Vistual Studio](https://visualstudio.microsoft.com/downloads/)
+- Mac系统下需要安装[Xcode](https://developer.apple.com/download/all/?q=Xcode)
+- Windows系统下需要安装[Vistual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) 或 [windows-build-tools](https://www.npmjs.com/package/windows-build-tools)
 
 #### 注意
 
+- 请仔细检查本地环境是否符合上述描述，尤其是Node、Yarn等版本号
 - 若要使用PowerPoint翻页追踪功能，请在以管理员运行的安装程序中将pptmonitor.exe所在文件夹路径添加到Windows Defender白名单中，可通过如下脚本添加
 ``` shell
 $ powershell -inputformat none -outputformat none -NonInteractive -Command Add-MpPreference -ExclusionPath XXXXX\ExtraResources
 ```
+- 自从[v1.4.0](https://github.com/AgoraIO-Usecase/AgoraMeetingExample-Electron/releases/tag/v1.4.0)提供原生插件后，对运行demo增加了本地原生模块编译环境的要求，若发生问题可参考[node-gyp 8.3.0](https://github.com/nodejs/node-gyp/tree/v8.3.0)
 
 #### 运行步骤
 
