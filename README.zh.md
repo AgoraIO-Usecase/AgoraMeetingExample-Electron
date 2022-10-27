@@ -31,7 +31,7 @@ _Read this in other languages: [English](README.md)_
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 - [CMake](https://cmake.org/download/) native-addon compiler >= 3.21
 - Mac系统下需要安装[Xcode](https://developer.apple.com/download/all/?q=Xcode)
-- Windows系统下需要安装[Vistual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) 或 [windows-build-tools](https://www.npmjs.com/package/windows-build-tools)
+- Windows系统下需要安装[Visual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) 或 [windows-build-tools](https://www.npmjs.com/package/windows-build-tools)
 
 #### 注意
 

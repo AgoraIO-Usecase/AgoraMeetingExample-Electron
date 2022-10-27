@@ -30,7 +30,7 @@ The AgoraMeetingExample-Electron project is an open-source demo that will show y
 - [Yarn](https://yarnpkg.com/) package manager >= 1.17.3
 - [CMake](https://cmake.org/download/) native-addon compiler >= 3.21
 - [Xcode](https://developer.apple.com/download/all/?q=Xcode) for macOS
-- [Vistual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) or [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) for Windows
+- [Visual Studio](https://visualstudio.microsoft.com/downloads/)(at least vs2017) or [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) for Windows
 
 #### Notice
 
